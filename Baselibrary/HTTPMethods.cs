@@ -40,12 +40,15 @@ namespace BaseLibrary
         {
             int Desc;
             bool ret = false;
-            if (isWindows)
+            if (isWindows){
                 ret = InternetGetConnectedState(out Desc, 0);
             
-            if (ret)
+                if (ret)
+                    ret = IsReachable(uriBase);
+            }
+            else{
                 ret = IsReachable(uriBase);
-
+            }
             return ret;
         }
         /// <summary>
