@@ -41,11 +41,16 @@ namespace BaseLibrary
             int Desc;
             bool ret = false;
             if (isWindows)
+            {
                 ret = InternetGetConnectedState(out Desc, 0);
-            
-            if (ret)
-                ret = IsReachable(uriBase);
 
+                if (ret)
+                    ret = IsReachable(uriBase);
+            }
+            else
+            {
+                ret = IsReachable(uriBase);
+            }
             return ret;
         }
         /// <summary>
@@ -147,7 +152,7 @@ namespace BaseLibrary
             //long ContentLength = 0;
             //if (!long.TryParse(resp.Headers.Get("Content-Length"), out ContentLength))
             //{
-                
+
             //}
 
             using (WebClient wc = new WebClient())
