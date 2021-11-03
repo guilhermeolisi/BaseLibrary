@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,36 @@ namespace BaseLibrary
             if (update)
                 Console.Write("\b");
             Console.Write(_twirl[progress % _twirl.Length]);
+        }
+        public static bool ExecCommandLineBash(string cmd, bool isAsync)
+        {
+            var escapedArgs = cmd.Replace("\"", "\\\"");
+
+            using (Process process = new())
+            {
+                process.StartInfo = new ProcessStartInfo
+                {
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    FileName = "bash",//"/bin/bash"
+                    Arguments = $"-c \"{escapedArgs}\""
+                };
+                try
+                {
+                    process.Start();
+                    if (!isAsync)
+                    {
+                        process.WaitForExit();
+                    }
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            };
+            return true;
         }
     }
 }
