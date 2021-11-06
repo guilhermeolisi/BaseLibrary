@@ -27,9 +27,10 @@ namespace BaseLibrary
                 Console.Write("\b");
             Console.Write(_twirl[progress % _twirl.Length]);
         }
-        public static bool ExecCommandLineBash(string cmd, bool isAsync)
+        public static bool ExecCommandLine(string cmd, string args, bool isAsync)
         {
-            var escapedArgs = cmd.Replace("\"", "\\\"");
+            string cmdEscaped = cmd.Replace("\"", "\\\"");
+            var argsEscaped = args.Replace("\"", "\\\"");
 
             using (Process process = new())
             {
@@ -39,8 +40,10 @@ namespace BaseLibrary
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    FileName = "bash",//"/bin/bash"
-                    Arguments = $"-c \"{escapedArgs}\""
+                    //FileName = "bash",//"/bin/bash"
+                    //Arguments = $"-c \"{escapedArgs}\""
+                    FileName = cmdEscaped,
+                    Arguments = argsEscaped
                 };
                 try
                 {
