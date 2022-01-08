@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Mail;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -176,6 +177,66 @@ namespace BaseLibrary
             //Fazer um evento para comunicar que já terminou
             //progressBar.Value = e.ProgressPercentage;
             DownloadProgressChanged(e.ProgressPercentage);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="keypass"></param>
+        /// <param name="emailTo"></param>
+        /// <param name="message"></param>
+        public static void SendEmail(string sender, string keypass, string subject, string emailTo, string message, bool isAsync)
+        {
+            //https://pt.stackoverflow.com/questions/630/como-posso-enviar-um-e-mail-pelo-gmail
+            //https://www.c-sharpcorner.com/blogs/send-email-using-gmail-smtp
+
+            MailMessage mail = new()
+            {
+                From = new(sender),
+                To = { emailTo },
+                Subject = subject,
+                Body = message,
+
+            };
+
+            SmtpClient smtp = new();
+            smtp.SendCompleted += (s, e) =>
+            {
+                // após o envio pode chamar o Dispose
+                smtp.Dispose();
+            };
+
+            if (sender.ToLower().Contains("gmail.com"))
+            {
+                //https://support.google.com/mail/answer/7126229?authuser=2&authuser=2&hl=pt-BR&authuser=2&visit_id=637722547938951094-494706498&rd=2#zippy=%2Cetapa-alterar-o-smtp-e-outras-configura%C3%A7%C3%B5es-no-seu-cliente-de-e-mail
+                //Port 465
+                smtp.Host = "smtp.gmail.com";
+            }
+            smtp.EnableSsl = true; // GMail requer SSL
+            smtp.Port = 587;       // porta para SSL 587
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network; // modo de envio
+            smtp.UseDefaultCredentials = false; // vamos utilizar credencias especificas
+
+
+            // seu usuário e senha para autenticação
+            smtp.Credentials = new NetworkCredential(sender, keypass);
+
+            // envia o e-mail
+            try
+            {
+                if (isAsync)
+                {
+                    smtp.SendAsync(mail, null);
+                }
+                else
+                {
+                    smtp.Send(mail);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

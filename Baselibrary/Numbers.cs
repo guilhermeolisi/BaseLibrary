@@ -352,5 +352,26 @@ namespace BaseLibrary
             }
             return new string(codeTemp);
         }
+        public static string OrdinalIntegerToString(int number)
+        {
+            string str = number.ToString();
+            if (str.Last() == '1' && (str.Length == 1 || str[1] != '1' ))
+            {
+                str += "st";
+            }
+            else if (str.Last() == '2' && (str.Length == 1 || str[1] != '1'))
+            {
+                str += "nd";
+            }
+            else if (str.Last() == '3' && (str.Length == 1 || str[1] != '1'))
+            {
+                str += "rd";
+            }
+            else
+            {
+                str += "th";
+            }
+            return str;
+        }
     }
 }

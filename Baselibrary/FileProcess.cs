@@ -38,7 +38,6 @@ namespace BaseLibrary
                         lastAttempt = null;
                 }
             }
-            //TODO implementar o catch
             catch (Exception e)
             {
                 if (lastAttempt == null)

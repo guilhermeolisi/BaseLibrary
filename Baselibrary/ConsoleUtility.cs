@@ -27,7 +27,7 @@ namespace BaseLibrary
                 Console.Write("\b");
             Console.Write(_twirl[progress % _twirl.Length]);
         }
-        public static bool ExecCommandLine(string cmd, string args, bool isAsync)
+        public static bool ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
         {
             string cmdEscaped = cmd.Replace("\"", "\\\"");
             var argsEscaped = args.Replace("\"", "\\\"");
@@ -36,25 +36,38 @@ namespace BaseLibrary
             {
                 process.StartInfo = new ProcessStartInfo
                 {
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardOutput = isShell ? false : true,
+                    UseShellExecute = isShell,
+                    CreateNoWindow = isQuite,
+                    WindowStyle = isQuite ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
                     //FileName = "bash",//"/bin/bash"
                     //Arguments = $"-c \"{escapedArgs}\""
-                    FileName = cmdEscaped,
-                    Arguments = argsEscaped
+                    //FileName = cmdEscaped,
+                    //Arguments = argsEscaped
+                    FileName = isEscaped ? cmdEscaped : cmd,
+                    Arguments = isEscaped ? argsEscaped : args
                 };
                 try
                 {
+                    if (!isQuite)
+                    {
+                        Console.Write("Executing " + cmd + "...");
+                    }
                     process.Start();
+                    if (process.StartInfo.RedirectStandardOutput && !isQuite)
+                    {
+                        Console.WriteLine(process.StandardOutput.ReadToEnd());
+                    }
                     if (!isAsync)
                     {
                         process.WaitForExit();
+                        if (!isQuite && process.ExitCode != 0)
+                            Console.Write("Exit code: " + process.ExitCode);
                     }
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine(e.ToString());
                     return false;
                 }
             };

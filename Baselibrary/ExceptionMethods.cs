@@ -1,0 +1,253 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BaseLibrary
+{
+    /// <summary>
+    /// https://stackoverflow.com/questions/8039660/net-how-to-convert-exception-to-string
+    /// </summary>
+    public static class ExceptionMethods
+    {
+        public static void VerifyLocalException(int type, bool isAsync)
+        {
+            string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location);
+            if (File.Exists(Path.Combine(folder, fileExceptions)))
+            {
+                Console.Write("Some old internal errors messages were found in local file. Trying to send to developer...");
+                string message = FileProcess.ReadTXT(Path.Combine(folder, fileExceptions));
+                if (SendOnlineException(type, message, isAsync))
+                {
+                    File.Delete(Path.Combine(folder, fileExceptions));
+                    Console.WriteLine("done");
+                    Console.WriteLine("Content of sent message:");
+                    Console.WriteLine(message);
+                }
+                else
+                {
+                    Console.WriteLine("fail. A new attempt will be made in the future");
+                }
+            }
+        }
+        public static void SendException(int type, Exception e, Version ver, bool isAsync, string messageExtra)
+        {
+            Console.Write("A internal error is found. Trying to send to developer...");
+            string message = "Sindarin Version " + ver.ToString() + Environment.NewLine + ToDetailedString(e) + (!String.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
+            if (SendOnlineException(type, message, isAsync))
+            {
+                Console.WriteLine("done");
+                VerifyLocalException(type, isAsync);
+                Console.WriteLine("Content of sent message:");
+                Console.WriteLine(message);
+            }
+            else
+            {
+                Console.WriteLine("fail. A new attempt will be made in the future");
+                SaveLocalException(message, isAsync);
+            }
+        }
+        static string fileExceptions = "Exceptions.txt";
+        private static async void SaveLocalException(string message, bool isAsync)
+        {
+            string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location); // System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+            message = "[" + DateTime.Now + "]" + Environment.NewLine + message;
+
+            if (File.Exists(Path.Combine(folder, fileExceptions)))
+            {
+                if (isAsync)
+                    message = await FileProcess.ReadTXTAsync(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
+                else
+                    message = FileProcess.ReadTXT(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
+            }
+            if (isAsync)
+                await FileProcess.WriteTXTAsync(Path.Combine(folder, fileExceptions), message);
+            else
+                FileProcess.WriteTXT(Path.Combine(folder, fileExceptions), message);
+        }
+        private static bool SendOnlineException(int type, string message, bool isAsync)
+        {
+            if (!HTTPMethods.IsConnectedToInternet("http://www.microsoft.com", false))
+                return false;
+
+            string sender, keypass;
+            switch (type)
+            {
+                case 0:
+                    sender = "sindarinsoftware@gmail.com";
+                    keypass = "g123g123";
+                    break;
+                default:
+                    return false;
+            }
+            HTTPMethods.SendEmail(sender, keypass, "Exception", sender, message, isAsync);
+            return true;
+        }
+        public static string ToDetailedString(this Exception exception)
+        {
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
+
+            return ToDetailedString(exception, ExceptionOptions.Default);
+        }
+
+        public static string ToDetailedString(this Exception exception, ExceptionOptions options)
+        {
+            var stringBuilder = new StringBuilder();
+
+            AppendValue(stringBuilder, "Type", exception.GetType().FullName, options);
+
+            foreach (PropertyInfo property in exception
+                .GetType()
+                .GetProperties()
+                .OrderByDescending(x => string.Equals(x.Name, nameof(exception.Message), StringComparison.Ordinal))
+                .ThenByDescending(x => string.Equals(x.Name, nameof(exception.Source), StringComparison.Ordinal))
+                .ThenBy(x => string.Equals(x.Name, nameof(exception.InnerException), StringComparison.Ordinal))
+                .ThenBy(x => string.Equals(x.Name, nameof(AggregateException.InnerExceptions), StringComparison.Ordinal)))
+            {
+                var value = property.GetValue(exception, null);
+                if (value == null && options.OmitNullProperties)
+                {
+                    if (options.OmitNullProperties)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        value = string.Empty;
+                    }
+                }
+
+                AppendValue(stringBuilder, property.Name, value, options);
+            }
+
+            return stringBuilder.ToString().TrimEnd('\r', '\n');
+        }
+
+        private static void AppendCollection(
+            StringBuilder stringBuilder,
+            string propertyName,
+            IEnumerable collection,
+            ExceptionOptions options)
+        {
+            stringBuilder.AppendLine($"{options.Indent}{propertyName} =");
+
+            var innerOptions = new ExceptionOptions(options, options.CurrentIndentLevel + 1);
+
+            var i = 0;
+            foreach (var item in collection)
+            {
+                var innerPropertyName = $"[{i}]";
+
+                if (item is Exception)
+                {
+                    var innerException = (Exception)item;
+                    AppendException(
+                        stringBuilder,
+                        innerPropertyName,
+                        innerException,
+                        innerOptions);
+                }
+                else
+                {
+                    AppendValue(
+                        stringBuilder,
+                        innerPropertyName,
+                        item,
+                        innerOptions);
+                }
+
+                ++i;
+            }
+        }
+
+        private static void AppendException(
+            StringBuilder stringBuilder,
+            string propertyName,
+            Exception exception,
+            ExceptionOptions options)
+        {
+            var innerExceptionString = ToDetailedString(
+                exception,
+                new ExceptionOptions(options, options.CurrentIndentLevel + 1));
+
+            stringBuilder.AppendLine($"{options.Indent}{propertyName} =");
+            stringBuilder.AppendLine(innerExceptionString);
+        }
+
+        private static string IndentString(string value, ExceptionOptions options)
+        {
+            return value.Replace(Environment.NewLine, Environment.NewLine + options.Indent);
+        }
+
+        private static void AppendValue(
+            StringBuilder stringBuilder,
+            string propertyName,
+            object value,
+            ExceptionOptions options)
+        {
+            if (value is DictionaryEntry)
+            {
+                DictionaryEntry dictionaryEntry = (DictionaryEntry)value;
+                stringBuilder.AppendLine($"{options.Indent}{propertyName} = {dictionaryEntry.Key} : {dictionaryEntry.Value}");
+            }
+            else if (value is Exception)
+            {
+                var innerException = (Exception)value;
+                AppendException(
+                    stringBuilder,
+                    propertyName,
+                    innerException,
+                    options);
+            }
+            else if (value is IEnumerable && !(value is string))
+            {
+                var collection = (IEnumerable)value;
+                if (collection.GetEnumerator().MoveNext())
+                {
+                    AppendCollection(
+                        stringBuilder,
+                        propertyName,
+                        collection,
+                        options);
+                }
+            }
+            else
+            {
+                stringBuilder.AppendLine($"{options.Indent}{propertyName} = {value}");
+            }
+        }
+    }
+
+    public struct ExceptionOptions
+    {
+        public static readonly ExceptionOptions Default = new ExceptionOptions()
+        {
+            CurrentIndentLevel = 0,
+            IndentSpaces = 4,
+            OmitNullProperties = true
+        };
+
+        internal ExceptionOptions(ExceptionOptions options, int currentIndent)
+        {
+            this.CurrentIndentLevel = currentIndent;
+            this.IndentSpaces = options.IndentSpaces;
+            this.OmitNullProperties = options.OmitNullProperties;
+        }
+
+        internal string Indent { get { return new string(' ', this.IndentSpaces * this.CurrentIndentLevel); } }
+
+        internal int CurrentIndentLevel { get; set; }
+
+        public int IndentSpaces { get; set; }
+
+        public bool OmitNullProperties { get; set; }
+    }
+}
