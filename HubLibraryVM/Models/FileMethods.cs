@@ -94,7 +94,7 @@ namespace GosControls.Models
                                         }
                                     }
                                     //Copia a pasta completa do work
-                                    FileProcess.DirectoryCopy(worksToExport.Last().GetFolder(), pathTemp, true, true);
+                                    BaseLibrary.FileMethods.DirectoryCopy(worksToExport.Last().GetFolder(), pathTemp, true, true);
                                     ObservableCollection<SampleInfo> sTemp = worksToExport.Last().GetSamples();
                                     if (sTemp is not null)
                                         foreach (SampleInfo s in sTemp)
@@ -286,7 +286,7 @@ namespace GosControls.Models
                                         {
                                             if (Directory.Exists(workPathTemp))
                                                 Directory.Delete(workPathTemp, true);
-                                            FileProcess.DirectoryCopy(workEntry, workPathTemp, true, true);
+                                            BaseLibrary.FileMethods.DirectoryCopy(workEntry, workPathTemp, true, true);
                                             Directory.Delete(workEntry, true);
                                             WorkInfo work = new WorkInfo();
                                             work.GetPropertyFromFile(Path.Combine(workPathTemp, "Properties.xml"));
@@ -364,7 +364,7 @@ namespace GosControls.Models
                             if (Directory.Exists(pathTemp))
                                 Directory.Delete(pathTemp, true);
                             //Directory.Move(info.ToImport.GetFolder(), pathTemp);
-                            FileProcess.DirectoryCopy(info.ToImport.GetFolder(), pathTemp, true, true);
+                            BaseLibrary.FileMethods.DirectoryCopy(info.ToImport.GetFolder(), pathTemp, true, true);
                             Directory.Delete(info.ToImport.GetFolder(), true);
                         }
                     }
@@ -446,7 +446,7 @@ namespace GosControls.Models
             //Tenta processar primeiro como Data file
             foreach (string file in files)
             {
-                if (FileProcess.CheckZipFile(file))
+                if (BaseLibrary.FileMethods.CheckZipFile(file))
                 {
                     imported.Add(await ImportProject(file, false, nimlothFolderApplication, nimlothFolderProjects, sameWorks));
                     if (!string.IsNullOrWhiteSpace(imported.Last()))

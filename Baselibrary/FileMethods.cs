@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BaseLibrary
 {
-    public static class FileProcess
+    public static class FileMethods
     {
         public static void WriteTXT(string pathFile, in string parTXT)
         {
@@ -22,12 +22,13 @@ namespace BaseLibrary
                 }
             }
             //TODO implementar o catch
-            catch (Exception e) { }
+            catch (Exception e) 
+            { }
         }
         private static DateTime? lastAttempt;
-        public static async Task WriteTXTAsync(string pathFile, string parTXT)
+        public static async Task<bool> WriteTXTAsync(string pathFile, string parTXT)
         {
-            if (pathFile == null) return;
+            if (pathFile == null) return false;
             try
             {
                 using (StreamWriter sw = new StreamWriter(pathFile, false, Encoding.UTF8))
@@ -36,6 +37,7 @@ namespace BaseLibrary
                     await sw.WriteAsync(parTXT);
                     if (lastAttempt != null)
                         lastAttempt = null;
+                    return true;
                 }
             }
             catch (Exception e)
@@ -48,10 +50,10 @@ namespace BaseLibrary
                 if ((DateTime.Now - ((DateTime)lastAttempt)).TotalSeconds > 5)
                 {
                     //TODO return a error
-                    return;
+                    return false;
                 }
                 await Task.Delay(500);
-                WriteTXTAsync(pathFile, parTXT);
+                return await WriteTXTAsync(pathFile, parTXT);
             }
         }
         public static string ReadTXT(string pathfile, bool isMandatory = true)
@@ -151,8 +153,6 @@ namespace BaseLibrary
                     + sourceDirName);
             }
 
-            DirectoryInfo[] dirs = dir.GetDirectories();
-
             // If the destination directory doesn't exist, create it.       
             //if (!Directory.Exists(destDirName))
             Directory.CreateDirectory(destDirName);
@@ -161,6 +161,11 @@ namespace BaseLibrary
                 Directory.SetCreationTime(destDirName, dir.CreationTime);
                 Directory.SetLastWriteTime(destDirName, dir.LastWriteTime);
             }
+            //else
+            //{
+            //    Directory.SetCreationTime(destDirName, DateTime.Now);
+            //    Directory.SetLastWriteTime(destDirName, DateTime.Now);
+            //}
 
             // Get the files in the directory and copy them to the new location.
             FileInfo[] files = dir.GetFiles();
@@ -170,14 +175,26 @@ namespace BaseLibrary
                 file.CopyTo(tempPath, true);
                 if (preserveTime)
                 {
-                    file.LastWriteTime = File.GetLastWriteTime(Path.Combine(destDirName, file.Name));
-                    file.CreationTime = File.GetCreationTime(Path.Combine(destDirName, file.Name));
+                    File.SetLastWriteTime(Path.Combine(destDirName, file.Name), file.LastWriteTime);
+                    File.SetCreationTime(Path.Combine(destDirName, file.Name), file.CreationTime);
+                    //file.LastWriteTime = File.GetLastWriteTime(Path.Combine(destDirName, file.Name));
+                    //file.CreationTime = File.GetCreationTime(Path.Combine(destDirName, file.Name));
                 }
+                //else
+                //{
+                //    File.SetLastWriteTime(Path.Combine(destDirName, file.Name), DateTime.Now);
+                //    File.SetCreationTime(Path.Combine(destDirName, file.Name), DateTime.Now);
+                //}
+                //#if DEBUG
+                //var trash = File.GetLastWriteTime(Path.Combine(destDirName, file.Name));
+                //#endif
             }
 
             // If copying subdirectories, copy them and their contents to new location.
             if (copySubDirs)
             {
+                DirectoryInfo[] dirs = dir.GetDirectories();
+
                 foreach (DirectoryInfo subdir in dirs)
                 {
                     string tempPath = Path.Combine(destDirName, subdir.Name);

@@ -14,13 +14,14 @@ namespace BaseLibrary
     /// </summary>
     public static class ExceptionMethods
     {
+        static string fileExceptions = "Exceptions.txt";
         public static void VerifyLocalException(int type, bool isAsync)
         {
             string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location);
             if (File.Exists(Path.Combine(folder, fileExceptions)))
             {
                 Console.Write("Some old internal errors messages were found in local file. Trying to send to developer...");
-                string message = FileProcess.ReadTXT(Path.Combine(folder, fileExceptions));
+                string message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions));
                 if (SendOnlineException(type, message, isAsync))
                 {
                     File.Delete(Path.Combine(folder, fileExceptions));
@@ -51,7 +52,6 @@ namespace BaseLibrary
                 SaveLocalException(message, isAsync);
             }
         }
-        static string fileExceptions = "Exceptions.txt";
         private static async void SaveLocalException(string message, bool isAsync)
         {
             string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location); // System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -61,31 +61,32 @@ namespace BaseLibrary
             if (File.Exists(Path.Combine(folder, fileExceptions)))
             {
                 if (isAsync)
-                    message = await FileProcess.ReadTXTAsync(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
+                    message = await FileMethods.ReadTXTAsync(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
                 else
-                    message = FileProcess.ReadTXT(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
+                    message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
             }
             if (isAsync)
-                await FileProcess.WriteTXTAsync(Path.Combine(folder, fileExceptions), message);
+                await FileMethods.WriteTXTAsync(Path.Combine(folder, fileExceptions), message);
             else
-                FileProcess.WriteTXT(Path.Combine(folder, fileExceptions), message);
+                FileMethods.WriteTXT(Path.Combine(folder, fileExceptions), message);
         }
         private static bool SendOnlineException(int type, string message, bool isAsync)
         {
             if (!HTTPMethods.IsConnectedToInternet("http://www.microsoft.com", false))
                 return false;
 
-            string sender, keypass;
+            string sender, keypass, emailTo;
+            sender = "sindarinsender@gmail.com";
+            keypass = "%hw.87&-";
             switch (type)
             {
                 case 0:
-                    sender = "sindarinsoftware@gmail.com";
-                    keypass = "g123g123";
+                    emailTo = "sindarinsoftware@gmail.com";
                     break;
                 default:
                     return false;
             }
-            HTTPMethods.SendEmail(sender, keypass, "Exception", sender, message, isAsync);
+            HTTPMethods.SendEmail(sender, keypass, "Exception", emailTo, message, isAsync);
             return true;
         }
         public static string ToDetailedString(this Exception exception)
@@ -131,11 +132,7 @@ namespace BaseLibrary
             return stringBuilder.ToString().TrimEnd('\r', '\n');
         }
 
-        private static void AppendCollection(
-            StringBuilder stringBuilder,
-            string propertyName,
-            IEnumerable collection,
-            ExceptionOptions options)
+        private static void AppendCollection(StringBuilder stringBuilder, string propertyName, IEnumerable collection, ExceptionOptions options)
         {
             stringBuilder.AppendLine($"{options.Indent}{propertyName} =");
 
@@ -168,11 +165,7 @@ namespace BaseLibrary
             }
         }
 
-        private static void AppendException(
-            StringBuilder stringBuilder,
-            string propertyName,
-            Exception exception,
-            ExceptionOptions options)
+        private static void AppendException(StringBuilder stringBuilder, string propertyName, Exception exception, ExceptionOptions options)
         {
             var innerExceptionString = ToDetailedString(
                 exception,

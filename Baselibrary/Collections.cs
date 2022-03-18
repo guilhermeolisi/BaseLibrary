@@ -36,7 +36,7 @@ namespace BaseLibrary
                 int i = 0;
                 while (i < obs.Count - 1)
                 {
-                    if (obs[i].ToString().ToUpper().CompareTo(obs[i + 1].ToString().ToUpper()) > 0)
+                    if (obs[i].ToString()?.ToUpper().CompareTo(obs[i + 1].ToString()?.ToUpper()) > 0)
                     {
                         obs.Move(i + 1, i);
                         i = 0;

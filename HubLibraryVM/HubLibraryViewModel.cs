@@ -25,11 +25,11 @@ namespace GosControls.ViewModels
         /// Pasta onde ficam os trabalhos ativos do usuário atual
         /// </summary>
         public string FolderUser { get => _folderLibrary; set { _folderLibrary = value; FoldersVerify(); } }
-        public string FolderLibrary { get => Path.Combine(FolderUser, "MyLibrary"); }
+        public string FolderLibrary { get => Path.Combine(FolderUser, "Library"); }
         /// <summary>
         /// Arquivo com a biblioteca de radiações
         /// </summary>
-        public string FolderProjects { get => Path.Combine(FolderLibrary, "Projects"); }
+        public string FolderWorks { get => Path.Combine(FolderLibrary, "Works"); }
         public string FolderDiffractometers { get => Path.Combine(FolderLibrary, "Diffractometers"); }
         public string FolderRadiations { get => Path.Combine(FolderLibrary, "Radiations"); }
         //public string FolderApplicationData { get => _folderAplicationData; set => _folderAplicationData = value; }
@@ -43,7 +43,7 @@ namespace GosControls.ViewModels
         private void FoldersVerify()
         {
             if (!Directory.Exists(FolderLibrary)) Directory.CreateDirectory(FolderLibrary);
-            if (!Directory.Exists(FolderProjects)) Directory.CreateDirectory(FolderProjects);
+            if (!Directory.Exists(FolderWorks)) Directory.CreateDirectory(FolderWorks);
             if (!Directory.Exists(FolderDiffractometers)) Directory.CreateDirectory(FolderDiffractometers);
             if (!Directory.Exists(FolderRadiations)) Directory.CreateDirectory(FolderRadiations);
         }
@@ -156,7 +156,7 @@ namespace GosControls.ViewModels
                 task = new Task(() =>
                 {
 
-                    string[] projectsList = Directory.GetDirectories(FolderProjects);
+                    string[] projectsList = Directory.GetDirectories(FolderWorks);
                     //TODO usar um loop parallel
                     //TODO o gargalo do processamento está neste loop, verificar o que está demorando neste processo
                     foreach (string p in projectsList)
@@ -593,7 +593,7 @@ namespace GosControls.ViewModels
         #region File
         public async Task ExportSelectedProject(string zipPath, ProjectInfoBase[] projectsToExport)
         {
-            string log = await FileMethods.ExportSelectedProject(zipPath, projectsToExport, FolderApplicationData);
+            string log = await Models.FileMethods.ExportSelectedProject(zipPath, projectsToExport, FolderApplicationData);
             if (!string.IsNullOrWhiteSpace(log))
                 AddLogText(log);
         }
@@ -607,7 +607,7 @@ namespace GosControls.ViewModels
             List<SameProjetcInfo> SameTemp = new();
             if (isReturn)
                 SameTemp.AddRange(SameWorksImport);
-            string imported = await FileMethods.ImportProject(zipFilePath, isReturn, FolderApplicationData, FolderProjects, SameTemp);
+            string imported = await Models.FileMethods.ImportProject(zipFilePath, isReturn, FolderApplicationData, FolderWorks, SameTemp);
             if (!isReturn)
             {
                 foreach (SameProjetcInfo same in SameTemp)
@@ -633,7 +633,7 @@ namespace GosControls.ViewModels
             List<SameProjetcInfo> sameWorks = new();
             List<string> imported;
             List<string> log;
-            (imported, log) = await FileMethods.ProcessFilesToImport(files, FolderApplicationData, FolderProjects, sameWorks);
+            (imported, log) = await Models.FileMethods.ProcessFilesToImport(files, FolderApplicationData, FolderWorks, sameWorks);
             if (imported != null && imported.Count > 0)
             {
                 string temp = string.Empty;
@@ -664,7 +664,7 @@ namespace GosControls.ViewModels
             if (!string.IsNullOrWhiteSpace(bakPath))
                 return;
 
-            string[] projectsDirectories = Directory.GetDirectories(FolderProjects);
+            string[] projectsDirectories = Directory.GetDirectories(FolderWorks);
             foreach (string pro in projectsDirectories)
             {
                 string[] experimentsDirectoreies = Directory.GetDirectories(pro);
@@ -684,8 +684,8 @@ namespace GosControls.ViewModels
                                     if (string.IsNullOrWhiteSpace(bakPath))
                                     {
                                         //TODO verificar primeiro se os textos são iguais
-                                        string backSinText = FileProcess.ReadTXT(sinPathTemp);
-                                        string backText = FileProcess.ReadTXT(bakPathTemp);
+                                        string backSinText = BaseLibrary.FileMethods.ReadTXT(sinPathTemp);
+                                        string backText = BaseLibrary.FileMethods.ReadTXT(bakPathTemp);
                                         if (backSinText.ToString() != backText.ToString())
                                         {
                                             bakPath = bakPathTemp.Substring(0);

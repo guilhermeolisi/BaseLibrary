@@ -73,5 +73,41 @@ namespace BaseLibrary
             };
             return true;
         }
+        public static bool DialogYesNo(string message)
+        {
+            Console.Write(message);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write(" [Y/n]: ");
+            Console.ResetColor();
+            bool answer = true;
+            do
+            {
+                ConsoleKeyInfo x = Console.ReadKey();
+
+                if (x.Key == ConsoleKey.Y || x.Key == ConsoleKey.Enter)
+                {
+                    if (x.Key == ConsoleKey.Enter)
+                    {
+                        Console.Write("Y");
+                    }
+                    break;
+                }
+                else if (x.Key == ConsoleKey.N || x.Key == ConsoleKey.Escape)
+                {
+                    if (x.Key == ConsoleKey.Escape)
+                    {
+                        Console.Write("n");
+                    }
+                    answer = false;
+                    break;
+                }
+                else
+                {
+                    Console.Write("\b \b");
+                }
+            } while (true);
+            Console.WriteLine();
+            return answer;
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace GosControls.Models
         //public static void ReadDiffractometers(string pathFile, ref ObservableCollection<DiffractometerInfo> list)
         //{
         //    if (!File.Exists(pathFile)) return;
-        //    string text = FileProcess.ReadTXT(pathFile);
+        //    string text = FileMethods.ReadTXT(pathFile);
         //    if (string.IsNullOrWhiteSpace(text))
         //        return;
         //    using (StringReader stringReader = new StringReader(text))
@@ -43,7 +43,7 @@ namespace GosControls.Models
 
             if (!File.Exists(pathFile)) return result;
 
-            string text = await FileProcess.ReadTXTAsync(pathFile);
+            string text = await BaseLibrary.FileMethods.ReadTXTAsync(pathFile);
             if (string.IsNullOrWhiteSpace(text))
                 return result;
             //XmlSerializer xml = new XmlSerializer(typeof(ObservableCollection<DiffractometerInfo>), new Type[] { typeof(DiffractometerInfo), typeof(RadiationInfo), typeof(XRayLineInfo) }); //TODO fazer a leitura async
@@ -85,7 +85,7 @@ namespace GosControls.Models
         //                xmlDiffractometers.Serialize(writer, list);
         //                if (writer.ToString().CompareTo(diffTemp) == 0) return;
         //                diffTemp = writer.ToString();
-        //                diffractometerTask = new Task(() => FileProcess.WriteTXTAsync(pathFile, diffTemp));
+        //                diffractometerTask = new Task(() => FileMethods.WriteTXTAsync(pathFile, diffTemp));
         //                diffractometerTask.Start();
         //                await diffractometerTask;
         //            }
@@ -111,7 +111,7 @@ namespace GosControls.Models
         {
             if (!File.Exists(pathFile)) 
                 return null;
-            string text = FileProcess.ReadTXT(pathFile);
+            string text = BaseLibrary.FileMethods.ReadTXT(pathFile);
             if (string.IsNullOrWhiteSpace(text))
             {
                 File.Delete(pathFile);
@@ -148,7 +148,7 @@ namespace GosControls.Models
                         xmlDiffractometer.Serialize(writer, diffTemp);
                         //if (writer.ToString().CompareTo(diffTemp) == 0) return;
                         //diffTemp = writer.ToString();
-                        diffractometerTask = new Task(() => FileProcess.WriteTXTAsync(Path.Combine(pathFolder, diffTemp.ToString() + ".xml"), writer.ToString()));
+                        diffractometerTask = new Task(() => BaseLibrary.FileMethods.WriteTXTAsync(Path.Combine(pathFolder, diffTemp.ToString() + ".xml"), writer.ToString()));
                         diffractometerTask.Start();
                         await diffractometerTask;
                     }
@@ -159,7 +159,7 @@ namespace GosControls.Models
         //public static void ReadRadiations(string pathFile, ref ObservableCollection<RadiationInfo> list)
         //{
         //    if (!File.Exists(pathFile)) return;
-        //    string text = FileProcess.ReadTXT(pathFile);
+        //    string text = FileMethods.ReadTXT(pathFile);
         //    if (string.IsNullOrWhiteSpace(text))
         //        return;
         //    using (StringReader stringReader = new StringReader(text))
@@ -197,7 +197,7 @@ namespace GosControls.Models
         {
             if (!File.Exists(pathFile))
                 return null;
-            string text = FileProcess.ReadTXT(pathFile);
+            string text = BaseLibrary.FileMethods.ReadTXT(pathFile);
             if (string.IsNullOrWhiteSpace(text))
                 return null;
             RadiationInfo result = null;
@@ -219,7 +219,7 @@ namespace GosControls.Models
 
         //    if (!File.Exists(pathFile)) return result;
 
-        //    string text = await FileProcess.ReadTXTAsync(pathFile);
+        //    string text = await FileMethods.ReadTXTAsync(pathFile);
         //    if (string.IsNullOrWhiteSpace(text))
         //        return result;
 
@@ -262,7 +262,7 @@ namespace GosControls.Models
         //                xmlRadiations.Serialize(writer, list);
         //                if (writer.ToString().CompareTo(radTemp) == 0) return;
         //                radTemp = writer.ToString();
-        //                radTask = new Task(() => FileProcess.WriteTXTAsync(pathFile, radTemp));
+        //                radTask = new Task(() => FileMethods.WriteTXTAsync(pathFile, radTemp));
         //                radTask.Start();
         //                await radTask;
         //            }
@@ -286,7 +286,7 @@ namespace GosControls.Models
                         xmlRadiation.Serialize(writer, radTemp);
                         //if (writer.ToString().CompareTo(radTextTemp) == 0) return;
                         //radTextTemp = writer.ToString();
-                        radTask = new Task(() => FileProcess.WriteTXTAsync(Path.Combine(pathFolder, radTemp.ToString() + ".xml"), writer.ToString()));
+                        radTask = new Task(() => BaseLibrary.FileMethods.WriteTXTAsync(Path.Combine(pathFolder, radTemp.ToString() + ".xml"), writer.ToString()));
                         radTask.Start();
                         await radTask;
                     }

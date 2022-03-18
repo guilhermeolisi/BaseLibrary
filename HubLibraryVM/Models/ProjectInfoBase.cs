@@ -249,7 +249,7 @@ namespace GosControls.Models
         //}
         //protected void GetFolderInfos(string folder)
         //{
-        //    FileProcess.InfoFromFolderPath(folder, ref _title, ref this.folder);
+        //    FileMethods.InfoFromFolderPath(folder, ref _title, ref this.folder);
         //    this.folder = folder;
         //    fileInfo = Path.Combine(this.folder, "Properties.xml");
         //}
@@ -663,7 +663,7 @@ namespace GosControls.Models
         #region Static methods
         public static void VerifyTitle(ProjectInfoBase obj, bool isImport = false)
         {
-            if (obj is null)
+            if (obj is null || string.IsNullOrWhiteSpace(obj.Title))
                 return;
 
             bool sameTitle = true;
