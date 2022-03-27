@@ -27,7 +27,7 @@ namespace BaseLibrary
                 Console.Write("\b");
             Console.Write(_twirl[progress % _twirl.Length]);
         }
-        public static bool ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
+        public static bool ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped/*, System.Collections.ObjectModel.Collection<string> argList*/)
         {
             string cmdEscaped = cmd.Replace("\"", "\\\"");
             var argsEscaped = args.Replace("\"", "\\\"");
@@ -45,7 +45,8 @@ namespace BaseLibrary
                     //FileName = cmdEscaped,
                     //Arguments = argsEscaped
                     FileName = isEscaped ? cmdEscaped : cmd,
-                    Arguments = isEscaped ? argsEscaped : args
+                    Arguments = isEscaped ? argsEscaped : args,
+                    //ArgumentList = argList
                 };
                 try
                 {
