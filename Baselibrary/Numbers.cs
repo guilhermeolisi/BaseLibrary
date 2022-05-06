@@ -328,26 +328,46 @@ namespace BaseLibrary
             }
         }
         public static Random Rand = new();
-        public static string GenerateCodeID(short legnth)
+        public static string GenerateCodeID(short legnth, bool isCaseSensitive)
         {
             char[] codeTemp = new char[legnth];
-            //0-9A-Za-z: 10 + 26 + 26 = 62 caracteres
-            //https://pt.wikipedia.org/wiki/ASCII
-
-            for (int i = 0; i < legnth; i++)
+            
+            if (isCaseSensitive)
             {
-                int tempShort = (int)Rand.Next(0, 61);
-                if (tempShort <= 9)
+                //0-9A-Za-z: 10 + 26 + 26 = 62 caracteres
+                //https://pt.wikipedia.org/wiki/ASCII
+                for (int i = 0; i < legnth; i++)
                 {
-                    codeTemp[i] = (char)(tempShort + 48);
+                    int tempShort = (int)Rand.Next(0, 61);
+                    if (tempShort <= 9)
+                    {
+                        codeTemp[i] = (char)(tempShort + 48);
+                    }
+                    else if (tempShort <= 35)
+                    {
+                        codeTemp[i] = (char)(tempShort + 65 - 10);
+                    }
+                    else
+                    {
+                        codeTemp[i] = (char)(tempShort + 97 - 36);
+                    }
                 }
-                else if (tempShort <= 35)
+            }
+            else
+            {
+                //0-9A-Z: 10 + 26 = 36 caracteres
+                //https://pt.wikipedia.org/wiki/ASCII
+                for (int i = 0; i < legnth; i++)
                 {
-                    codeTemp[i] = (char)(tempShort + 65 - 10);
-                }
-                else
-                {
-                    codeTemp[i] = (char)(tempShort + 97 - 36);
+                    int tempShort = (int)Rand.Next(0, 35);
+                    if (tempShort <= 9)
+                    {
+                        codeTemp[i] = (char)(tempShort + 48);
+                    }
+                    else if (tempShort <= 35)
+                    {
+                        codeTemp[i] = (char)(tempShort + 65 - 10);
+                    }
                 }
             }
             return new string(codeTemp);

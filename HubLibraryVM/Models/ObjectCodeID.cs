@@ -48,7 +48,7 @@ namespace GosControls.Models
         {
             if (isGetPropertyFromFile || isXmlProcess) return;
             char c = this is ProjectInfo ? 'P' : this is ExperimentInfo ? 'E' : this is WorkInfo ? 'W' : this is DiffractometerInfo ? 'D' : this is RadiationInfo ? 'R' : this is SampleInfo ? 'S' : '_';
-            CodeID = c + Numbers.GenerateCodeID(10);
+            CodeID = c + Numbers.GenerateCodeID(10, false);
         }
         protected bool isGetPropertyFromFile = false;
         protected bool IsPropertiesUpdate = false;

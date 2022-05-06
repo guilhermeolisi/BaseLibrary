@@ -224,7 +224,7 @@ namespace GosControls.Models
                                 {
                                     if (VerifySameCodeID(experimentName))
                                     {
-                                        experimentName = 'E' + Numbers.GenerateCodeID(10);
+                                        experimentName = 'E' + Numbers.GenerateCodeID(10, false);
                                         experimentPath = Path.Combine(projectPath, experimentName);
                                     }
                                     Directory.Move(experimentEntry, experimentPath);
@@ -242,7 +242,7 @@ namespace GosControls.Models
                                         {
                                             if (VerifySameCodeID(workName))
                                             {
-                                                workName = 'W' + Numbers.GenerateCodeID(10);
+                                                workName = 'W' + Numbers.GenerateCodeID(10, false);
                                                 workPath = Path.Combine(experimentPath, workName);
                                             }
                                             workPathTemp = workPath;
@@ -415,7 +415,7 @@ namespace GosControls.Models
                     }
                 if (same)
                 {
-                    string newPath = Path.Combine(folder[0] + Numbers.GenerateCodeID(10));
+                    string newPath = Path.Combine(folder[0] + Numbers.GenerateCodeID(10, false));
                     Directory.Move(folder, newPath);
                     VerifyCodeIDChildrens(newPath);
                 }
