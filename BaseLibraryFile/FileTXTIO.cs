@@ -256,7 +256,7 @@ public class FileTXTIO
         TextResult = null;
         if (!File.Exists(_pathFile))
         {
-            eWrite = new FileNotFoundException("Path file: " + _pathFile);
+            eRead = new FileNotFoundException("Path file: " + _pathFile);
             return false;
         }
 
