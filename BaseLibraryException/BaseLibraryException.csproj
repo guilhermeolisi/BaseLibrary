@@ -7,4 +7,9 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BaseLibraryFile\BaseLibraryFile.csproj" />
+    <ProjectReference Include="..\BaseLibraryHTTP\BaseLibraryHTTP.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -15,14 +15,14 @@ namespace BaseLibrary;
 public static class ExceptionMethods
 {
     static string fileExceptions = "Exceptions.txt";
-    public static void VerifyLocalException(int type, bool isAsync)
+    public static void VerifyLocalException(string emailTo, bool isAsync)
     {
         string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location);
         if (File.Exists(Path.Combine(folder, fileExceptions)))
         {
             Console.Write("Some old internal errors messages were found in local file. Trying to send to developer...");
             string message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions));
-            if (SendOnlineException(type, message, isAsync))
+            if (SendOnlineException(emailTo, message, isAsync))
             {
                 File.Delete(Path.Combine(folder, fileExceptions));
                 Console.WriteLine("done");
@@ -35,14 +35,22 @@ public static class ExceptionMethods
             }
         }
     }
-    public static void SendException(int type, Exception e, Version ver, bool isAsync, string messageExtra)
+    public static void SendException(string emailTo, Exception e, bool isAsync, string messageExtra)
     {
+        Console.WriteLine();
         Console.Write("A internal error is found. Trying to send to developer...");
-        string message = "Sindarin Version " + ver.ToString() + Environment.NewLine + ToDetailedString(e) + (!String.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
-        if (SendOnlineException(type, message, isAsync))
+        var program = Assembly.GetEntryAssembly().GetName();
+        string Name = program?.Name;
+        Version ver = program?.Version;
+        string message = "Program: " + Name + Environment.NewLine +
+            "Version: " + ver.ToString() + Environment.NewLine + 
+            ToDetailedString(e) + 
+            (!String.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
+
+        if (SendOnlineException(emailTo, message, isAsync))
         {
             Console.WriteLine("done");
-            VerifyLocalException(type, isAsync);
+            VerifyLocalException(emailTo, isAsync);
             Console.WriteLine("Content of sent message:");
             Console.WriteLine(message);
         }
@@ -54,7 +62,7 @@ public static class ExceptionMethods
     }
     private static async void SaveLocalException(string message, bool isAsync)
     {
-        string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location); // System.Reflection.Assembly.GetExecutingAssembly().Location;
+        string folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
         message = "[" + DateTime.Now + "]" + Environment.NewLine + message;
 
@@ -70,23 +78,22 @@ public static class ExceptionMethods
         else
             FileMethods.WriteTXT(Path.Combine(folder, fileExceptions), message);
     }
-    private static bool SendOnlineException(int type, string message, bool isAsync)
+    private static bool SendOnlineException(string emailTo, string message, bool isAsync)
     {
-        if (!HTTPMethods.IsConnectedToInternet("http://www.microsoft.com", false))
+        if (!HTTPMethods.IsConnectedToInternetPing())
             return false;
 
-        string sender, keypass, emailTo;
+        string sender, keypass;
         sender = "sindarinsender@gmail.com";
         keypass = "%hw.87&-";
-        switch (type)
+        try
         {
-            case 0:
-                emailTo = "sindarinapp@gmail.com";
-                break;
-            default:
-                return false;
+            HTTPMethods.SendEmail(sender, keypass, "Exception", emailTo, message, isAsync);
         }
-        HTTPMethods.SendEmail(sender, keypass, "Exception", emailTo, message, isAsync);
+        catch (Exception ex)
+        {
+            return false;
+        }
         return true;
     }
     public static string ToDetailedString(this Exception exception)

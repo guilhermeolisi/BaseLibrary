@@ -15,11 +15,18 @@ public static class HTTPMethods
         byte[] buffer = new byte[32];
         int timeout = 1000;
         PingOptions pingOptions = new PingOptions();
-        PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
-        if (reply.Status == IPStatus.Success)
+        try
         {
-            // presumably online
-            return true;
+            PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
+            if (reply.Status == IPStatus.Success)
+            {
+                // presumably online
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            return false;
         }
         return false;
     }
@@ -83,7 +90,12 @@ public static class HTTPMethods
             Console.WriteLine(ex);
         }
     }
-
+    public static bool IsValidURL(string url)
+    {
+        Uri uriResult;
+        return Uri.TryCreate(url, UriKind.Absolute, out uriResult)
+            && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+    }
     ////https://techblog.desenvolvedores.net/2011/03/22/checar-se-a-conexao-com-a-internet-esta-ativa/
     //[DllImport("wininet.dll")]
     //private extern static bool InternetGetConnectedState(out int Description, int ReservedValue);
