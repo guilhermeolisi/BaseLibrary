@@ -92,16 +92,19 @@ public class FileTXTIO
         //Verificar se o arquivo original está intacto
         try
         {
-            if (!FileMethods.CheckTextFile(_pathFile))
+            if (File.Exists(_pathFile))
             {
-                eWrite = new FileLoadException("Wrong file formart or violated file: " + _pathFile);
-                return false;
-            }
-            else
-            {
-                using (StreamReader sr = new(_pathFile))
+                if (!FileMethods.CheckTextFile(_pathFile))
                 {
-                    sr.ReadToEnd();
+                    eWrite = new FileLoadException("Wrong file formart or violated file: " + _pathFile);
+                    return false;
+                }
+                else
+                {
+                    using (StreamReader sr = new(_pathFile))
+                    {
+                        sr.ReadToEnd();
+                    }
                 }
             }
         }
