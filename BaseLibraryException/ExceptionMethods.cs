@@ -98,7 +98,7 @@ public static class ExceptionMethods
     }
     public static string ToDetailedString(this Exception exception)
     {
-        if (exception == null)
+        if (exception is null)
         {
             throw new ArgumentNullException(nameof(exception));
         }
