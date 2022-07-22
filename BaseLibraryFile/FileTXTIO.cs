@@ -9,7 +9,7 @@ public class FileTXTIO
 {
     private int _delay = 500;
     private string text;
-    private string _pathFile;
+    private string? _pathFile;
     private string _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
     private bool _isStayBak;
     public bool? isOK;
@@ -19,7 +19,7 @@ public class FileTXTIO
         _pathFile = pathFile;
         _isStayBak = isStayBak;
     }
-    public void SetPathFile(string pathFile)
+    public void SetPathFile(string? pathFile)
     {
         if (_isStayBak && !string.IsNullOrWhiteSpace(_fileBak))
         {
@@ -257,6 +257,11 @@ public class FileTXTIO
     public bool ReadTXT()
     {
         TextResult = null;
+        if (_pathFile is null)
+        {
+            eRead = new FileNotFoundException("Path file is null");
+            return false;
+        }
         if (!File.Exists(_pathFile))
         {
             eRead = new FileNotFoundException("Path file: " + _pathFile);

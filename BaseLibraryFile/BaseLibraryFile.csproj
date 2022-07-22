@@ -7,4 +7,8 @@
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="File.TypeChecker" Version="3.0.0" />
+  </ItemGroup>
+
 </Project>

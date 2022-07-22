@@ -1,4 +1,7 @@
-﻿using System;
+﻿using FileTypeChecker;
+using FileTypeChecker.Abstracts;
+using FileTypeChecker.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -271,9 +274,40 @@ public static class FileMethods
 
         return true;
     }
-     public static void FileNameAvailable(ref string fullPath)
+    /// <summary>
+    /// Verifica se é um arquivo imagem
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static bool CheckImageFile(string path)
     {
-        string dir = Path.GetDirectoryName(fullPath);
+        try
+        {
+            using (var fileStream = File.OpenRead(path))
+            {
+                var isRecognizableType = FileTypeValidator.IsTypeRecognizable(fileStream);
+
+                if (!isRecognizableType)
+                {
+                    // Do something ...
+                }
+
+                //IFileType fileType = FileTypeValidator.GetFileType(fileStream);
+                return fileStream.IsImage();
+                //Console.WriteLine("Type Name: {0}", fileType.Name);
+                //Console.WriteLine("Type Extension: {0}", fileType.Extension);
+                //Console.WriteLine("Is Image?: {0}", fileStream.IsImage());
+                //Console.WriteLine("Is Bitmap?: {0}", fileStream.Is<Bitmap>());
+            }
+        }
+        catch (InvalidDataException)
+        {
+            return false;
+        }
+    }
+    public static void FileNameAvailable(ref string fullPath)
+    {
+        string? dir = Path.GetDirectoryName(fullPath);
         string fileName = Path.GetFileNameWithoutExtension(fullPath);
         string exten = Path.GetExtension(fullPath);
         if (string.IsNullOrWhiteSpace(exten))
