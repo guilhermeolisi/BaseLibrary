@@ -106,7 +106,7 @@ namespace GosControls.ViewModels
                         if (rad != null && !string.IsNullOrWhiteSpace(rad.ToString()))
                             radiations.Add(rad);
                     }
-                    Collections.OrderObservable(radiations);
+                    Collections.OrderObservableToString(radiations);
                     RaisePropertyChanged("Radiations");
                 }
                 //Diffractometers
@@ -120,7 +120,7 @@ namespace GosControls.ViewModels
                             diffractometers.Add(diff);
                         diff.AddInitialRadiation(Radiations);
                     }
-                    Collections.OrderObservable(diffractometers);
+                    Collections.OrderObservableToString(diffractometers);
                     RaisePropertyChanged("Diffractometers");
                 }
 
@@ -193,7 +193,7 @@ namespace GosControls.ViewModels
                 {
                     while (projectTemp.Count > 0)
                         Projects.Add(projectTemp.Dequeue());
-                    Collections.OrderObservable(Projects);
+                    Collections.OrderObservableToString(Projects);
                 }
             }
         }
@@ -367,7 +367,7 @@ namespace GosControls.ViewModels
         {
             Diffractometers.Add(diff);
             Diffractometers.Last().PropertyChanged += ModelPropertyChangedEvent;
-            Collections.OrderObservable(diffractometers);
+            Collections.OrderObservableToString(diffractometers);
         }
         public async void DiffractometersFileUpdate(DiffractometerInfo diff)
         {
@@ -395,7 +395,7 @@ namespace GosControls.ViewModels
             Radiations.Add(rad);
             //Radiations.Last().PropertyChanged += ModelPropertyChangedEvent;
             //Radiations.Last().Lines.CollectionChanged += CollectionChanged;
-            Collections.OrderObservable(radiations);
+            Collections.OrderObservableToString(radiations);
         }
         private ObservableCollection<RadiationInfo> radiations = new();
         public ObservableCollection<RadiationInfo> Radiations { get => radiations; set { radiations = value; RaisePropertyChanged(); } }

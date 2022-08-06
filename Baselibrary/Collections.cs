@@ -1,49 +1,142 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 
-namespace BaseLibrary
+namespace BaseLibrary;
+
+public static class Collections
 {
-    public static class Collections
+    public static void OrderObservableToString<T>(this ObservableCollection<T> obs)
     {
-        public static void OrderObservable<T>(in ObservableCollection<T> obs)
+        Type[] interfaces = obs.GetType().GetGenericArguments()[0].GetInterfaces();
+        bool isIComparable = false;
+        foreach (Type inter in interfaces)
+            if (inter.Name == "IComparable")
+            {
+                isIComparable = true;
+                break;
+            }
+        if (isIComparable)
         {
-            Type[] interfaces = obs.GetType().GetGenericArguments()[0].GetInterfaces();
-            bool isIComparable = false;
-            foreach (Type inter in interfaces)
-                if (inter.Name == "IComparable")
+            int i = 0;
+            while (i < obs.Count - 1)
+            {
+                if ((obs[i] as IComparable).CompareTo(obs[i + 1]) > 0)
                 {
-                    isIComparable = true;
+                    obs.Move(i + 1, i);
+                    i = 0;
+                }
+                else
+                    i++;
+            }
+        }
+        else
+        {
+            int i = 0;
+            while (i < obs.Count - 1)
+            {
+                if (obs[i].ToString()?.ToUpper().CompareTo(obs[i + 1].ToString()?.ToUpper()) > 0)
+                {
+                    obs.Move(i + 1, i);
+                    i = 0;
+                }
+                else
+                    i++;
+            }
+        }
+    }
+    public static bool RemoveIfContain<T>(this ICollection<T> list, T item)
+    {
+        bool has = false;
+        foreach (T item2 in list)
+        {
+            if (item2.Equals(item))
+            {
+                has = true;
+                break;
+            }
+        }
+        if (has)
+        {
+            list.Remove(item);
+            return true;
+        }
+        return false;
+    }
+    public static bool[] RemoveIfContain<T>(this ICollection<T> list, ICollection items)
+    {
+        bool[] result = new bool[items.Count];
+        List<T> toRemove = new();
+        int i = 0;
+        foreach (var item in items)
+        {
+            foreach (T itemL in list)
+            {
+                if (itemL.Equals(item))
+                {
+                    result[i] = true;
+                    toRemove.Add((T)item);
                     break;
                 }
-            if (isIComparable)
+            }
+            i++;
+        }
+        for (i = 0; i < toRemove.Count; i++)
+        {
+            list.Remove(toRemove[i]);
+        }
+        return result;
+    }
+    public static void MirrorList<T>(this IEnumerable original, ICollection<T> destine)
+    {
+        List<T> toRemove = new();
+        foreach (T itemD in destine)
+        {
+            bool has = false;
+            if (itemD is not null)
             {
-                int i = 0;
-                while (i < obs.Count - 1)
+                foreach (T itemO in original)
                 {
-                    if ((obs[i] as IComparable).CompareTo(obs[i + 1]) > 0)
+                    if (itemO is null)
+                        continue;
+                    if (itemO.Equals(itemD))
                     {
-                        obs.Move(i + 1, i);
-                        i = 0;
+                        has = true;
+                        break;
                     }
-                    else
-                        i++;
                 }
             }
-            else
+            if (!has)
             {
-                int i = 0;
-                while (i < obs.Count - 1)
+                toRemove.Add(itemD);
+            }
+        }
+        for (int i = 0; i < toRemove.Count; i++)
+        {
+            destine.Remove(toRemove[i]);
+        }
+        foreach (T itemO in original)
+        {
+            if (itemO is null)
+                continue;
+            bool has = false;
+            foreach (T itemD in destine)
+            {
+                if (itemD is null)
                 {
-                    if (obs[i].ToString()?.ToUpper().CompareTo(obs[i + 1].ToString()?.ToUpper()) > 0)
-                    {
-                        obs.Move(i + 1, i);
-                        i = 0;
-                    }
-                    else
-                        i++;
+                    continue;
                 }
+                if (itemO.Equals(itemD))
+                {
+                    has = true;
+                    break;
+                }
+            }
+            if (!has)
+            {
+                destine.Add(itemO);
             }
         }
     }

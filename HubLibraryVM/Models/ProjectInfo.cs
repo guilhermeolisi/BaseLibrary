@@ -82,7 +82,7 @@ namespace GosControls.Models
         }
         public override void TakeSamples(ObservableCollection<SampleInfo> projectSams)
         {
-            Collections.OrderObservable(projectSamples);
+            Collections.OrderObservableToString(projectSamples);
             RaisePropertyChanged("ProjectSamples");
             foreach (SampleInfo s in ProjectSamples)
                 s.PropertyChanged += ProjectPropertyChanged;

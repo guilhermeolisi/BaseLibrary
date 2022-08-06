@@ -204,7 +204,7 @@ namespace GosControls.Models
                         Children.Add(new WorkInfo((ExperimentInfo)this, child));
                 }
             if (children.Count > 1)
-                Collections.OrderObservable(Children);
+                Collections.OrderObservableToString(Children);
         }
         public virtual void KillAllChildren()
         {

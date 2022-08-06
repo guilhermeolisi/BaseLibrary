@@ -82,7 +82,7 @@ namespace GosControls.Models
                         i--;
                     }
                 }
-                Collections.OrderObservable(diffractometers);
+                Collections.OrderObservableToString(diffractometers);
                 if (someChanged)
                     WriteProperty();
                 RaisePropertyChanged("Diffractometers");
@@ -117,7 +117,7 @@ namespace GosControls.Models
                         i--;
                     }
                 }
-                Collections.OrderObservable(Samples);
+                Collections.OrderObservableToString(Samples);
                 if (someChanged)
                     WriteProperty();
                 RaisePropertyChanged("Samples");
