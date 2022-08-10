@@ -13,11 +13,11 @@ namespace BaseLibrary
         /// 
         /// </summary>
         /// <returns>int 0 Window, 1 Linux, 2 OSX</returns>
-        public static (PlatformID, short, bool) OSCheck()
+        public static (PlatformID, sbyte, bool) OSCheck()
         {
             PlatformID platform = Environment.OSVersion.Platform;
             bool is64x = System.Environment.Is64BitOperatingSystem;
-            short os;
+            sbyte os;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 os = 0;
