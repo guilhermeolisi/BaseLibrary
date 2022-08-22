@@ -1,14 +1,9 @@
 ﻿using FileTypeChecker;
 using FileTypeChecker.Abstracts;
 using FileTypeChecker.Extensions;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
@@ -123,7 +118,7 @@ public static class FileMethods
                 }
             }
         }
-        if (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile) > File.GetCreationTime(pathFile + tmpExt))
+        if (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetLastWriteTime(pathFile) > File.GetCreationTime(pathFile + tmpExt))
         {
             try
             {
@@ -393,9 +388,11 @@ public static class FileMethods
     /// Verifica se é um arquivo binário ou de texto
     /// </summary>
     /// <returns>text return true, binary return false</returns>
-    public static bool CheckTextFile(string filePath)
+    public static bool CheckTextFileByChars(string filePath)
     {
-        if (!File.Exists(filePath)) return false;
+        //https://stackoverflow.com/questions/4744890/c-sharp-check-if-file-is-text-based
+        if (!File.Exists(filePath))
+            return false;
         const int charsToCheck = 8000;
         const char nulChar = '\0';
 
@@ -408,11 +405,19 @@ public static class FileMethods
                 if (streamReader.EndOfStream)
                     return true;
 
+#if DEBUG
+                var char1 = streamReader.Read();
+                var char2 = (char)char1;
+                if (char2 == nulChar)
+#else
                 if ((char)streamReader.Read() == nulChar)
+#endif
+
                 {
+
                     nulCount++;
 
-                    if (nulCount >= 1)
+                    if (nulCount >= 2) //verificar quantos characteres diferentes consecutivos devem ser consideraods um binário
                         return false;
                 }
                 else
@@ -423,6 +428,13 @@ public static class FileMethods
         }
 
         return true;
+    }
+    public static bool CheckTextFile(string filePath)
+    {
+
+        var result = TextFileEncodingDetector.DetectTextFileEncoding(filePath);
+
+        return result is not null;
     }
     /// <summary>
     /// Verifica se é um arquivo imagem
@@ -443,7 +455,7 @@ public static class FileMethods
                     return false;
                 }
 
-                //IFileType fileType = FileTypeValidator.GetFileType(fileStream);
+                IFileType fileType = FileTypeValidator.GetFileType(fileStream);
                 return fileStream.IsImage();
                 //Console.WriteLine("Type Name: {0}", fileType.Name);
                 //Console.WriteLine("Type Extension: {0}", fileType.Extension);

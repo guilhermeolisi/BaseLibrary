@@ -9,9 +9,9 @@ namespace BaseLibrary;
 
 public interface IThemeCollection
 {
-    List<(char type, object theme)> Themes { get; }
+    List<(char type, IThemeBase theme)> Themes { get; }
     int Length => Themes.Count;
-    public (char type, object theme) this[int index]
+    public (char type, IThemeBase theme) this[int index]
     {
         get => Themes[index];
         set => Themes[index] = value;

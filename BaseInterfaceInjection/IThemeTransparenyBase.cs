@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
-public interface IThemeChanger
+public interface IThemeTransparencyBase : IThemeBase
 {
-    Task SetTheme(char theme);
-    Task SetTransparency(bool isTransparent, char? type);
+    bool Transparency { get; }
 }
