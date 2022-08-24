@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseInterfaceInjection", "B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibrarySerializerXML", "BaseLibrarySerializerXML\BaseLibrarySerializerXML.csproj", "{B764C1CE-DC02-4388-8C05-419BC586F41D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryFile.UnitTest", "BaseLibraryFile.MSTest\BaseLibraryFile.UnitTest.csproj", "{77C42737-A2D7-4058-B0DA-5678AA32251C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,7 +33,8 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}.Debug|x64.ActiveCfg = Debug|x64
 		{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}.Debug|x64.Build.0 = Debug|x64
 		{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}.Debug|x86.ActiveCfg = Debug|x86
@@ -137,6 +140,18 @@ Global
 		{B764C1CE-DC02-4388-8C05-419BC586F41D}.Release|x64.Build.0 = Release|x64
 		{B764C1CE-DC02-4388-8C05-419BC586F41D}.Release|x86.ActiveCfg = Release|Any CPU
 		{B764C1CE-DC02-4388-8C05-419BC586F41D}.Release|x86.Build.0 = Release|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Debug|x64.Build.0 = Debug|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Debug|x86.Build.0 = Debug|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Release|x64.ActiveCfg = Release|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Release|x64.Build.0 = Release|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Release|x86.ActiveCfg = Release|Any CPU
+		{77C42737-A2D7-4058-B0DA-5678AA32251C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

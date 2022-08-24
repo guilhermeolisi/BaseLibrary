@@ -5,10 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <RootNamespace>BaseLibrary</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="File.TypeChecker" Version="3.0.0" />
+    <PackageReference Include="Splat" Version="14.4.1" />
   </ItemGroup>
 
 </Project>

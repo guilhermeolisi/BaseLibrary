@@ -1,24 +1,29 @@
-﻿using System;
+﻿using Splat;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
-public class FileTXTIO
+public class FileTXTIO : IFileTXTIO
 {
-    private int _delay = 500;
+    protected IFileServices fileServices;
+    
+    private int _delay = 250;
     private string text;
     private string? _pathFile;
-    private string _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
+    private string? _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
     private bool _isStayBak;
-    public bool? isOK;
-    public FileTXTIO(string pathFile, bool isStayBak, int delay = 250)
+    public FileTXTIO(/*string? pathFile = null, bool isStayBak = false, int delay = 250, */IFileServices? fileServices = null)
     {
-        _delay = delay;
-        _pathFile = pathFile;
-        _isStayBak = isStayBak;
+        this.fileServices = fileServices ?? Locator.Current!.GetService<IFileServices>()!;
+
+        //_delay = delay;
+        //_pathFile = pathFile;
+        //_isStayBak = isStayBak;
     }
+    public void SetStayBak(bool value) => _isStayBak = value;
     public void SetPathFile(string? pathFile)
     {
         if (_isStayBak && !string.IsNullOrWhiteSpace(_fileBak))
@@ -63,7 +68,7 @@ public class FileTXTIO
     #region Write
     private Task tryWriteTask;
     private static DateTime? lastWriteAttempt;
-    public Exception eWrite;
+    public Exception eWrite { get; private set; }
     public async Task<bool> WriteTXTAsync(string parTXT)
     {
         Task<bool> task = new Task<bool>(() => WriteTXT(parTXT));
@@ -94,7 +99,7 @@ public class FileTXTIO
         {
             if (File.Exists(_pathFile))
             {
-                if (!FileMethods.CheckTextFile(_pathFile))
+                if (!fileServices.Check.CheckTextFile(_pathFile))
                 {
                     eWrite = new FileLoadException("Wrong file formart or violated file: " + _pathFile);
                     return false;
@@ -156,7 +161,7 @@ public class FileTXTIO
                 //texta o arquivo bak
                 try
                 {
-                    if (!FileMethods.CheckTextFile(_fileBak))
+                    if (!fileServices.Check.CheckTextFile(_fileBak))
                     {
                         File.Delete(_fileBak);
                     }
@@ -245,8 +250,9 @@ public class FileTXTIO
     #endregion
     #region Read
     private static DateTime? lastReadAttempt;
-    public string TextResult;
-    public Exception eRead;
+    
+    public string TextResult { get; private set; }
+    public Exception eRead { get; private set; }
     public async Task<bool> ReadTXTAsync()
     {
         Task<bool> task = new Task<bool>(() => ReadTXT());
