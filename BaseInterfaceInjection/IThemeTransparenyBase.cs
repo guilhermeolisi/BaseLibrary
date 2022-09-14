@@ -9,4 +9,5 @@ namespace BaseLibrary;
 public interface IThemeTransparencyBase : IThemeBase
 {
     bool Transparency { get; }
+    bool isAllTransparent { get; }
 }

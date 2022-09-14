@@ -8,10 +8,12 @@ namespace BaseLibrary;
 
 public class FileServicesText : IFileServicesText
 {
-    public bool WriteTXT(string pathFile, in string parTXT)
+    public bool WriteTXT(string pathFile, string parTXT)
     {
         if (string.IsNullOrWhiteSpace(pathFile))
-            return false;
+            throw new ArgumentNullException(nameof(pathFile));
+        if (string.IsNullOrWhiteSpace(parTXT))
+            throw new ArgumentNullException(nameof(parTXT));
         short count = 0;
         bool isCont = true;
         bool returnBak = false;
@@ -70,6 +72,7 @@ public class FileServicesText : IFileServicesText
                     using (StreamWriter sw = new StreamWriter(pathFile, false, Encoding.UTF8))
                     {
                         await sw.WriteAsync(parTXT);
+                        returnBak = false;
                         return true;
                     }
                 }

@@ -2,6 +2,7 @@
 using FileTypeChecker.Abstracts;
 using FileTypeChecker.Extensions;
 using Splat;
+using System.Drawing;
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -70,6 +71,21 @@ public class FileServicesDirectory : IFileServicesDirectory
                 DirectoryCopy(subdir.FullName, tempPath, copySubDirs, preserveTime);
             }
         }
+    }
+    public double GetDirectorySize(string directory)
+    {
+        double result = 0;
+        foreach (string dir in Directory.GetDirectories(directory))
+        {
+            GetDirectorySize(dir);
+        }
+
+        foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
+        {
+            result += file.Length;
+        }
+
+        return result;
     }
     public void DirectoryClear(string sourceDirName)
     {

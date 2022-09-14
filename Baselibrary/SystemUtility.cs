@@ -40,7 +40,7 @@ namespace BaseLibrary
         /// https://stackoverflow.com/questions/2819934/detect-windows-version-in-net
         /// </summary>
         /// <returns>0: 95; 1: 98; 2: 98SE; 3: Me; 4: NT 3.51; 5: NT 4.0; 6: 2000; 7: XP; 8: Vsta; 9: 7; 10: 8; 11: 8.1; 12: 10; 13: 11</returns>
-        public static short WindowsVersion()
+        public static sbyte WindowsVersion()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -52,7 +52,7 @@ namespace BaseLibrary
             Version vs = os.Version;
 
             //Variable to hold our return value
-            short operatingSystem = -1;
+            sbyte operatingSystem = -1;
 
             if (os.Platform == PlatformID.Win32Windows)
             {

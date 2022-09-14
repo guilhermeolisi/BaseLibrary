@@ -13,4 +13,8 @@
     <PackageReference Include="Splat" Version="14.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Baselibrary\BaseLibraryGeneral.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -8,7 +8,7 @@ namespace BaseLibrary;
 
 public interface IFileServicesText
 {
-    bool WriteTXT(string pathFile, in string parTXT);
+    bool WriteTXT(string pathFile, string parTXT);
 
     Task<bool> WriteTXTAsync(string pathFile, string parTXT);
     string? ReadTXT(string pathFile);

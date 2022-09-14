@@ -51,7 +51,7 @@ public class FileServicesCheck : IFileServicesCheck
 
                     nulCount++;
 
-                    if (nulCount >= 2) //verificar quantos characteres diferentes consecutivos devem ser consideraods um binário
+                    if (nulCount >= 1) //verificar quantos characteres diferentes consecutivos devem ser consideraods um binário
                         return false;
                 }
                 else

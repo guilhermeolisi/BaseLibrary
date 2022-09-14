@@ -35,8 +35,10 @@ public class FileServicesName : IFileServicesName
         actualFolder = m.Groups["FolderName"].Value;
         folderParent = m.Groups["FolderParent"].Value;
     }
-    public string FileNameAvailable(string fullPath, char? mode)
+    public string FileNameAvailable(string fullPath, char? mode = null)
     {
+        if (string.IsNullOrWhiteSpace(fullPath))
+            throw new ArgumentNullException(nameof(fullPath));
         string? dir = Path.GetDirectoryName(fullPath);
         string fileName = Path.GetFileNameWithoutExtension(fullPath);
         string exten = Path.GetExtension(fullPath);
@@ -59,12 +61,16 @@ public class FileServicesName : IFileServicesName
         return fullPath;
     }
     static readonly char[] forbiden = new char[] { '/', '\\', '>', '<', ':', '*', '?', '"', '|' };
-    public string CutCharacterFileForbiden(string filePath)
+    public string CutCharacterFileForbiden(string fileName, bool cut)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
-            return filePath;
-        if (filePath.Length > 30)
-            filePath = filePath[0..29];
+        if (fileName is null)
+            throw new ArgumentNullException(nameof(fileName));
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = "unnamed";
+        }
+        if (cut && fileName.Length > 30)
+            fileName = fileName[0..39];
         int ind = 0;
 
 #if DEBUG
@@ -76,12 +82,12 @@ public class FileServicesName : IFileServicesName
 
 #endif
 
-        while (ind < filePath.Length)
+        while (ind < fileName.Length)
         {
             bool isForbiden = false;
             for (int i = 0; i < forbiden.Length; i++)
             {
-                if (filePath[ind] == forbiden[i])
+                if (fileName[ind] == forbiden[i])
                 {
                     isForbiden = true;
                     break;
@@ -91,7 +97,7 @@ public class FileServicesName : IFileServicesName
             {
                 for (int i = 0; i < 32; i++)
                 {
-                    if (filePath[ind] == i)
+                    if (fileName[ind] == i)
                     {
                         isForbiden = true;
                         break;
@@ -101,14 +107,14 @@ public class FileServicesName : IFileServicesName
             if (isForbiden)
             {
 #if DEBUG
-                var tasrh = filePath[ind];
-                var trash2 = filePath.Insert(ind, " ");
-                var trash3 = filePath.Remove(ind, 1);
+                var tasrh = fileName[ind];
+                var trash2 = fileName.Insert(ind, " ");
+                var trash3 = fileName.Remove(ind, 1);
 #endif
-                filePath = filePath.Remove(ind, 1).Insert(ind, " ");
+                fileName = fileName.Remove(ind, 1).Insert(ind, " ");
             }
             ind++;
         }
-        return filePath;
+        return fileName;
     }
 }

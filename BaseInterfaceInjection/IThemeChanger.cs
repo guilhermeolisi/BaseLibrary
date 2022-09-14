@@ -9,5 +9,5 @@ namespace BaseLibrary;
 public interface IThemeChanger
 {
     Task SetTheme(char theme);
-    Task SetTransparency(bool isTransparent, char? type);
+    Task SetTransparency(bool isTransparent, bool isOnlyPanel, char? type);
 }

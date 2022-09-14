@@ -367,6 +367,10 @@ public static class Numbers
                 }
             }
         }
+#if DEBUG
+        var trash = new string(codeTemp);
+#endif
+
         return new string(codeTemp);
     }
     public static string OrdinalIntegerToString(int number)

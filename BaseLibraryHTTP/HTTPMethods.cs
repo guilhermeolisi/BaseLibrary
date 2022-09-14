@@ -33,18 +33,18 @@ public static class HTTPMethods
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="sender"></param>
+    /// <param name="emailSender"></param>
     /// <param name="keypass"></param>
     /// <param name="emailTo"></param>
     /// <param name="message"></param>
-    public static void SendEmail(string sender, string keypass, string subject, string emailTo, string message, bool isAsync)
+    public static void SendEmail(string emailSender, string keypass, string subject, string emailTo, string message, bool isAsync)
     {
         //https://pt.stackoverflow.com/questions/630/como-posso-enviar-um-e-mail-pelo-gmail
         //https://www.c-sharpcorner.com/blogs/send-email-using-gmail-smtp
 
         MailMessage mail = new()
         {
-            From = new(sender),
+            From = new(emailSender),
             To = { emailTo },
             Subject = subject,
             Body = message,
@@ -58,7 +58,7 @@ public static class HTTPMethods
             smtp.Dispose();
         };
 
-        if (sender.ToLower().Contains("gmail.com"))
+        if (emailSender.ToLower().Contains("gmail.com"))
         {
             //https://support.google.com/mail/answer/7126229?authuser=2&authuser=2&hl=pt-BR&authuser=2&visit_id=637722547938951094-494706498&rd=2#zippy=%2Cetapa-alterar-o-smtp-e-outras-configura%C3%A7%C3%B5es-no-seu-cliente-de-e-mail
             //Port 465
@@ -71,7 +71,7 @@ public static class HTTPMethods
 
 
         // seu usuário e senha para autenticação
-        smtp.Credentials = new NetworkCredential(sender, keypass);
+        smtp.Credentials = new NetworkCredential(emailSender, keypass);
 
         // envia o e-mail
         try

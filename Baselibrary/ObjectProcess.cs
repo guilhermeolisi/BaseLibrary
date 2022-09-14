@@ -50,7 +50,14 @@ namespace BaseLibrary
                 {
                     continue;
                 }
-                SetObjectValue(ref destination, destinationMember, GetMemberValue(source, sourceMember));
+                try
+                {
+                    SetObjectValue(ref destination, destinationMember, GetMemberValue(source, sourceMember));
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
             }
         }
 
