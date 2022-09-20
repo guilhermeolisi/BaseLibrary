@@ -11,6 +11,7 @@ namespace BaseLibrary;
 
 public interface IHTTPServices
 {
-    bool IsConnectedToInternetPing(string? host = null);
+    bool IsConnectedToInternetPing(string host);
+    bool IsConnectedToInternet();
     bool IsValidURL(string url);
 }

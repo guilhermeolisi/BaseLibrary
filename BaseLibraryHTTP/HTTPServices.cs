@@ -11,8 +11,10 @@ namespace BaseLibrary;
 
 public class HTTPServices : IHTTPServices
 {
-    public bool IsConnectedToInternetPing(string? host = null)
+    public bool IsConnectedToInternetPing(string host)
     {
+        //Está retornando falso mesmo quando estou com conexão com internet, verificar se o host do google está correto
+
         Ping myPing = new Ping();
         if (string.IsNullOrWhiteSpace(host))
             host = "google.com";
@@ -34,6 +36,7 @@ public class HTTPServices : IHTTPServices
         }
         return false;
     }
+    public bool IsConnectedToInternet() => NetworkInterface.GetIsNetworkAvailable();
     public bool IsValidURL(string url)
     {
         Uri uriResult;

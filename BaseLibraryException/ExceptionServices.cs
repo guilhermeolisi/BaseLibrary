@@ -6,45 +6,76 @@ namespace BaseLibrary;
 
 public class ExceptionServices : IExceptionServices
 {
-    private string fileExceptions = "Exceptions.txt";
+    private string fileExceptionsPostfix = " - Exceptions";
+    private string fileNameExceptionSender = "SendingException";
     //private string emailSender, password, folder, emailTo;
     private string folder, emailTo;
     private bool isConsole;
-    private IExceptionDetails details;
+    private IExceptionDetailsServices details;
     IEmailSender emailSender;
-    public ExceptionServices(string folder, string emailTo, IExceptionDetails? details = null, IEmailSender? emailSender = null, bool isConsole = false)
+    IHTTPServices httpServices;
+    public ExceptionServices(string emailTo, string folder = null, IExceptionDetailsServices? details = null, IEmailSender? emailSender = null, IHTTPServices? httpServices = null, bool isConsole = false)
     {
-        this.folder = folder ?? throw new ArgumentNullException(nameof(folder));
+        this.folder = folder;// ?? throw new ArgumentNullException(nameof(folder));
         this.emailTo = emailTo ?? throw new ArgumentNullException(nameof(emailTo));
-        this.details = details ?? Locator.Current.GetService<IExceptionDetails>()! ?? throw new ArgumentNullException(nameof(details));
-        this.emailSender = emailSender ?? Locator.Current.GetService<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
+        this.details = details ?? Locator.Current.GetService<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(details));
+        this.emailSender = this.emailSender ?? Locator.Current.GetService<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
+
+        this.httpServices = httpServices ?? Locator.Current.GetService<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
         this.isConsole = isConsole;
     }
-    public void VerifyLocalException(bool isAsync)
+    public void SetFolder(string folder)
     {
+        if (this.folder == folder)
+            return;
+        this.folder = folder ?? throw new ArgumentNullException(nameof(folder));
+    }
+    public async Task VerifyLocalException(bool isAsync)
+    {
+        if (string.IsNullOrWhiteSpace(folder))
+            throw new NullReferenceException(nameof(folder));
         //string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location);
-        if (File.Exists(Path.Combine(folder, fileExceptions)))
+
+        string[] files = Directory.GetFiles(folder, fileExceptionsPostfix);
+
+        foreach (var item in files)
         {
-            if (isConsole)
-                Console.Write("Some old internal errors messages were found in local file. Trying to send to developer...");
-            string? message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions));
-            if (SendOnlineException(message, isAsync))
+            if (File.Exists(item))
             {
-                File.Delete(Path.Combine(folder, fileExceptions));
                 if (isConsole)
+                    Console.Write("Some old internal errors messages were found in local file. Trying to send to developer...");
+                string? message = FileMethods.ReadTXT(item);
+                string appName = Path.GetFileNameWithoutExtension(item);
+                if (appName.Contains(fileExceptionsPostfix))
+                    appName = appName.Replace(fileExceptionsPostfix, "");
+
+                if (await SendOnlineException(message, appName, isAsync) is GOSResult result && result.Success)
                 {
-                    Console.WriteLine("done");
-                    Console.WriteLine("Content of sent message:");
-                    Console.WriteLine(message);
+                    File.Delete(item);
+                    if (isConsole)
+                    {
+                        Console.WriteLine("done");
+                        Console.WriteLine("Content of sent message:");
+                        Console.WriteLine(message);
+                    }
+                }
+                else
+                {
+                    if (isConsole)
+                    {
+                        Console.WriteLine("fail. A new attempt will be made in the future");
+                    }
+                    if (result.Exception is not null)
+                    {
+                        string messageException = details.ToDetailedString(result.Exception);
+                        SaveLocalException(messageException, fileNameExceptionSender, isAsync);
+                    }
                 }
             }
-            else
-            {
-                Console.WriteLine("fail. A new attempt will be made in the future");
-            }
         }
+
     }
-    public void SendException(Exception e, bool isAsync, string messageExtra)
+    public async Task SendException(Exception e, bool isAsync, string messageExtra)
     {
         if (isConsole)
         {
@@ -52,19 +83,18 @@ public class ExceptionServices : IExceptionServices
             Console.Write("A internal error is found. Trying to send to developer...");
         }
         var program = Assembly.GetEntryAssembly()?.GetName();
-        string? Name = program?.Name;
+        string? appName = program?.Name;
         Version? ver = program?.Version;
-        string message = "Program: " + Name + Environment.NewLine +
+        string message = "[" + DateTime.Now + "]" + Environment.NewLine + "Program: " + appName + Environment.NewLine +
             "Version: " + ver?.ToString() + Environment.NewLine +
             details.ToDetailedString(e) +
             (!string.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
 
-        if (SendOnlineException(message, isAsync))
+        if (await SendOnlineException(message, appName, isAsync) is GOSResult result && result.Success)
         {
             if (isConsole)
-                Console.WriteLine("done");
-            if (isConsole)
             {
+                Console.WriteLine("done");
                 Console.WriteLine("Content of sent message:");
                 Console.WriteLine(message);
             }
@@ -75,46 +105,54 @@ public class ExceptionServices : IExceptionServices
         {
             if (isConsole)
                 Console.WriteLine("fail. A new attempt will be made in the future");
-            SaveLocalException(message, isAsync);
+            SaveLocalException(message, appName, isAsync);
+            if (result.Exception is not null)
+            {
+                string messageException = details.ToDetailedString(result.Exception);
+                SaveLocalException(messageException, fileNameExceptionSender, isAsync);
+            }
         }
     }
-    private async void SaveLocalException(string message, bool isAsync)
+    private async void SaveLocalException(string message, string appName, bool isAsync)
     {
         //string folder = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-        message = "[" + DateTime.Now + "]" + Environment.NewLine + message;
+        //message = "[" + DateTime.Now + "]" + Environment.NewLine + message;
 
-        if (File.Exists(Path.Combine(folder, fileExceptions)))
+        string file = Path.Combine(folder, appName + fileExceptionsPostfix + ".txt");
+
+        if (File.Exists(file))
         {
             if (isAsync)
-                message = await FileMethods.ReadTXTAsync(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
+                message = await FileMethods.ReadTXTAsync(file) + Environment.NewLine + Environment.NewLine + message;
             else
-                message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
+                message = FileMethods.ReadTXT(file) + Environment.NewLine + Environment.NewLine + message;
         }
         if (isAsync)
-            await FileMethods.WriteTXTAsync(Path.Combine(folder, fileExceptions), message);
+            await FileMethods.WriteTXTAsync(file, message);
         else
-            FileMethods.WriteTXT(Path.Combine(folder, fileExceptions), message);
+            FileMethods.WriteTXT(file, message);
     }
-    private bool SendOnlineException(string? message, bool isAsync)
+    private async Task<GOSResult> SendOnlineException(string? message, string appName, bool isAsync)
     {
-        if (!HTTPMethods.IsConnectedToInternetPing())
-            return false;
+        if (!httpServices.IsConnectedToInternet())
+            return new GOSResult(false);
 
         //string sender, keypass;
         //sender = "sindarinsender@gmail.com";
         //keypass = "%hw.87&-";
 
-
-
         try
         {
-            emailSender.SendEmail("Exception", emailTo, message, isAsync);
+            if (isAsync)
+                return await emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}]" + DateTime.Now, message, isAsync);
+            else
+                return emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}]" + DateTime.Now, message, isAsync).Result;
         }
         catch (Exception ex)
         {
-            return false;
+            return new GOSResult(false, ex, "");
         }
-        return true;
+
     }
 }

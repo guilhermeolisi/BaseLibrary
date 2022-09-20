@@ -10,10 +10,10 @@ public class FileServices : IFileServices
     public IFileServicesName Name { get; }
     public FileServices(IFileServicesText? _servicesText = null, IFileServicesDirectory? _servicesDirectory = null, IFileServicesCheck? _servicesCheck = null, IFileServicesName? _servicesName = null)
     {
-        Text = _servicesText ?? Locator.Current!.GetService<IFileServicesText>()!;
-        Directory = _servicesDirectory ?? Locator.Current!.GetService<IFileServicesDirectory>()!;
-        Check = _servicesCheck ?? Locator.Current!.GetService<IFileServicesCheck>()!;
-        Name = _servicesName ?? Locator.Current!.GetService<IFileServicesName>()!;
+        Text = _servicesText ?? Locator.Current!.GetService<IFileServicesText>()! ?? new FileServicesText();
+        Directory = _servicesDirectory ?? Locator.Current!.GetService<IFileServicesDirectory>()! ?? new FileServicesDirectory();
+        Check = _servicesCheck ?? Locator.Current!.GetService<IFileServicesCheck>()! ?? new FileServicesCheck();
+        Name = _servicesName ?? Locator.Current!.GetService<IFileServicesName>()! ?? new FileServicesName();
     }
 
 

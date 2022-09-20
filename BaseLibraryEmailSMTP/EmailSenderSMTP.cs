@@ -9,13 +9,13 @@ using Splat;
 
 namespace BaseLibrary;
 
-public class EmailSender : IEmailSender
+public class EmailSenderSMTP : IEmailSender
 {
     private IHTTPServices httpServices;
     private string emailSender, password;
     private EmailSMTPInfo smtpInfo;
     SmtpClient smtp;
-    public EmailSender(string emailSender, EmailSMTPInfo smtpInfo, IHTTPServices? httpServices = null)
+    public EmailSenderSMTP(string emailSender, EmailSMTPInfo smtpInfo, IHTTPServices? httpServices = null)
     {
 
 
@@ -36,18 +36,18 @@ public class EmailSender : IEmailSender
         
         if (smtpInfo.Credentials is not null)
         {
-            smtp.Credentials = smtp.Credentials;
+            smtp.Credentials = smtpInfo.Credentials;
         }
         else
         {
             smtp.UseDefaultCredentials = true;
         }
     }
-    public GOSResult SendEmail(string emailTo, string subject, string message, bool isAsync)
+    public async Task<GOSResult> SendEmail(string emailTo, string subject, string message, bool isAsync)
     {
 
         //TODO Verificar conexão com internet
-        if (httpServices.IsConnectedToInternetPing())
+        if (!httpServices.IsConnectedToInternet())
         {
             return new GOSResult(false, new Exception(@"There doest seem to be a network/internet connection.\r\nPlease contact your system administrator"), null);
         }

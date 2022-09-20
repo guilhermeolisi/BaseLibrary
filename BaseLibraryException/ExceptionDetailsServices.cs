@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
-public class ExceptionDetails : IExceptionDetails
+public class ExceptionDetailsServices : IExceptionDetailsServices
 {
     public string ToDetailedString(Exception exception)
     {

@@ -4,15 +4,16 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x64;x86</Platforms>
     <RootNamespace>BaseLibrary</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibraryEmailSMTP.csproj" />
-    <ProjectReference Include="..\BaseLibraryFile\BaseLibraryFile.csproj" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="ZOHOCRMSDK-2.1" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BaseLibraryHTTP\BaseLibraryHTTP.csproj" />
-    <ProjectReference Include="..\BaseLibraryZohoEmailAPI\BaseLibraryEmailZoho.csproj" />
   </ItemGroup>
 
 </Project>

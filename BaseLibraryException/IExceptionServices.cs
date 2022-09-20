@@ -5,6 +5,7 @@ namespace BaseLibrary;
 
 public interface IExceptionServices
 {
-    void VerifyLocalException(bool isAsync);
-    void SendException(Exception e, bool isAsync, string messageExtra);
+    void SetFolder(string folder);
+    Task VerifyLocalException(bool isAsync);
+    Task SendException(Exception e, bool isAsync, string messageExtra);
 }

@@ -9,7 +9,7 @@ namespace BaseLibrary;
 
 public static class ExceptionExtension
 {
-    private static ExceptionDetails details = new();
+    private static ExceptionDetailsServices details = new();
     public static string ToDetailedString(this Exception exception)
     {
         if (exception is null)
