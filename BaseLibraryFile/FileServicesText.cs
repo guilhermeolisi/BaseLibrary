@@ -12,7 +12,7 @@ public class FileServicesText : IFileServicesText
     {
         if (string.IsNullOrWhiteSpace(pathFile))
             throw new ArgumentNullException(nameof(pathFile));
-        if (string.IsNullOrWhiteSpace(parTXT))
+        if (parTXT is null)
             throw new ArgumentNullException(nameof(parTXT));
         short count = 0;
         bool isCont = true;

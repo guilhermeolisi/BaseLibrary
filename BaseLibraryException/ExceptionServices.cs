@@ -32,6 +32,10 @@ public class ExceptionServices : IExceptionServices
     }
     public async Task VerifyLocalException(bool isAsync)
     {
+#if DEBUG
+        return;
+#endif
+
         if (string.IsNullOrWhiteSpace(folder))
             throw new NullReferenceException(nameof(folder));
         //string folder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ExceptionMethods)).Location);
@@ -77,6 +81,10 @@ public class ExceptionServices : IExceptionServices
     }
     public async Task SendException(Exception e, bool isAsync, string messageExtra)
     {
+#if DEBUG
+        return;
+#endif
+
         if (isConsole)
         {
             Console.WriteLine();
@@ -135,6 +143,7 @@ public class ExceptionServices : IExceptionServices
     }
     private async Task<GOSResult> SendOnlineException(string? message, string appName, bool isAsync)
     {
+
         if (!httpServices.IsConnectedToInternet())
             return new GOSResult(false);
 
