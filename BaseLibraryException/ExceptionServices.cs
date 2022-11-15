@@ -1,6 +1,7 @@
 ﻿using BaseLibrary;
 using Splat;
 using System.Reflection;
+using System.Runtime.ConstrainedExecution;
 
 namespace BaseLibrary;
 
@@ -92,11 +93,7 @@ public class ExceptionServices : IExceptionServices
         }
         var program = Assembly.GetEntryAssembly()?.GetName();
         string? appName = program?.Name;
-        Version? ver = program?.Version;
-        string message = "[" + DateTime.Now + "]" + Environment.NewLine + "Program: " + appName + Environment.NewLine +
-            "Version: " + ver?.ToString() + Environment.NewLine +
-            details.ToDetailedString(e) +
-            (!string.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
+        string message = GetExceptionText(e, messageExtra);
 
         if (await SendOnlineException(message, appName, isAsync) is GOSResult result && result.Success)
         {
@@ -120,6 +117,17 @@ public class ExceptionServices : IExceptionServices
                 SaveLocalException(messageException, fileNameExceptionSender, isAsync);
             }
         }
+    }
+    public string GetExceptionText(Exception e, string messageExtra)
+    {
+        var program = Assembly.GetEntryAssembly()?.GetName();
+        string? appName = program?.Name;
+        Version? ver = program?.Version;
+        string message = "[" + DateTime.Now + "]" + Environment.NewLine + "Program: " + appName + Environment.NewLine +
+            "Version: " + ver?.ToString() + Environment.NewLine +
+            details.ToDetailedString(e) +
+            (!string.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
+        return message;
     }
     private async void SaveLocalException(string message, string appName, bool isAsync)
     {
