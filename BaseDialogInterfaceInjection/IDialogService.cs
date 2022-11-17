@@ -13,4 +13,5 @@ public interface IDialogService
     Task<string?> SelectFolder(string? initialFolder = null);
     Task<bool?> ConfirmDialog(string message, string[] buttons);
     Task<string?> GetOneEntryDialog(string message, string entry, string[] buttons);
+    Task<bool?> FromViewModelDialog(object viewmodel, string title, string[] buttons);
 }

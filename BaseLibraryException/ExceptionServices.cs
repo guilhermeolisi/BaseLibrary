@@ -20,7 +20,7 @@ public class ExceptionServices : IExceptionServices
         this.folder = folder;// ?? throw new ArgumentNullException(nameof(folder));
         this.emailTo = emailTo ?? throw new ArgumentNullException(nameof(emailTo));
         this.details = details ?? Locator.Current.GetService<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(details));
-        this.emailSender = this.emailSender ?? Locator.Current.GetService<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
+        this.emailSender = emailSender ?? Locator.Current.GetService<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
 
         this.httpServices = httpServices ?? Locator.Current.GetService<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
         this.isConsole = isConsole;
@@ -162,9 +162,9 @@ public class ExceptionServices : IExceptionServices
         try
         {
             if (isAsync)
-                return await emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}]" + DateTime.Now, message, isAsync);
+                return await emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now, message, isAsync);
             else
-                return emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}]" + DateTime.Now, message, isAsync).Result;
+                return emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now, message, isAsync).Result;
         }
         catch (Exception ex)
         {
