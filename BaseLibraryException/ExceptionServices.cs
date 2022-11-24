@@ -80,7 +80,7 @@ public class ExceptionServices : IExceptionServices
         }
 
     }
-    public async Task SendException(Exception e, bool isAsync, string messageExtra)
+    public async Task SendException(Exception e, bool isAsync, string messageExtra, string OSversion)
     {
 #if DEBUG
         return;
@@ -92,8 +92,12 @@ public class ExceptionServices : IExceptionServices
             Console.Write("A internal error is found. Trying to send to developer...");
         }
         var program = Assembly.GetEntryAssembly()?.GetName();
+        Version version = program.Version;
         string? appName = program?.Name;
-        string message = GetExceptionText(e, messageExtra);
+        string message = 
+            appName + " " + version.ToString() + Environment.NewLine +
+            (string.IsNullOrWhiteSpace(OSversion) ? "" : OSversion) + Environment.NewLine +
+            GetExceptionText(e, messageExtra);
 
         if (await SendOnlineException(message, appName, isAsync) is GOSResult result && result.Success)
         {

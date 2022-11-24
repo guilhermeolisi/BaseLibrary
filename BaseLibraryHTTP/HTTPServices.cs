@@ -46,6 +46,22 @@ public class HTTPServices : IHTTPServices
         return Uri.TryCreate(url, UriKind.Absolute, out uriResult)
             && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
+    public bool IsValidEmail(string email)
+    {
+        //https://mailtrap.io/blog/validate-email-address-c/
+        var valid = true;
+
+        try
+        {
+            var emailAddress = new MailAddress(email);
+        }
+        catch (Exception e)
+        {
+            valid = false;
+        }
+
+        return valid;
+    }
     public bool OpenUrlDefaultBrowse(string url)
     {
 

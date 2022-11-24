@@ -14,5 +14,6 @@ public interface IHTTPServices
     bool IsConnectedToInternetPing(string host);
     bool IsConnectedToInternet();
     bool IsValidURL(string url);
+    bool IsValidEmail(string email);
     public bool OpenUrlDefaultBrowse(string url);
 }

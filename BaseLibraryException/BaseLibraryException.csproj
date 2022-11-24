@@ -12,7 +12,6 @@
     <ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibraryEmailSMTP.csproj" />
     <ProjectReference Include="..\BaseLibraryFile\BaseLibraryFile.csproj" />
     <ProjectReference Include="..\BaseLibraryHTTP\BaseLibraryHTTP.csproj" />
-    <ProjectReference Include="..\BaseLibraryZohoEmailAPI\BaseLibraryEmailZoho.csproj" />
   </ItemGroup>
 
 </Project>
