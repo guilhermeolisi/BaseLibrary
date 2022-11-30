@@ -134,7 +134,7 @@ public class ConsoleServices : IConsoleServices
             Console.ResetColor();
         }
     }
-    public void WriteLine(string str, int color = 0)
+    public void WriteLine(string str = "", int color = 0)
     {
         Write(str, color);
         Console.WriteLine();
@@ -164,5 +164,53 @@ public class ConsoleServices : IConsoleServices
         }
         return gosResult.Success;
     }
+    public void OpenFile(string fileName, sbyte os)
+    {
+        using (Process process = new())
+        {
+            string commandProcess = null;
+            string argsProcess = "";
+            if (os == 0)
+            {
+                commandProcess = "\"" + fileName + "\"";// Path.Combine(sindarinFolder, "Sindarin manual.pdf");
+            }
+            else if (os == 1)
+            {
+                commandProcess = "xdg-open";
+                argsProcess = fileName;
+            }
+            else if (os == 2)
+            {
+                commandProcess = "open";
+                argsProcess = fileName;
+            }
+            process.StartInfo = new()
+            {
+                FileName = fileName, //"\"" + fileManual + "\"",
+                UseShellExecute = true,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                //WorkingDirectory = sindarinFolder,
+                Arguments = argsProcess
+            };
 
+            try
+            {
+                if (File.Exists(fileName))
+                {
+                    process.Start();
+                }
+                else
+                {
+                    //Console.WriteLine("File not found: " + Path.Combine(sindarinFolder, fileManual));
+                }
+            }
+            catch (Exception e)
+            {
+                //Console.WriteLine("Problem trying to open the file \"" + Path.Combine(sindarinFolder, fileManual) + "\"");
+                //Console.WriteLine(e.Message);
+                //ExceptionMethods.SendException(emailTo, e, false, null);
+            }
+        }
+    }
 }

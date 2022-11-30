@@ -19,6 +19,30 @@ public struct GOSResult
         Exception = null;
         Message = null;
     }
+    public GOSResult(string message) : this()
+    {
+        Success = false;
+        Exception = null;
+        Message = message;
+    }
+    public GOSResult(Exception exception) : this()
+    {
+        Success = false;
+        Exception = exception;
+        Message = null;
+    }
+    public GOSResult(bool success, string message) : this()
+    {
+        Success = success;
+        Exception = null;
+        Message = message;
+    }
+    public GOSResult(bool success, Exception exception) : this()
+    {
+        Success = success;
+        Exception = exception;
+        Message = null;
+    }
     public GOSResult(bool success, Exception exception, string message) : this()
     {
         Success = success;

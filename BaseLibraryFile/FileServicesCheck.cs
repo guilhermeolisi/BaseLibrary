@@ -63,12 +63,16 @@ public class FileServicesCheck : IFileServicesCheck
 
         return true;
     }
-    public bool CheckTextFile(string filePath)
+    public bool CheckTextFileByEncoding(string filePath)
     {
 
         var result = TextFileEncodingDetector.DetectTextFileEncoding(filePath);
 
         return result is not null;
+    }
+    public bool CheckTextFile(string filePath)
+    {
+        return CheckTextFileByEncoding(filePath) || CheckTextFileByChars(filePath);
     }
     public bool CheckImageFile(string path)
     {

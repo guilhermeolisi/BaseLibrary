@@ -99,7 +99,7 @@ public class FileTXTIO : IFileTXTIO
         {
             if (File.Exists(_pathFile))
             {
-                if (!fileServices.Check.CheckTextFile(_pathFile))
+                if (!fileServices.Check.CheckTextFile(_pathFile) /*&& !fileServices.Check.CheckTextFileByChars(_pathFile)*/)
                 {
                     eWrite = new FileLoadException("Wrong file formart or violated file: " + _pathFile);
                     return false;
@@ -161,7 +161,7 @@ public class FileTXTIO : IFileTXTIO
                 //texta o arquivo bak
                 try
                 {
-                    if (!fileServices.Check.CheckTextFile(_fileBak))
+                    if (!fileServices.Check.CheckTextFile(_fileBak) && !fileServices.Check.CheckTextFileByChars(_fileBak))
                     {
                         File.Delete(_fileBak);
                     }

@@ -25,7 +25,7 @@ public interface IConsoleServices
     /// </summary>
     /// <param name="str"></param>
     /// <param name="color"></param>
-    void WriteLine(string str, int color = 0);
+    void WriteLine(string str = "", int color = 0);
     /// <summary>
     /// 0: White; 1: Green; 2: Yellow; 3: Red
     /// </summary>
@@ -39,4 +39,5 @@ public interface IConsoleServices
     /// <param name="color"></param>
     void EraseAndWrite(string oldStr, string newStr, int color = 0);
     bool ProcessGOSResult(GOSResult gosResult, StringBuilder logTemp);
+    void OpenFile(string fileName, sbyte os);
 }
