@@ -1,5 +1,6 @@
 ﻿using Splat;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace BaseLibrary;
 public class FileTXTIO : IFileTXTIO
 {
     protected IFileServices fileServices;
-    
+
     private int _delay = 250;
     private string text;
     private string? _pathFile;
@@ -26,7 +27,10 @@ public class FileTXTIO : IFileTXTIO
     public void SetStayBak(bool value) => _isStayBak = value;
     public void SetPathFile(string? pathFile)
     {
-        if (_isStayBak && !string.IsNullOrWhiteSpace(_fileBak))
+        if (pathFile == _pathFile)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(_pathFile) && _isStayBak && !string.IsNullOrWhiteSpace(_fileBak))
         {
             if (File.Exists(_fileBak))
             {
@@ -69,25 +73,14 @@ public class FileTXTIO : IFileTXTIO
     private Task tryWriteTask;
     private static DateTime? lastWriteAttempt;
     public Exception eWrite { get; private set; }
-    public async Task<bool> WriteTXTAsync(string parTXT)
-    {
-        Task<bool> task = new Task<bool>(() => WriteTXT(parTXT));
-        task.Start();
-        await task;
-        return task.Result;
-    }
-    public bool WriteTXT(string parTXT)
+
+    public bool BeforeWrite()
     {
         if (_pathFile is null)
         {
             eWrite = new ArgumentNullException("File name");
             return false;
         }
-        lock (this)
-        {
-            text = parTXT;
-        }
-
         //TODO Verificar o ascesso ao arquivo original
         if (!VerifyFilesAcess(false))
         {
@@ -189,80 +182,113 @@ public class FileTXTIO : IFileTXTIO
                 }
             }
         }
-
-        //Escreve o arquivo de fato
-        try
+        return true;
+    }
+    public StreamWriter GetStreamWriter()
+    {
+        return new StreamWriter(_pathFile, false, Encoding.UTF8);
+    }
+    public bool AfterWriteOrReader()
+    {
+        bool hasAcess = false;
+        if (File.Exists(_fileBak))
         {
-            using (StreamWriter sw = new StreamWriter(_pathFile, false, Encoding.UTF8))
+            if (!_isStayBak)
             {
-                sw.Write(text);
-                if (File.Exists(_fileBak))
+                while (!hasAcess)
                 {
-                    if (!_isStayBak)
+                    try
                     {
-                        hasAcess = false;
-                        while (!hasAcess)
+                        File.Delete(_fileBak);
+                        hasAcess = true;
+                    }
+                    catch (IOException e)
+                    {
+                        if (lastWriteAttempt is null)
                         {
-                            try
-                            {
-                                File.Delete(_fileBak);
-                                hasAcess = true;
-                            }
-                            catch (IOException e)
-                            {
-                                if (lastWriteAttempt is null)
-                                {
-                                    lastWriteAttempt = DateTime.Now;
-                                }
-                                else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
-                                {
-                                    lastWriteAttempt = null;
-                                    hasAcess = true;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                lastWriteAttempt = null;
-                                hasAcess = true;
-                            }
+                            lastWriteAttempt = DateTime.Now;
+                        }
+                        else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+                        {
+                            lastWriteAttempt = null;
+                            hasAcess = true;
                         }
                     }
+                    catch (Exception e)
+                    {
+                        lastWriteAttempt = null;
+                        hasAcess = true;
+                    }
                 }
-                return true;
             }
         }
-        catch (Exception ex)
-        {
-            if (lastWriteAttempt is null)
-            {
-                lastWriteAttempt = DateTime.Now;
-            }
-            else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
-            {
-                eWrite = ex;
-                lastWriteAttempt = null;
-                return false;
-            }
-            Task.Delay(_delay);
-            return WriteTXT(parTXT);
-        }
+        return true;
     }
-    #endregion
-    #region Read
-    private static DateTime? lastReadAttempt;
-    
-    public string TextResult { get; private set; }
-    public Exception eRead { get; private set; }
-    public async Task<bool> ReadTXTAsync()
+    public bool ProcessWriterException(string parTXT, Exception ex)
     {
-        Task<bool> task = new Task<bool>(() => ReadTXT());
+        if (lastWriteAttempt is null)
+        {
+            lastWriteAttempt = DateTime.Now;
+        }
+        else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+        {
+            eWrite = ex;
+            lastWriteAttempt = null;
+            return false;
+        }
+        Task.Delay(_delay);
+        return WriteTXT(parTXT);
+    }
+    public async Task<bool> WriteTXTAsync(string parTXT)
+    {
+        Task<bool> task = new Task<bool>(() => WriteTXT(parTXT));
         task.Start();
         await task;
         return task.Result;
     }
-    public bool ReadTXT()
+    public bool WriteTXT(string parTXT)
     {
-        TextResult = null;
+        lock (this)
+        {
+            text = parTXT;
+        }
+
+        if (!BeforeWrite())
+        {
+            return false;
+        }
+        bool hasAcess = false;
+        //Escreve o arquivo de fato
+        try
+        {
+            using (StreamWriter sw = GetStreamWriter())
+            {
+                sw.Write(text);
+                if (lastReadAttempt is not null)
+                    lastReadAttempt = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            return ProcessWriterException(parTXT, ex);
+        }
+        finally
+        {
+            if (!AfterWriteOrReader())
+            {
+
+            }
+        }
+        return true;
+    }
+    #endregion
+    #region Read
+    private static DateTime? lastReadAttempt;
+
+    public string TextResult { get; private set; }
+    public Exception eRead { get; private set; }
+    public bool BeforeReader()
+    {
         if (_pathFile is null)
         {
             eRead = new FileNotFoundException("Path file is null");
@@ -279,27 +305,113 @@ public class FileTXTIO : IFileTXTIO
         {
             return false;
         }
-
+        //faz cópia do arquivo bak
         if (_isStayBak)
         {
-            try
+            if (File.Exists(_fileBak))
             {
-                if (File.Exists(_fileBak))
+                try
                 {
                     File.Delete(_fileBak);
                 }
-                File.Copy(_pathFile, _fileBak);
-            }
-            catch (Exception ex)
-            {
-                eRead = ex;
-                return false;
+                catch (Exception ex)
+                {
+                    eRead = ex;
+                    return false;
+                }
             }
         }
         try
         {
-            using (StreamReader sr = new(_pathFile))
+            File.Copy(_pathFile, _fileBak, true);
+        }
+        catch (Exception ex)
+        {
+            eRead = ex;
+            return false;
+        }
+        return true;
+    }
+    public StreamReader GetStreamReader()
+    {
+        return new StreamReader(_pathFile);
+    }
+    public bool ProcessReaderException(Exception ex)
+    {
+        if (lastReadAttempt is null)
+        {
+            lastReadAttempt = DateTime.Now;
+        }
+        else if ((DateTime.Now - ((DateTime)lastReadAttempt)).TotalMilliseconds > 5 * _delay / 2)
+        {
+            if (File.Exists(_fileBak))
             {
+                bool hasAcess = false;
+                while (!hasAcess)
+                {
+                    using (StreamReader sr = new(_fileBak))
+                    {
+                        TextResult = sr.ReadToEnd();
+
+                        try
+                        {
+                            File.Delete(_pathFile);
+                            File.Copy(_fileBak, _pathFile);
+                            File.Delete(_fileBak);
+                            hasAcess = true;
+                            return true;
+                        }
+                        catch (IOException e)
+                        {
+                            if (lastWriteAttempt is null)
+                            {
+                                lastWriteAttempt = DateTime.Now;
+                            }
+                            else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+                            {
+                                lastWriteAttempt = null;
+                                hasAcess = true;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            lastWriteAttempt = null;
+                            hasAcess = true;
+                        }
+                    }
+                }
+
+            }
+            eRead = ex;
+            lastReadAttempt = null;
+            return false;
+        }
+        Task.Delay(_delay);
+        return ReadTXT();
+    }
+    public async Task<bool> ReadTXTAsync()
+    {
+        Task<bool> task = new Task<bool>(() => ReadTXT());
+        task.Start();
+        await task;
+        return task.Result;
+    }
+    public bool ReadTXT()
+    {
+        TextResult = null;
+
+        if (!BeforeReader())
+        {
+            return false;
+        }
+
+        //Escreve de fato o arquivo
+        try
+        {
+            using (StreamReader sr = GetStreamReader())
+            {
+                if (sr is null)
+                    return false;
                 TextResult = sr.ReadToEnd();
 
                 if (lastReadAttempt is not null)
@@ -309,56 +421,14 @@ public class FileTXTIO : IFileTXTIO
         }
         catch (Exception ex)
         {
-            if (lastReadAttempt is null)
+            return ProcessReaderException(ex);
+        }
+        finally
+        {
+            if (!AfterWriteOrReader())
             {
-                lastReadAttempt = DateTime.Now;
-            }
-            else if ((DateTime.Now - ((DateTime)lastReadAttempt)).TotalMilliseconds > 5 * _delay / 2)
-            {
-                if (File.Exists(_fileBak))
-                {
-                    bool hasAcess = false;
-                    while (!hasAcess)
-                    {
-                        using (StreamReader sr = new(_fileBak))
-                        {
-                            TextResult = sr.ReadToEnd();
 
-                            try
-                            {
-                                File.Delete(_pathFile);
-                                File.Copy(_fileBak, _pathFile);
-                                File.Delete(_fileBak);
-                                hasAcess = true;
-                                return true;
-                            }
-                            catch (IOException e)
-                            {
-                                if (lastWriteAttempt is null)
-                                {
-                                    lastWriteAttempt = DateTime.Now;
-                                }
-                                else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
-                                {
-                                    lastWriteAttempt = null;
-                                    hasAcess = true;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                lastWriteAttempt = null;
-                                hasAcess = true;
-                            }
-                        }
-                    }
-
-                }
-                eRead = ex;
-                lastReadAttempt = null;
-                return false;
             }
-            Task.Delay(_delay);
-            return ReadTXT();
         }
     }
     private static DateTime? lastAcessAttempt;
