@@ -24,6 +24,7 @@ public class FileServicesText : IFileServicesText
             {
                 count++;
                 isCont = false;
+#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     using (StreamWriter sw = new StreamWriter(pathFile, false, Encoding.UTF8))
@@ -44,6 +45,7 @@ public class FileServicesText : IFileServicesText
                     if (!returnBak)
                         returnBak = true;
                 }
+#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         finally
@@ -67,6 +69,7 @@ public class FileServicesText : IFileServicesText
             {
                 count++;
                 isCont = false;
+#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     using (StreamWriter sw = new StreamWriter(pathFile, false, Encoding.UTF8))
@@ -88,6 +91,7 @@ public class FileServicesText : IFileServicesText
                     if (!returnBak)
                         returnBak = true;
                 }
+#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         finally
@@ -110,18 +114,21 @@ public class FileServicesText : IFileServicesText
         {
             if (File.Exists(pathFile + tmpExt))
             {
+#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     File.Copy(pathFile + tmpExt, pathFile, true);
                 }
                 catch (Exception e)
                 {
-
+                    //TODO verificar o que fazer
                 }
+#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         if (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetLastWriteTime(pathFile) > File.GetCreationTime(pathFile + tmpExt))
         {
+#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 File.Delete(pathFile + tmpExt);
@@ -130,6 +137,7 @@ public class FileServicesText : IFileServicesText
             {
 
             }
+#pragma warning restore CS0168 // Variable is declared but never used
         }
     }
     public string? ReadTXT(string pathFile)
@@ -145,6 +153,7 @@ public class FileServicesText : IFileServicesText
             {
                 count++;
                 isCont = false;
+#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     using (StreamReader sr = new StreamReader(fileTemp))
@@ -161,6 +170,7 @@ public class FileServicesText : IFileServicesText
                 {
                     return null;
                 }
+#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         finally
@@ -182,6 +192,7 @@ public class FileServicesText : IFileServicesText
             {
                 count++;
                 isCont = false;
+#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     using (StreamReader sr = new StreamReader(fileTemp))
@@ -198,6 +209,7 @@ public class FileServicesText : IFileServicesText
                 {
                     return null;
                 }
+#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         finally
@@ -222,6 +234,7 @@ public class FileServicesText : IFileServicesText
 
         if ((File.Exists(pathFile + tmpExt) && !File.Exists(pathFile)) || (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile)))
         {
+#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 File.Move(pathFile + tmpExt, pathFile, true);
@@ -230,6 +243,7 @@ public class FileServicesText : IFileServicesText
             {
                 return pathFile + tmpExt;
             }
+#pragma warning restore CS0168 // Variable is declared but never used
         }
         return pathFile;
     }
@@ -237,6 +251,7 @@ public class FileServicesText : IFileServicesText
     {
         if ((File.Exists(pathFile + tmpExt) && !File.Exists(pathFile)) || (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile + tmpExt) > File.GetCreationTime(pathFile)))
         {
+#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 File.Move(pathFile + tmpExt, pathFile, true);
@@ -245,6 +260,7 @@ public class FileServicesText : IFileServicesText
             {
 
             }
+#pragma warning restore CS0168 // Variable is declared but never used
         }
     }
 }

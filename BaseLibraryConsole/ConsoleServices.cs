@@ -168,7 +168,7 @@ public class ConsoleServices : IConsoleServices
     {
         using (Process process = new())
         {
-            string commandProcess = null;
+            string? commandProcess = null;
             string argsProcess = "";
             if (os == 0)
             {
@@ -194,6 +194,7 @@ public class ConsoleServices : IConsoleServices
                 Arguments = argsProcess
             };
 
+#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 if (File.Exists(fileName))
@@ -211,6 +212,7 @@ public class ConsoleServices : IConsoleServices
                 //Console.WriteLine(e.Message);
                 //ExceptionMethods.SendException(emailTo, e, false, null);
             }
+#pragma warning restore CS0168 // Variable is declared but never used
         }
     }
 }

@@ -16,7 +16,7 @@ public class FileServicesName : IFileServicesName
         folder = m.Groups["Folder"].Value;
         extension = m.Groups["Extension"].Value;
     }
-    public (string, string, string) InfoFromFilePath(in string filepath)
+    public (string?, string?, string?) InfoFromFilePath(in string filepath)
     {
         if (string.IsNullOrWhiteSpace(filepath)) return (null, null, null);
 

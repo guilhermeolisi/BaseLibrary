@@ -72,7 +72,7 @@ OF SUCH DAMAGE.
 
     const long _defaultHeuristicSampleSize = 0x10000; //completely arbitrary - inappropriate for high numbers of files / high speed requirements
 
-    public static Encoding DetectTextFileEncoding(string InputFilename)
+    public static Encoding? DetectTextFileEncoding(string InputFilename)
     {
         using (FileStream textfileStream = File.OpenRead(InputFilename))
         {
@@ -80,13 +80,13 @@ OF SUCH DAMAGE.
         }
     }
 
-    public static Encoding DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize)
+    public static Encoding? DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize)
     {
         bool uselessBool = false;
         return DetectTextFileEncoding(InputFileStream, _defaultHeuristicSampleSize, out uselessBool);
     }
 
-    public static Encoding DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize, out bool HasBOM)
+    public static Encoding? DetectTextFileEncoding(FileStream InputFileStream, long HeuristicSampleSize, out bool HasBOM)
     {
         if (InputFileStream == null)
             throw new ArgumentNullException("Must provide a valid Filestream!", "InputFileStream");
@@ -97,7 +97,7 @@ OF SUCH DAMAGE.
         if (!InputFileStream.CanSeek)
             throw new ArgumentException("Provided file stream cannot seek!", "InputFileStream");
 
-        Encoding encodingFound = null;
+        Encoding? encodingFound = null;
 
         long originalPos = InputFileStream.Position;
 
@@ -133,18 +133,18 @@ OF SUCH DAMAGE.
         return encodingFound;
     }
 
-    public static Encoding DetectTextByteArrayEncoding(byte[] TextData)
+    public static Encoding? DetectTextByteArrayEncoding(byte[] TextData)
     {
         bool uselessBool = false;
         return DetectTextByteArrayEncoding(TextData, out uselessBool);
     }
 
-    public static Encoding DetectTextByteArrayEncoding(byte[] TextData, out bool HasBOM)
+    public static Encoding? DetectTextByteArrayEncoding(byte[] TextData, out bool HasBOM)
     {
         if (TextData == null)
             throw new ArgumentNullException("Must provide a valid text data byte array!", "TextData");
 
-        Encoding encodingFound = null;
+        Encoding? encodingFound = null;
 
         encodingFound = DetectBOMBytes(TextData);
 
@@ -173,7 +173,7 @@ OF SUCH DAMAGE.
         if (TextData == null)
             throw new ArgumentNullException("Must provide a valid text data byte array!", "TextData");
 
-        Encoding encodingFound = null;
+        Encoding? encodingFound = null;
 
         encodingFound = DetectBOMBytes(TextData);
 
@@ -184,7 +184,7 @@ OF SUCH DAMAGE.
         }
         else
         {
-            byte[] heuristicSample = null;
+            byte[]? heuristicSample = null;
             if (TextData.Length > MaxHeuristicSampleSize)
             {
                 heuristicSample = new byte[MaxHeuristicSampleSize];
@@ -201,7 +201,7 @@ OF SUCH DAMAGE.
     }
 
 
-    public static Encoding DetectBOMBytes(byte[] BOMBytes)
+    public static Encoding? DetectBOMBytes(byte[] BOMBytes)
     {
         if (BOMBytes == null)
             throw new ArgumentNullException("Must provide a valid BOM byte array!", "BOMBytes");
@@ -230,7 +230,9 @@ OF SUCH DAMAGE.
             return Encoding.UTF8;
 
         if (BOMBytes[0] == 0x2b && BOMBytes[1] == 0x2f && BOMBytes[2] == 0x76)
+#pragma warning disable SYSLIB0001 // Type or member is obsolete
             return Encoding.UTF7;
+#pragma warning restore SYSLIB0001 // Type or member is obsolete
 
         if (BOMBytes.Length < 4)
             return null;
@@ -244,7 +246,7 @@ OF SUCH DAMAGE.
         return null;
     }
 
-    public static Encoding DetectUnicodeInByteSampleByHeuristics(byte[] SampleBytes)
+    public static Encoding? DetectUnicodeInByteSampleByHeuristics(byte[] SampleBytes)
     {
         long oddBinaryNullsInSample = 0;
         long evenBinaryNullsInSample = 0;

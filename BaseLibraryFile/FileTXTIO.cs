@@ -12,10 +12,19 @@ public class FileTXTIO : IFileTXTIO
     protected IFileServices fileServices;
 
     private int _delay = 250;
-    private string text;
+    private string? text;
     private string? _pathFile;
     private string? _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
+
     private bool _isStayBak;
+    private Task<bool>? tryWriteTask;
+    private DateTime? lastWriteAttempt;
+    public Exception eWrite { get; private set; }
+    private static DateTime? lastReadAttempt;
+
+    public string TextResult { get; private set; }
+    public Exception eRead { get; private set; }
+
     public FileTXTIO(/*string? pathFile = null, bool isStayBak = false, int delay = 250, */IFileServices? fileServices = null)
     {
         this.fileServices = fileServices ?? Locator.Current!.GetService<IFileServices>()!;
@@ -23,6 +32,9 @@ public class FileTXTIO : IFileTXTIO
         //_delay = delay;
         //_pathFile = pathFile;
         //_isStayBak = isStayBak;
+        eRead = null!;
+        TextResult = null!;
+        eWrite = null!;
     }
     public void SetStayBak(bool value) => _isStayBak = value;
     public void SetPathFile(string? pathFile)
@@ -38,7 +50,7 @@ public class FileTXTIO : IFileTXTIO
                 {
                     File.Delete(_fileBak);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -56,7 +68,7 @@ public class FileTXTIO : IFileTXTIO
                 {
                     File.Delete(_fileBak);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -70,9 +82,6 @@ public class FileTXTIO : IFileTXTIO
 
     }
     #region Write
-    private Task tryWriteTask;
-    private static DateTime? lastWriteAttempt;
-    public Exception eWrite { get; private set; }
 
     public bool BeforeWrite()
     {
@@ -128,7 +137,7 @@ public class FileTXTIO : IFileTXTIO
                         {
                             File.Delete(_fileBak);
                         }
-                        File.Copy(_pathFile, _fileBak);
+                        File.Copy(_pathFile, _fileBak!);
                         hasAcess = true;
                     }
                     catch (IOException e)
@@ -154,13 +163,13 @@ public class FileTXTIO : IFileTXTIO
                 //texta o arquivo bak
                 try
                 {
-                    if (!fileServices.Check.CheckTextFile(_fileBak) && !fileServices.Check.CheckTextFileByChars(_fileBak))
+                    if (!fileServices.Check.CheckTextFile(_fileBak!) && !fileServices.Check.CheckTextFileByChars(_fileBak!))
                     {
-                        File.Delete(_fileBak);
+                        File.Delete(_fileBak!);
                     }
                     else
                     {
-                        using (StreamReader sr = new(_fileBak))
+                        using (StreamReader sr = new(_fileBak!))
                         {
                             sr.ReadToEnd();
                         }
@@ -202,7 +211,7 @@ public class FileTXTIO : IFileTXTIO
                         File.Delete(_fileBak);
                         hasAcess = true;
                     }
-                    catch (IOException e)
+                    catch (IOException)
                     {
                         if (lastWriteAttempt is null)
                         {
@@ -214,7 +223,7 @@ public class FileTXTIO : IFileTXTIO
                             hasAcess = true;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         lastWriteAttempt = null;
                         hasAcess = true;
@@ -241,10 +250,10 @@ public class FileTXTIO : IFileTXTIO
     }
     public async Task<bool> WriteTXTAsync(string parTXT)
     {
-        Task<bool> task = new Task<bool>(() => WriteTXT(parTXT));
-        task.Start();
-        await task;
-        return task.Result;
+        tryWriteTask = new Task<bool>(() => WriteTXT(parTXT));
+        tryWriteTask.Start();
+        await tryWriteTask;
+        return tryWriteTask.Result;
     }
     public bool WriteTXT(string parTXT)
     {
@@ -283,10 +292,6 @@ public class FileTXTIO : IFileTXTIO
     }
     #endregion
     #region Read
-    private static DateTime? lastReadAttempt;
-
-    public string TextResult { get; private set; }
-    public Exception eRead { get; private set; }
     public bool BeforeReader()
     {
         if (_pathFile is null)
@@ -353,6 +358,7 @@ public class FileTXTIO : IFileTXTIO
                     {
                         TextResult = sr.ReadToEnd();
 
+#pragma warning disable CS0168 // Variable is declared but never used
                         try
                         {
                             File.Delete(_pathFile);
@@ -378,6 +384,7 @@ public class FileTXTIO : IFileTXTIO
                             lastWriteAttempt = null;
                             hasAcess = true;
                         }
+#pragma warning restore CS0168 // Variable is declared but never used
                     }
                 }
 

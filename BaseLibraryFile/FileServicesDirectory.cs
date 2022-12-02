@@ -103,11 +103,13 @@ public class FileServicesDirectory : IFileServicesDirectory
     }
     public void CreatAllPath(string goal)
     {
-        string tempPath = goal[..];
+        if (goal is null)
+            return;
+        string? tempPath = goal[..];
         Stack<string> folderToCreate = new();
         while (!Directory.Exists(tempPath))
         {
-            folderToCreate.Push(tempPath[..]);
+            folderToCreate.Push(tempPath![..]);
             tempPath = Path.GetDirectoryName(tempPath);
         }
         if (string.IsNullOrWhiteSpace(tempPath))
