@@ -1,19 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <RootNamespace>BaseLibrary</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Platforms>AnyCPU;x64;x86</Platforms>
+		<RootNamespace>BaseLibrary</RootNamespace>
+		<IsTrimmable>true</IsTrimmable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Splat" Version="14.4.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Splat" Version="14.4.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Baselibrary\BaseLibraryGeneral.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Baselibrary\BaseLibraryGeneral.csproj" />
+	</ItemGroup>
 
 </Project>

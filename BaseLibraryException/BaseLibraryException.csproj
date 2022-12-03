@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <RootNamespace>BaseLibrary</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Platforms>AnyCPU;x64;x86</Platforms>
+		<RootNamespace>BaseLibrary</RootNamespace>
+		<IsTrimmable>true</IsTrimmable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibraryEmailSMTP.csproj" />
-    <ProjectReference Include="..\BaseLibraryFile\BaseLibraryFile.csproj" />
-    <ProjectReference Include="..\BaseLibraryHTTP\BaseLibraryHTTP.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibraryEmailSMTP.csproj" />
+		<ProjectReference Include="..\BaseLibraryFile\BaseLibraryFile.csproj" />
+		<ProjectReference Include="..\BaseLibraryHTTP\BaseLibraryHTTP.csproj" />
+	</ItemGroup>
 
 </Project>
