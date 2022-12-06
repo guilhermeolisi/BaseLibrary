@@ -74,6 +74,9 @@ public class FileServicesDirectory : IFileServicesDirectory
     }
     public double GetDirectorySize(string directory)
     {
+        if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            return 0;
+
         double result = 0;
         foreach (string dir in Directory.GetDirectories(directory))
         {
