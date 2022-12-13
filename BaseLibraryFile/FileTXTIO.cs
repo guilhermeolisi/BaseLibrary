@@ -1,9 +1,5 @@
 ﻿using Splat;
-using System;
-using System.ComponentModel;
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
@@ -163,7 +159,7 @@ public class FileTXTIO : IFileTXTIO
                 //texta o arquivo bak
                 try
                 {
-                    if (!fileServices.Check.CheckTextFile(_fileBak!) && !fileServices.Check.CheckTextFileByChars(_fileBak!))
+                    if (!fileServices.Check.CheckTextFile(_fileBak!) /*&& !fileServices.Check.CheckTextFileByChars(_fileBak!)*/)
                     {
                         File.Delete(_fileBak!);
                     }

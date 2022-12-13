@@ -1,11 +1,4 @@
-﻿using FileTypeChecker;
-using FileTypeChecker.Abstracts;
-using FileTypeChecker.Extensions;
-using System.IO.Compression;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public static class FileMethods
 {
@@ -27,7 +20,7 @@ public static class FileMethods
     /// Verifica se é um arquivo binário ou de texto
     /// </summary>
     /// <returns>text return true, binary return false</returns>
-    public static bool CheckTextFileByChars(string filePath) => services.Check.CheckTextFileByChars(filePath);
+    //public static bool CheckTextFileByChars(string filePath) => services.Check.CheckTextFileByChars(filePath);
     public static bool CheckTextFile(string filePath) => services.Check.CheckTextFile(filePath);
     /// <summary>
     /// Verifica se é um arquivo imagem

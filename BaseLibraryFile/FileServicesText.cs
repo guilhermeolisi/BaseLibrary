@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace BaseLibrary;
 
@@ -14,9 +10,19 @@ public class FileServicesText : IFileServicesText
             throw new ArgumentNullException(nameof(pathFile));
         if (parTXT is null)
             throw new ArgumentNullException(nameof(parTXT));
+
+        if (!Directory.Exists(Path.GetDirectoryName(pathFile)))
+        {
+            return false;
+        }
+
         short count = 0;
         bool isCont = true;
         bool returnBak = false;
+
+
+        bool isnew = !File.Exists(pathFile);
+
         try
         {
             BakWriteBegin(pathFile);
@@ -31,6 +37,12 @@ public class FileServicesText : IFileServicesText
                     {
                         sw.Write(parTXT);
                     }
+                    DateTime now = DateTime.Now;
+                    if (isnew)
+                    {
+                        File.SetCreationTime(pathFile, now);
+                    }
+                    File.SetLastWriteTime(pathFile, now);
                     return true;
                 }
                 catch (IOException e)
@@ -53,15 +65,28 @@ public class FileServicesText : IFileServicesText
             BakWriteEnd(pathFile, returnBak);
         }
 
+#if DEBUG
+        if (File.Exists(pathFile + tmpExt))
+        {
+
+        }
+#endif
+
         return false;
     }
     public async Task<bool> WriteTXTAsync(string pathFile, string parTXT)
     {
         if (string.IsNullOrWhiteSpace(pathFile))
-            return false;
+            throw new ArgumentNullException(nameof(pathFile));
+        if (parTXT is null)
+            throw new ArgumentNullException(nameof(parTXT));
+
         short count = 0;
         bool isCont = true;
         bool returnBak = false;
+
+        bool isnew = !File.Exists(pathFile);
+
         try
         {
             BakWriteBegin(pathFile);
@@ -76,8 +101,14 @@ public class FileServicesText : IFileServicesText
                     {
                         await sw.WriteAsync(parTXT);
                         returnBak = false;
-                        return true;
                     }
+                    DateTime now = DateTime.Now;
+                    if (isnew)
+                    {
+                        File.SetCreationTime(pathFile, now);
+                    }
+                    File.SetLastWriteTime(pathFile, now);
+                    return true;
                 }
                 catch (IOException e)
                 {
@@ -98,6 +129,14 @@ public class FileServicesText : IFileServicesText
         {
             BakWriteEnd(pathFile, returnBak);
         }
+
+#if DEBUG
+        if (File.Exists(pathFile + tmpExt))
+        {
+
+        }
+#endif
+
         return false;
     }
     private const string tmpExt = ".tmp";
@@ -106,6 +145,7 @@ public class FileServicesText : IFileServicesText
         if (File.Exists(pathFile))
         {
             File.Copy(pathFile, pathFile + tmpExt, true);
+            File.SetCreationTime(pathFile + tmpExt, DateTime.Now);
         }
     }
     private void BakWriteEnd(string pathFile, bool returnBak)
@@ -117,7 +157,22 @@ public class FileServicesText : IFileServicesText
 #pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
+                    DateTime creation = File.GetCreationTime(pathFile + tmpExt);
+                    DateTime lastWrite = File.GetLastWriteTime(pathFile + tmpExt);
                     File.Copy(pathFile + tmpExt, pathFile, true);
+#if DEBUG
+                    var trash = File.GetCreationTime(pathFile);
+                    var trash2 = File.GetLastWriteTime(pathFile);
+#endif
+
+                    if (File.GetCreationTime(pathFile) != creation)
+                    {
+                        File.SetCreationTime(pathFile, creation);
+                    }
+                    if (File.GetLastWriteTime(pathFile) != creation)
+                    {
+                        File.SetLastWriteTime(pathFile, creation);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -142,11 +197,17 @@ public class FileServicesText : IFileServicesText
     }
     public string? ReadTXT(string pathFile)
     {
-        if (string.IsNullOrWhiteSpace(pathFile) || !File.Exists(pathFile))
-            return null;
+        if (string.IsNullOrWhiteSpace(pathFile))
+            throw new ArgumentNullException(nameof(pathFile));
+
+
         short count = 0;
         bool isCont = true;
         string fileTemp = BakReadBegin(pathFile);
+        if (fileTemp == pathFile + tmpExt && !File.Exists(Path.GetDirectoryName(pathFile)))
+        {
+            return null;
+        }
         try
         {
             while (isCont && count < 3)
@@ -177,15 +238,28 @@ public class FileServicesText : IFileServicesText
         {
             BakReadEnd(pathFile);
         }
+
+#if DEBUG
+        if (File.Exists(pathFile + tmpExt))
+        {
+
+        }
+#endif
+
         return null;
     }
     public async Task<string?> ReadTXTAsync(string pathFile)
     {
-        if (string.IsNullOrWhiteSpace(pathFile) || !File.Exists(pathFile))
-            return null;
+        if (string.IsNullOrWhiteSpace(pathFile))
+            throw new ArgumentNullException(nameof(pathFile));
+
         short count = 0;
         bool isCont = true;
         string fileTemp = BakReadBegin(pathFile);
+        if (fileTemp == pathFile + tmpExt && !File.Exists(Path.GetDirectoryName(pathFile)))
+        {
+            return null;
+        }
         try
         {
             while (isCont && count < 10)
@@ -216,6 +290,13 @@ public class FileServicesText : IFileServicesText
         {
             BakReadEnd(pathFile);
         }
+
+#if DEBUG
+        if (File.Exists(pathFile + tmpExt))
+        {
+
+        }
+#endif
         return null;
     }
     private string BakReadBegin(string pathFile)
@@ -232,12 +313,29 @@ public class FileServicesText : IFileServicesText
         DateTime? trash4 = (File.Exists(pathFile) ? File.GetCreationTime(pathFile) : null);
 #endif
 
-        if ((File.Exists(pathFile + tmpExt) && !File.Exists(pathFile)) || (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile)))
+        if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile)) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile))
         {
 #pragma warning disable CS0168 // Variable is declared but never used
             try
             {
+                DateTime creation = File.GetCreationTime(pathFile + tmpExt);
+                DateTime lastWrite = File.GetLastWriteTime(pathFile + tmpExt);
+
                 File.Move(pathFile + tmpExt, pathFile, true);
+#if DEBUG
+                var trash10 = File.GetCreationTime(pathFile);
+                var trash12 = File.GetLastWriteTime(pathFile);
+#endif
+
+                if (File.GetCreationTime(pathFile) != creation)
+                {
+                    File.SetCreationTime(pathFile, creation);
+                }
+                if (File.GetLastWriteTime(pathFile) != creation)
+                {
+                    File.SetLastWriteTime(pathFile, creation);
+                }
+
             }
             catch (Exception e)
             {
@@ -249,18 +347,47 @@ public class FileServicesText : IFileServicesText
     }
     private void BakReadEnd(string pathFile)
     {
-        if ((File.Exists(pathFile + tmpExt) && !File.Exists(pathFile)) || (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile + tmpExt) > File.GetCreationTime(pathFile)))
+        if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile)) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile))
         {
 #pragma warning disable CS0168 // Variable is declared but never used
             try
             {
+                DateTime creation = File.GetCreationTime(pathFile + tmpExt);
+                DateTime lastWrite = File.GetLastWriteTime(pathFile + tmpExt);
+
                 File.Move(pathFile + tmpExt, pathFile, true);
+
+#if DEBUG
+                var trash10 = File.GetCreationTime(pathFile);
+                var trash12 = File.GetLastWriteTime(pathFile);
+#endif
+
+                if (File.GetCreationTime(pathFile) != creation)
+                {
+                    File.SetCreationTime(pathFile, creation);
+                }
+                if (File.GetLastWriteTime(pathFile) != creation)
+                {
+                    File.SetLastWriteTime(pathFile, creation);
+                }
+
+            }
+            catch (Exception e)
+            {
+                return;
+            }
+#pragma warning restore CS0168 // Variable is declared but never used
+        }
+        if (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile + tmpExt) < File.GetLastWriteTime(pathFile))
+        {
+            try
+            {
+                File.Delete(pathFile + tmpExt);
             }
             catch (Exception e)
             {
 
             }
-#pragma warning restore CS0168 // Variable is declared but never used
         }
     }
 }

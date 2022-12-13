@@ -4,17 +4,12 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Platforms>AnyCPU;x64;x86</Platforms>
-		<RootNamespace>BaseLibrary</RootNamespace>
+		<Platforms>AnyCPU;x86;x64</Platforms>
 		<IsTrimmable>true</IsTrimmable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Splat" Version="14.4.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Baselibrary\BaseLibraryGeneral.csproj" />
+		<ProjectReference Include="..\Baselibrary\BaseLibrary.General.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,24 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static System.Math;
 
-namespace BaseLibrary;
+namespace BaseLibrary.Numbers;
 
-public static class Numbers
+public class NumberServices : INumberServices
 {
     /// <summary>
     /// retorna se o inteiro é impar
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static bool IsOdd(int value) => value % 2 != 0;
+    public bool IsOdd(int value) => value % 2 != 0;
     /// <summary>
     /// Conta o número de casas decimais de um número, zeros a esquerda depois da vírgula não é considerado
     /// </summary>
     /// <param name="value"></param>
     /// <returns>valor negativo significa a quantidade de zero antes da virgula</returns>
-    public static int CountDecimal(double value)
+    public int CountDecimal(double value)
     {
         //outra possibilidade para contar as casas decimais é
         //(3.1415.ToString(CultureInfo.InvariantCulture)).Split('.')[1].Length
@@ -52,7 +55,7 @@ public static class Numbers
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static int CountAlgharisms(double value, bool removeZeroRigth)
+    public int CountAlgharisms(double value, bool removeZeroRigth)
     {
         if (double.IsNaN(value))
             return 0;
@@ -86,7 +89,7 @@ public static class Numbers
     /// <param name="value"></param>
     /// <param name="decimals">Negativo indica a quantidade de casas antes da vígula que será zero</param>
     /// <returns></returns>
-    public static double RoundDecimal(double value, int decimals)
+    public double RoundDecimal(double value, int decimals)
     {
         if (decimals >= 0)
             return Round(value, decimals);
@@ -102,7 +105,7 @@ public static class Numbers
             return temp * Pow(10.0, -decimals);
         }
     }
-    public static double RoundAlgharisms(double value, uint algharims)
+    public double RoundAlgharisms(double value, uint algharims)
     {
         if (double.IsNaN(value))
             return double.NaN;
@@ -130,7 +133,8 @@ public static class Numbers
             return RoundDecimal(value, firstAlgharism + (int)algharims - 1);
         }
     }
-    public static string DoubleResultText(double valueNull, double esdNull, string arredonda = null)
+    public string DoubleResultText(NumberESD value, string? arredonda = null) => DoubleResultText(value.Value, value.ESD, arredonda);
+    public string DoubleResultText(double valueNull, double esdNull, string? arredonda = null)
     {
 #if DEBUG
         //TRASH
@@ -309,7 +313,7 @@ public static class Numbers
 
         return result;
     }
-    public static int OrderNumber(double value)
+    public int OrderNumber(double value)
     {
         double result = Log10(Abs(value));
         if (result < 0)
@@ -324,8 +328,8 @@ public static class Numbers
             return (int)result;
         }
     }
-    public static Random Rand = new();
-    public static string GenerateCodeID(short legnth, bool isCaseSensitive)
+    public Random Rand = new();
+    public string GenerateCodeID(short legnth, bool isCaseSensitive)
     {
         char[] codeTemp = new char[legnth];
 
@@ -373,7 +377,7 @@ public static class Numbers
 
         return new string(codeTemp);
     }
-    public static string OrdinalIntegerToString(int number)
+    public string OrdinalIntegerToString(int number)
     {
         string str = number.ToString();
         if (str.Last() == '1' && (str.Length == 1 || str[1] != '1'))
@@ -394,7 +398,7 @@ public static class Numbers
         }
         return str;
     }
-    public static T Clamp<T>(T value, T min, T max) where T : IComparable<T>
+    public T Clamp<T>(T value, T min, T max) where T : IComparable<T>
     {
         //https://stackoverflow.com/questions/3176602/how-to-force-a-number-to-be-in-a-range-in-c
         if (value.CompareTo(min) < 0)

@@ -10,9 +10,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibraryEmailSMTP.csproj" />
-		<ProjectReference Include="..\BaseLibraryFile\BaseLibraryFile.csproj" />
-		<ProjectReference Include="..\BaseLibraryHTTP\BaseLibraryHTTP.csproj" />
+		<ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibrary.Email.SMTP.csproj" />
+		<ProjectReference Include="..\BaseLibraryFile\BaseLibrary.File.csproj" />
+		<ProjectReference Include="..\BaseLibraryHTTP\BaseLibrary.HTTP.csproj" />
 	</ItemGroup>
 
 </Project>
