@@ -89,7 +89,7 @@ public static class Collections
         }
         return result;
     }
-    public static void MirrorList<T>(this IEnumerable original, ICollection<T> destine)
+    public static void MirrorTo<T>(this IEnumerable original, ICollection<T> destine)
     {
         List<T> toRemove = new();
         foreach (T itemD in destine)
@@ -139,5 +139,26 @@ public static class Collections
                 destine.Add(itemO);
             }
         }
+    }
+    public static void CloneTo<T>(this IEnumerable original, ICollection<T> destine)
+    {
+        destine.Clear();
+        foreach (T item in original)
+        {
+            if (item is null)
+                continue;
+            destine.Add(item);
+        }
+    }
+    public static int GetIndexOf(this IEnumerable original, object value) //where T : IComparable
+    {
+        int ind = 0;
+        foreach (var item in original)
+        {
+            if (item.Equals(value))
+                return ind;
+            ind++;
+        }
+        return -1;
     }
 }

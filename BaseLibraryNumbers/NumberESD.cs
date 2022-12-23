@@ -11,23 +11,23 @@ public struct NumberESD : IComparable
 {
     public double Value = double.NaN;
     public double ESD = double.NaN;
-    private readonly string? numberText = null;
-    private readonly string? stringFormat = null;
-    public string? NumberText { get => !HasValue ? null : !double.IsNaN(Value) ? NumberMethods.DoubleResultText(Value, ESD, stringFormat) : !string.IsNullOrWhiteSpace(numberText) ? numberText : "-"; }
+    public string? Text { get; private set; } = null;
+    public string? StringFormat { get; private set; } = null;
+    public string? NumberText { get => !HasValue ? null : !double.IsNaN(Value) ? NumberMethods.DoubleResultText(Value, ESD, StringFormat) : !string.IsNullOrWhiteSpace(Text) ? Text : "-"; }
     public bool HasValue;
-    //public NumberESD()
-    //{
-    //    Value = double.NaN;
-    //    ESD = double.NaN;
-    //    this.stringFormat = null;
-    //    this.numberText = null;
-    //}
-    public NumberESD(double value, double esd, string? stringFormat, string? numberText)
+    public NumberESD()
+    {
+        Value = double.NaN;
+        ESD = double.NaN;
+        this.StringFormat = null;
+        this.Text = null;
+    }
+    public NumberESD(double value, double esd, string? stringFormat, string? text)
     {
         Value = value;
         ESD = esd;
-        this.stringFormat = stringFormat;
-        this.numberText = numberText;
+        this.StringFormat = stringFormat;
+        this.Text = text;
         HasValue = true;
     }
     public NumberESD(double value, double esd)
@@ -39,29 +39,33 @@ public struct NumberESD : IComparable
     public NumberESD(double value, string? stringFormat)
     {
         Value = value;
-        this.stringFormat = stringFormat;
+        this.StringFormat = stringFormat;
         ESD = double.NaN;
         HasValue = true;
     }
-    public NumberESD(string numberText)
+    public NumberESD(string text)
     {
-        this.numberText = numberText;
+        this.Text = text;
         Value = double.NaN;
         ESD = double.NaN;
         HasValue = true;
     }
-
+    
     public int CompareTo(object? obj)
     {
         //https://learn.microsoft.com/pt-br/troubleshoot/developer/visualstudio/csharp/language-compilers/use-icomparable-icomparer
         NumberESD? number = (NumberESD)obj!;
         if (number is not null)
-            return Value.CompareTo(number.Value);
+            return Value.CompareTo(((NumberESD)number).Value);
 
         double? doub = (double)obj;
         if (doub is not null)
-            return Value.CompareTo(doub);
+            return Value.CompareTo((double)doub);
 
         throw new ArithmeticException();
+    }
+    public override string ToString()
+    {
+        return NumberText;
     }
 }
