@@ -224,4 +224,8 @@ public class TextServices : ITextServices
         }
         return false;
     }
+    public string RemoveSpaces(string text)
+    {
+        return text.Replace(" ", "");
+    }
 }

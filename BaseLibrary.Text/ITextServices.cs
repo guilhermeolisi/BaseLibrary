@@ -11,4 +11,5 @@ public interface ITextServices
     //string TextToGreek(string text, bool isUpper = false);
     string RemoveSpaceBetweenNumberGreek(string text);
     string TextToGreekBetweenSpaces(string text, bool isUpper = false);
+    string RemoveSpaces(string text);
 }

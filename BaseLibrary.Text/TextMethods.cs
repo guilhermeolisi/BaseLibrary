@@ -19,4 +19,5 @@ public static class TextMethods
     //public static string TextToGreek(this string text, bool isUpper = false) => services.TextToGreek(text, isUpper);
     public static string RemoveSpaceBetweenNumberGreek(this string text) => services.RemoveSpaceBetweenNumberGreek(text);
     public static string TextToGreekBetweenSpaces(this string text, bool isUpper = false) => services.TextToGreekBetweenSpaces(text, isUpper);
+    public static string RemoveSpaces(this string text) => services.RemoveSpaces(text);
 }

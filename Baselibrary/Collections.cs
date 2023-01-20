@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace BaseLibrary;
@@ -47,6 +48,37 @@ public static class Collections
             }
         }
     }
+    public static IList<TSource> GOSOrderBy<TSource, TKey>(this IList<TSource> source, Func<TSource, TKey> keySelector)
+        where TKey : IComparable
+    {
+        int i = 0;
+        while (i < source.Count - 1)
+        {
+            if (keySelector(source[i]).CompareTo(keySelector(source[i + 1])) > 0)
+            {
+                int j = 0;
+                while (j < i)
+                {
+                    if (keySelector(source[j]).CompareTo(keySelector(source[i])) > 0)
+                    {
+                        TSource itemi = source[i];
+                        source.RemoveAt(i);
+                        source.Insert(j, itemi);
+                        break;
+                    }
+                    else
+                    {
+                        j++;
+                    }
+                }
+            }
+            else
+            {
+                i++;
+            }
+        }
+        return source;
+    }
     public static bool RemoveIfContain<T>(this ICollection<T> list, T item)
     {
         bool has = false;
@@ -89,7 +121,7 @@ public static class Collections
         }
         return result;
     }
-    public static void MirrorTo<T>(this IEnumerable original, ICollection<T> destine)
+    public static IEnumerable MirrorTo<T>(this IEnumerable original, ICollection<T> destine)
     {
         List<T> toRemove = new();
         foreach (T itemD in destine)
@@ -139,6 +171,7 @@ public static class Collections
                 destine.Add(itemO);
             }
         }
+        return original;
     }
     public static void CloneTo<T>(this IEnumerable original, ICollection<T> destine)
     {

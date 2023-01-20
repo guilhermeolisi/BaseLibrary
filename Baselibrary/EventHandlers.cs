@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseLibrary
+namespace BaseLibrary;
+
+public static class EventHandlers
 {
-    public static class EventHandlers
-    {
-        public delegate void AsyncMethodFinishedEventHandler(string sender);
-    }
+    public delegate void AsyncMethodFinishedEventHandler(string sender);
 }
