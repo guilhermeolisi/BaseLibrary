@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 
-namespace BaseLibrary;
+namespace BaseLibrary.Collections;
 
-public static class Collections
+public static class Extensions
 {
     public static void OrderObservableToString<T>(this ObservableCollection<T> obs)
     {
@@ -193,5 +190,51 @@ public static class Collections
             ind++;
         }
         return -1;
+    }
+    public static IEnumerable<T> Foreach<T>(this IEnumerable<T> list, Action<T> action)
+    {
+        foreach (var item in list)
+        {
+            action.Invoke(item);
+        }
+        return list;
+    }
+    public static IEnumerable Foreach(this IEnumerable list, Action<object> action)
+    {
+        foreach (var item in list)
+        {
+            action.Invoke(item);
+        }
+        return list;
+    }
+    public static IEnumerable<T> GetOnlyDistinct<T,TComp>(this IEnumerable<T> list, Func<T, TComp> propToComp)
+    {
+        if (propToComp is null)
+            throw new ArgumentNullException(nameof(propToComp));
+        List<T> result = new();
+        int ind1 = 0;
+        int ind2 = 0;
+        foreach (var item in list)
+        {
+            bool hasEqual = false;
+            ind2 = 0;
+            foreach (var item2 in list)
+            {
+                if (ind2 >= ind1)
+                    break;
+                if (propToComp.Invoke(item).Equals(propToComp.Invoke(item2)))
+                {
+                    hasEqual = true;
+                    break;
+                }
+                ind2++;
+            }
+            if (!hasEqual)
+            {
+                result.Add(item);
+            }
+            ind1++;
+        }
+        return list;
     }
 }
