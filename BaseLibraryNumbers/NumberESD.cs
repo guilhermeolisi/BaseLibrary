@@ -14,7 +14,7 @@ public struct NumberESD : IComparable
     public string? Text { get; private set; } = null;
     public string? StringFormat { get; private set; } = null;
     public string? NumberText { get => !HasValue ? null : !double.IsNaN(Value) ? NumberMethods.DoubleResultText(Value, ESD, StringFormat) : !string.IsNullOrWhiteSpace(Text) ? Text : "-"; }
-    public bool HasValue;
+    public bool HasValue { get; set; }
     public NumberESD()
     {
         Value = double.NaN;

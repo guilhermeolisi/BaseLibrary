@@ -6,6 +6,8 @@ public class TextServices : ITextServices
 {
     public string FirstLetterToUpper(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         if (text.Length > 0 && char.IsAsciiLetterLower(text[0]))
         {
             text = char.ToUpper(text[0]) + text.Substring(1, text.Length - 1);
@@ -14,6 +16,8 @@ public class TextServices : ITextServices
     }
     public string CamelCaseWithSpace(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         int ind = 0;
         while (ind < text.Length - 1)
         {
@@ -42,6 +46,8 @@ public class TextServices : ITextServices
     };
     public string TextToNumber(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         for (int i = 0; i < numbers.Length; i++)
         {
             text = text.Replace(numbers[i].text, numbers[i].num.ToString(), StringComparison.CurrentCultureIgnoreCase);
@@ -50,6 +56,8 @@ public class TextServices : ITextServices
     }
     public string TextToNumberBetweenSpaces(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         for (int i = 0; i < numbers.Length; i++)
         {
             int ind = 0;
@@ -87,6 +95,8 @@ public class TextServices : ITextServices
     }
     public string NumberToText(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         for (int i = 0; i < numbers.Length; i++)
         {
             //if (text.Contains(numbers[i].num.ToString(), StringComparison.InvariantCultureIgnoreCase))
@@ -150,6 +160,8 @@ public class TextServices : ITextServices
     //}
     public string TextToGreekBetweenSpaces(string text, bool isUpper = false)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         for (int i = 0; i < greeks.Length; i++)
         {
             if (text.Contains(greeks[i].text))
@@ -194,6 +206,8 @@ public class TextServices : ITextServices
     }
     public string RemoveSpaceBetweenNumberGreek(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         int ind = 0;
         while (ind < text.Length - 1)
         {
@@ -226,6 +240,8 @@ public class TextServices : ITextServices
     }
     public string RemoveSpaces(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return text;
         return text.Replace(" ", "");
     }
 }
