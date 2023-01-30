@@ -49,7 +49,7 @@ public class EmailSenderSMTP : IEmailSender
         //TODO Verificar conexão com internet
         if (!httpServices.IsConnectedToInternet())
         {
-            return new GOSResult(false, new Exception(@"There doest seem to be a network/internet connection.\r\nPlease contact your system administrator"), null);
+            return new GOSResult(new Exception(@"There doest seem to be a network/internet connection.\r\nPlease contact your system administrator"));
         }
 
 
@@ -78,7 +78,7 @@ public class EmailSenderSMTP : IEmailSender
         }
         catch (Exception ex)
         {
-            return new(false, ex, null);
+            return new(ex);
         }
         return new(true);
     }

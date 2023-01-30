@@ -172,7 +172,7 @@ public class ExceptionServices : IExceptionServices
         }
         catch (Exception ex)
         {
-            return new GOSResult(false, ex, "");
+            return new GOSResult(ex);
         }
 
     }

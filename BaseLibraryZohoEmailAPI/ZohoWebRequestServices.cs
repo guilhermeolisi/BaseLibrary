@@ -75,7 +75,7 @@ public class ZohoWebRequestServices : IEmailSender
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return new GOSResult(false, ex, null);
+            return new GOSResult(ex);
         }
 
         return new GOSResult(false);

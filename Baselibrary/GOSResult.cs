@@ -15,7 +15,7 @@ public struct GOSResult
     public string Message { get; private set; }
     public GOSResult(bool success) : this()
     {
-        Success = success; 
+        Success = success;
         Exception = null;
         Message = null;
     }
@@ -49,5 +49,10 @@ public struct GOSResult
         Exception = exception;
         Message = message;
     }
-
+    public GOSResult(bool success, object _object) : this()
+    {
+        Success = success;
+        Exception = null;
+        Message = null;
+    }
 }

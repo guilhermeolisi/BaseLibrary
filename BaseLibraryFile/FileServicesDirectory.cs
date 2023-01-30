@@ -72,6 +72,13 @@ public class FileServicesDirectory : IFileServicesDirectory
             }
         }
     }
+    public void FileCopy(string original, string destination, bool preservetime = true)
+    {
+        File.Copy(original, destination);
+        File.SetCreationTime(destination, File.GetCreationTime(original));
+        File.SetLastWriteTime(destination, File.GetLastWriteTime(original));
+        File.SetLastAccessTime(destination, File.GetLastAccessTime(original));
+    }
     public double GetDirectorySize(string directory)
     {
         if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))

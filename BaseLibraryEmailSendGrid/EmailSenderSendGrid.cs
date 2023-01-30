@@ -46,7 +46,7 @@ public class EmailSenderSendGrid : IEmailSender
             string result = response.StatusCode + Environment.NewLine +
                 response.Headers + Environment.NewLine +
                 response.Body + Environment.NewLine;
-            return new GOSResult(false, null, result);
+            return new GOSResult(result);
         }
     }
 }

@@ -132,7 +132,7 @@ public class ZohoCRMServices : IEmailSender
                             //Get the Message
                             Console.WriteLine("Message: " + exception.Message.Value);
 
-                            return new GOSResult(false, new Exception(GetAPIExceptionMessage(exception)), null);
+                            return new GOSResult(new Exception(GetAPIExceptionMessage(exception)));
                         }
                     }
                 }
@@ -159,7 +159,7 @@ public class ZohoCRMServices : IEmailSender
 
                     //Get the Message
                     Console.WriteLine("Message: " + exception.Message.Value);
-                    return new GOSResult(false, new Exception(GetAPIExceptionMessage(exception)), null);
+                    return new GOSResult(new Exception(GetAPIExceptionMessage(exception)));
                 }
             }
             else
@@ -194,7 +194,7 @@ public class ZohoCRMServices : IEmailSender
                         result += string.Format("{0} ({1}) in ", prop.Name, prop.PropertyType.Name) + Environment.NewLine;
                     }
                 }
-                return new GOSResult(false, null, result);
+                return new GOSResult(result);
             }
         }
         return new GOSResult(false);
