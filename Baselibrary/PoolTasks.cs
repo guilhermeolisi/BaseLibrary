@@ -27,11 +27,14 @@ public class PoolTasks : IPoolTasks
             while (tasks.Count > 0)
             {
                 Task task = tasks.Dequeue();
-                if (task is not null && task.Status != TaskStatus.Running)
+                if (task is null)
+                    continue;
+                if (task.Status == TaskStatus.Created)
                 {
                     task.Start();
                 }
-                task.Wait();
+                if (task.Status == TaskStatus.Running)
+                    task.Wait();
             }
         });
         processTask.Start();

@@ -39,4 +39,7 @@ public static class FileMethods
     public static void InfoFromFolderPath(in string filepath, ref string actualFolder, ref string folderParent) => services.Name.InfoFromFolderPath(filepath, ref actualFolder, ref folderParent);
     public static string FileNameAvailable(this string fullPath, char? mode) => services.Name.FileNameAvailable(fullPath, mode);
     public static string CutCharacterFileForbiden(this string filePath, bool cut) => services.Name.CutCharacterFileForbiden(filePath, cut);
+    public static void CopyConserveTime(string original, string destination, bool preservetime = true) => services.File.CopyConserveTime(original, destination, preservetime);
+    public static long FileSize(string fileName) => services.File.FileSize(fileName);
+    public static DateTime FileLastModification(string fileName) => services.File.FileLastModification(fileName);
 }

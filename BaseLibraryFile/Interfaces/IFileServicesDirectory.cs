@@ -14,5 +14,4 @@ public interface IFileServicesDirectory
     void DirectoryClear(string sourceDirName);
     public double GetDirectorySize(string directory);
     void CreatAllPath(string goal);
-    void FileCopy(string original, string destination, bool preservetime = true);
 }

@@ -6,6 +6,7 @@ public interface IFileServices
     IFileServicesDirectory Directory { get; }
     IFileServicesCheck Check { get; }
     IFileServicesName Name { get; }
+    IFileServicesFile File { get; }
 
     //bool WriteTXT(string pathFile, in string parTXT);
     //Task<bool> WriteTXTAsync(string pathFile, string parTXT);
