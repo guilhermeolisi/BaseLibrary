@@ -42,4 +42,5 @@ public static class FileMethods
     public static void CopyConserveTime(string original, string destination, bool preservetime = true) => services.File.CopyConserveTime(original, destination, preservetime);
     public static long FileSize(string fileName) => services.File.FileSize(fileName);
     public static DateTime FileLastModification(string fileName) => services.File.FileLastModification(fileName);
+    public static void ExtractZipConserveTime(string zipPath, string extractPath) => services.File.ExtractZipConserveTime(zipPath, extractPath);
 }
