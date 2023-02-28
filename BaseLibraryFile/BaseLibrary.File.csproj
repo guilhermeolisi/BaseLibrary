@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<RootNamespace>BaseLibrary</RootNamespace>
-		<IsTrimmable>true</IsTrimmable>
+		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>
 
 	<ItemGroup>

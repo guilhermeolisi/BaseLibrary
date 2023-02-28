@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x86;x64</Platforms>
-		<IsTrimmable>true</IsTrimmable>
+		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>
 
 	<ItemGroup>

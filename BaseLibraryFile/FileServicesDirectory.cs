@@ -120,4 +120,37 @@ public class FileServicesDirectory : IFileServicesDirectory
         while (folderToCreate.Count > 0)
             Directory.CreateDirectory(folderToCreate.Pop());
     }
+    public void RenameAllWhithoutSpaces(string folder)
+    {
+        string[] files = Directory.GetFiles(folder);
+        string parentFolder = null;
+        for (int i = 0; i < files.Length; i++)
+        {
+            string fileName = Path.GetFileName(files[i]);
+            if (fileName.Contains(' '))
+            {
+#if DEBUG
+                var trash  = files[i].Replace(" ", "%20");
+#endif
+                parentFolder ??= Path.GetDirectoryName(files[i]);
+                fileName = fileName.Replace(" ", "%20");
+                File.Move(files[i], Path.Combine(parentFolder, fileName));
+            }
+        }
+        string[] folders = Directory.GetDirectories(folder);
+        for (int i = 0; i < folders.Length; i++)
+        {
+            string folderPath = folders[i].Substring(0);
+            string folderName = Path.GetFileName(folderPath);
+            if (folderName.Contains(' '))
+            {
+                parentFolder ??= Path.GetDirectoryName(folderPath);
+                
+                folderName = folderName.Replace(" ", "%20");
+                folderPath = Path.Combine(parentFolder, folderName);
+                Directory.Move(folders[i], folderPath);
+            }
+            RenameAllWhithoutSpaces(folderPath);
+        }
+    }
 }

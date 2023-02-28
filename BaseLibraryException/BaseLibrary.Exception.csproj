@@ -6,11 +6,10 @@
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 		<RootNamespace>BaseLibrary</RootNamespace>
-		<IsTrimmable>true</IsTrimmable>
+		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BaseLibraryEmailSMTP\BaseLibrary.Email.SMTP.csproj" />
 		<ProjectReference Include="..\BaseLibraryFile\BaseLibrary.File.csproj" />
 		<ProjectReference Include="..\BaseLibraryHTTP\BaseLibrary.HTTP.csproj" />
 	</ItemGroup>

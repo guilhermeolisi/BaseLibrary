@@ -14,4 +14,5 @@ public interface IFileServicesDirectory
     void DirectoryClear(string sourceDirName);
     public double GetDirectorySize(string directory);
     void CreatAllPath(string goal);
+    void RenameAllWhithoutSpaces(string folder);
 }
