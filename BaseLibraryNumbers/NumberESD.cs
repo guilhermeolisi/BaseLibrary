@@ -21,6 +21,7 @@ public struct NumberESD : IComparable
         ESD = double.NaN;
         this.StringFormat = null;
         this.Text = null;
+        HasValue = false;
     }
     public NumberESD(double value, double esd, string? stringFormat, string? text)
     {

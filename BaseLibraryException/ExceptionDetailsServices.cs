@@ -35,6 +35,11 @@ public class ExceptionDetailsServices : IExceptionDetailsServices
             .ThenBy(x => string.Equals(x.Name, nameof(exception.InnerException), StringComparison.Ordinal))
             .ThenBy(x => string.Equals(x.Name, nameof(AggregateException.InnerExceptions), StringComparison.Ordinal)))
         {
+#if DEBUG
+            if (property.Name == "InnerException")
+            { }
+#endif
+
             var value = property.GetValue(exception, null);
             if (value == null && options.OmitNullProperties)
             {

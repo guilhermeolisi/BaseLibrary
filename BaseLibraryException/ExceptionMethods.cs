@@ -224,4 +224,15 @@ public static class ExceptionMethods
             stringBuilder.AppendLine($"{options.Indent}{propertyName} = {value}");
         }
     }
+    public static string GetExceptionText(Exception e, string messageExtra)
+    {
+        var program = Assembly.GetEntryAssembly()?.GetName();
+        string? appName = program?.Name;
+        Version? ver = program?.Version;
+        string message = "[" + DateTime.Now + "]" + Environment.NewLine + "Program: " + appName + Environment.NewLine +
+            "Version: " + ver?.ToString() + Environment.NewLine +
+            ToDetailedString(e) +
+            (!string.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
+        return message;
+    }
 }

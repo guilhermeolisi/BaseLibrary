@@ -8,7 +8,7 @@ public class TextServices : ITextServices
     {
         if (string.IsNullOrEmpty(text))
             return text;
-        if (text.Length > 0 && char.IsAsciiLetterLower(text[0]))
+        if (text.Length > 0 && /*char.IsAsciiLetterLower(text[0])*/ char.IsLower(text[0]))
         {
             text = char.ToUpper(text[0]) + text.Substring(1, text.Length - 1);
         }
@@ -21,7 +21,8 @@ public class TextServices : ITextServices
         int ind = 0;
         while (ind < text.Length - 1)
         {
-            if (char.IsAsciiLetterUpper(text[ind]) && ind != 0 && !char.IsAsciiLetterUpper(text[ind + 1]))
+            //if (char.IsAsciiLetterUpper(text[ind]) && ind != 0 && !char.IsAsciiLetterUpper(text[ind + 1]))
+            if (char.IsUpper(text[ind]) && ind != 0 && !char.IsUpper(text[ind + 1]))
             {
                 text = text.Insert(ind, " ");
                 ind++;

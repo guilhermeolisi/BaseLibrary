@@ -2,7 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<Platforms>AnyCPU;x64;x86</Platforms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Platforms>AnyCPU;x86;x64;ARM32;ARM64</Platforms>
 		<RootNamespace>BaseLibrary</RootNamespace>
 		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>

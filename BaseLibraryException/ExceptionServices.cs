@@ -33,9 +33,6 @@ public class ExceptionServices : IExceptionServices
     }
     public async Task VerifyLocalException(bool isAsync)
     {
-#if DEBUG
-        return;
-#endif
 
         if (string.IsNullOrWhiteSpace(folder))
             throw new NullReferenceException(nameof(folder));
@@ -80,11 +77,8 @@ public class ExceptionServices : IExceptionServices
         }
 
     }
-    public async Task SendException(Exception e, bool isAsync, string messageExtra, string OSversion)
+    public async Task SendException(Exception e, bool isAsync, string? messageExtra, string? OSversion)
     {
-#if DEBUG
-        return;
-#endif
 
         if (isConsole)
         {
@@ -94,7 +88,7 @@ public class ExceptionServices : IExceptionServices
         var program = Assembly.GetEntryAssembly()?.GetName();
         Version version = program.Version;
         string? appName = program?.Name;
-        string message = 
+        string message =
             appName + " " + version.ToString() + Environment.NewLine +
             (string.IsNullOrWhiteSpace(OSversion) ? "" : OSversion) + Environment.NewLine +
             GetExceptionText(e, messageExtra);
@@ -106,6 +100,10 @@ public class ExceptionServices : IExceptionServices
                 Console.WriteLine("done");
                 Console.WriteLine("Content of sent message:");
                 Console.WriteLine(message);
+            }
+            else
+            {
+                
             }
             VerifyLocalException(isAsync);
 
