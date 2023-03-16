@@ -12,15 +12,23 @@ public class ConsoleServices : IConsoleServices
 {
     //https://www.codeproject.com/Tips/5255878/A-Console-Progress-Bar-in-Csharp
     const char _block = '■';
-    const string _back = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+    const string _back = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"; //total: 17
     const string _twirl = "-\\|/";
-    public void WriteProgressBar(int percent, bool update = false)
+    public void WriteProgressBar(int percent, int progress = -1, bool update = false)
     {
         var p = (int)((percent / 10f) + .5f);
+        //int progress;
+        //if (currentValue < 0)
+        //    progress = -1;
+        //else
+        //    progress = ;
         if (update)
-            Console.Write(_back + "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
+            Console.Write((progress >= 0 ? "\b" : "") + _back + 
+                (progress >= 0 ? _twirl[progress % _twirl.Length] : "") + 
+                "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
         else
-            Console.Write("[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
+            Console.Write((progress >= 0 ? _twirl[progress % _twirl.Length] : "") +
+                "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
     }
     public void WriteProgress(int progress, bool update = false)
     {

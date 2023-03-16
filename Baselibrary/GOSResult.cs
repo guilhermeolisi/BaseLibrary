@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,5 +55,15 @@ public struct GOSResult
         Success = success;
         Exception = null;
         Message = null;
+    }
+
+    public override string ToString()
+    {
+        string result = (Success ? "Success" : "FAIL") +
+            (string.IsNullOrEmpty(Message) ? string.Empty : Environment.NewLine + "MESSAGE" + Environment.NewLine + Message) +
+            (Exception is null ? string.Empty : Environment.NewLine + "EXCEPTION" + Environment.NewLine + Exception.Message + (Exception.InnerException is not null ? Environment.NewLine + Exception.InnerException : string.Empty) + (Exception.StackTrace is not null ? Environment.NewLine + Exception.StackTrace : string.Empty));
+        ;
+
+        return result;
     }
 }

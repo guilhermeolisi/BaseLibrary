@@ -2,7 +2,7 @@
 
 public static class FileMethods
 {
-    static IFileServices services = new FileServices();
+    static IFileServices services = new FileServices(new FileServicesText(), new FileServicesDirectory(), new FileServicesCheck(), new FileServicesName(), new FileServicesFile());
     public static bool WriteTXT(string pathFile, in string parTXT) => services.Text.WriteTXT(pathFile, parTXT);
     public static async Task<bool> WriteTXTAsync(string pathFile, string parTXT) => await services.Text.WriteTXTAsync(pathFile, parTXT);
     public static string? ReadTXT(string pathFile) => services.Text.ReadTXT(pathFile);

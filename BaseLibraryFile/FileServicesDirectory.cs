@@ -107,16 +107,19 @@ public class FileServicesDirectory : IFileServicesDirectory
     public void CreatAllPath(string goal)
     {
         if (goal is null)
-            return;
-        string? tempPath = goal[..];
+            throw new ArgumentNullException(nameof(goal));
+        if (string.IsNullOrWhiteSpace(goal))
+            throw new ArgumentException(nameof(goal) + " parameter is empty");
+
+        string? tempPath = goal.Substring(0);
         Stack<string> folderToCreate = new();
-        while (!Directory.Exists(tempPath))
+        while (!string.IsNullOrWhiteSpace(tempPath) && !Directory.Exists(tempPath))
         {
-            folderToCreate.Push(tempPath![..]);
+            folderToCreate.Push(tempPath!.Substring(0));
             tempPath = Path.GetDirectoryName(tempPath);
         }
-        if (string.IsNullOrWhiteSpace(tempPath))
-            return;
+        //if (string.IsNullOrWhiteSpace(tempPath))
+        //    return;
         while (folderToCreate.Count > 0)
             Directory.CreateDirectory(folderToCreate.Pop());
     }

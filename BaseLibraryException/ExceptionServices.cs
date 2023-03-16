@@ -120,7 +120,8 @@ public class ExceptionServices : IExceptionServices
             }
         }
     }
-    public string GetExceptionText(Exception e, string messageExtra)
+    public bool IsConnectedToInternet() => httpServices.IsConnectedToInternet();
+    public string GetExceptionText(Exception e, string? messageExtra)
     {
         var program = Assembly.GetEntryAssembly()?.GetName();
         string? appName = program?.Name;

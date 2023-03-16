@@ -10,7 +10,7 @@ namespace BaseLibrary;
 
 public interface IConsoleServices
 {
-    void WriteProgressBar(int percent, bool update = false);
+    void WriteProgressBar(int percent, int progress = -1, bool update = false);
     void WriteProgress(int progress, bool update = false);
     GOSResult ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped);
     bool DialogYesNo(string message);
