@@ -15,4 +15,5 @@ public interface IFileServicesDirectory
     public double GetDirectorySize(string directory);
     void CreatAllPath(string goal);
     void RenameAllWhithoutSpaces(string folder);
+    int CountTotalFiles(string folder, string? pattern = null, string[]? excludePattern = null);
 }

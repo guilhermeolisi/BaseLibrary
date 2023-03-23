@@ -2,8 +2,10 @@
 using FileTypeChecker.Abstracts;
 using FileTypeChecker.Extensions;
 using Splat;
+using System.Diagnostics.Tracing;
 using System.Drawing;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -133,7 +135,7 @@ public class FileServicesDirectory : IFileServicesDirectory
             if (fileName.Contains(' '))
             {
 #if DEBUG
-                var trash  = files[i].Replace(" ", "%20");
+                var trash = files[i].Replace(" ", "%20");
 #endif
                 parentFolder ??= Path.GetDirectoryName(files[i]);
                 fileName = fileName.Replace(" ", "%20");
@@ -148,12 +150,42 @@ public class FileServicesDirectory : IFileServicesDirectory
             if (folderName.Contains(' '))
             {
                 parentFolder ??= Path.GetDirectoryName(folderPath);
-                
+
                 folderName = folderName.Replace(" ", "%20");
                 folderPath = Path.Combine(parentFolder, folderName);
                 Directory.Move(folders[i], folderPath);
             }
             RenameAllWhithoutSpaces(folderPath);
         }
+    }
+    public int CountTotalFiles(string folder, string? pattern = null, string[]? excludePattern = null)
+    {
+        int result = 0;
+
+        string[] files = pattern is null ? Directory.GetFiles(folder) : Directory.GetFiles(folder, pattern);
+
+        result += files.Length;
+
+        int excludeP = 0;
+        for (int j = 0; j < excludePattern?.Length; j++)
+        {
+            if (!string.IsNullOrEmpty(excludePattern[j]))
+            {
+                for (int i = 0; i < files.Length; i++)
+                {
+                    if (files[i].Contains(excludePattern[j]))
+                        excludeP++;
+                }
+            }
+
+        }
+        result -= excludeP;
+        string[] directories = Directory.GetDirectories(folder);
+
+        for (int i = 0; i < directories.Length; i++)
+        {
+            result += CountTotalFiles(directories[i]);
+        }
+        return result;
     }
 }
