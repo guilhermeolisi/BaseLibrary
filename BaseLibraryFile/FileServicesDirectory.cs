@@ -184,7 +184,7 @@ public class FileServicesDirectory : IFileServicesDirectory
 
         for (int i = 0; i < directories.Length; i++)
         {
-            result += CountTotalFiles(directories[i]);
+            result += CountTotalFiles(directories[i], pattern, excludePattern);
         }
         return result;
     }
