@@ -74,15 +74,18 @@ public class FileServicesDirectory : IFileServicesDirectory
             }
         }
     }
-    public double GetDirectorySize(string directory)
+    public double GetDirectorySize(string directory, bool recursive)
     {
         if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
             return 0;
 
         double result = 0;
-        foreach (string dir in Directory.GetDirectories(directory))
+        if (recursive)
         {
-            GetDirectorySize(dir);
+            foreach (string dir in Directory.GetDirectories(directory))
+            {
+                GetDirectorySize(dir, recursive);
+            }
         }
 
         foreach (FileInfo file in new DirectoryInfo(directory).GetFiles())
