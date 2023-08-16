@@ -3,6 +3,58 @@ namespace BaseLibrary.Math;
 
 public class MathServices : IMathServices
 {
+    public double Mean(IEnumerable<double> x)
+    {
+        double sum = 0;
+        int count = 0;
+        foreach (var item in x)
+        {
+            sum += item;
+            count++;
+        }
+
+        return sum / count;
+    }
+    public double StandardDeviation(IEnumerable<double> x)
+    {
+        double mean = Mean(x);
+        return StandardDeviation(x, mean);
+    }
+    public double StandardDeviation(IEnumerable<double> x, double mean)
+    {
+        double sum = 0;
+        int count = 0;
+        foreach (var item in x)
+        {
+            sum += Pow(item - mean, 2);
+            count++;
+        }
+
+        return Sqrt(sum / (count));
+    }
+    //public double Mean(double[] x)
+    //{
+    //    double sum = 0;
+    //    for (int i = 0; i < x.Length; i++)
+    //    {
+    //        sum += x[i];
+    //    }
+    //    return sum / x.Length;
+    //}
+    //public double StandardDeviation(double[] x)
+    //{
+    //    double mean = Mean(x);
+    //    return StandardDeviation(x, mean);
+    //}
+    //public double StandardDeviation(double[] x, double mean)
+    //{
+    //    double sum = 0;
+    //    for (int i = 0; i < x.Length; i++)
+    //    {
+    //        sum += Pow(x[i] - mean, 2);
+    //    }
+    //    return Sqrt(sum / (x.Length - 1));
+    //}
     public double[] DerivativeFivePoint(double[] y, double step, int order)
     {
         //https://en.wikipedia.org/wiki/Five-point_stencil
