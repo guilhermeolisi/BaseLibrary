@@ -408,7 +408,7 @@ public class FileTXTIO : IFileTXTIO
             return false;
         }
 
-        //Escreve de fato o arquivo
+        //Lê de fato o arquivo
         try
         {
             using (StreamReader sr = GetStreamReader())
