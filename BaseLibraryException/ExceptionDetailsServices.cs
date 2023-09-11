@@ -1,11 +1,6 @@
-﻿using BaseLibrary;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
@@ -37,7 +32,7 @@ public class ExceptionDetailsServices : IExceptionDetailsServices
         {
 #if DEBUG
             if (property.Name == "InnerException")
-            { }
+            { } //Verificar se o InnerException é incluido nas informações. Sim é inlcuido
 #endif
 
             var value = property.GetValue(exception, null);

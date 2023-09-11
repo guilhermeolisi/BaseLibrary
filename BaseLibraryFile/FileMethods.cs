@@ -40,7 +40,8 @@ public static class FileMethods
     public static string FileNameAvailable(this string fullPath, char? mode) => services.Name.FileNameAvailable(fullPath, mode);
     public static string CutCharacterFileForbiden(this string filePath, bool cut) => services.Name.CutCharacterFileForbiden(filePath, cut);
     public static void CopyConserveTime(string original, string destination, bool preservetime = true) => services.File.CopyConserveTime(original, destination, preservetime);
-    public static long FileSize(string fileName) => services.File.FileSize(fileName);
-    public static DateTime FileLastModification(string fileName) => services.File.FileLastModification(fileName);
+    public static long FileSize(string filePath) => services.File.FileSize(filePath);
+    public static DateTime FileLastModification(string filePath) => services.File.FileLastModification(filePath);
     public static void ExtractZipConserveTime(string zipPath, string extractPath) => services.File.ExtractZipConserveTime(zipPath, extractPath);
+    public static void OpenFile(string filePath, sbyte OS) => services.File.OpenFile(filePath, OS);
 }
