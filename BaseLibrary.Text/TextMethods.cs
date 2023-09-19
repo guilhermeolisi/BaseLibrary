@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BaseLibrary.Text;
+﻿namespace BaseLibrary.Text;
 
 public static class TextMethods
 {
@@ -20,4 +14,7 @@ public static class TextMethods
     public static string RemoveSpaceBetweenNumberGreek(this string text) => services.RemoveSpaceBetweenNumberGreek(text);
     public static string TextToGreekBetweenSpaces(this string text, bool isUpper = false) => services.TextToGreekBetweenSpaces(text, isUpper);
     public static string RemoveSpaces(this string text) => services.RemoveSpaces(text);
+
+    public static (string nameResult, string sufix) GetNameAndSufixAvailable(this string text, char? mode = null) => services.GetNameAndSufixAvailable(text, mode);
+    public static string CombineNameAndSufix(this string name, string sufix, int index) => services.CombineNameAndSufix(name, sufix, index);
 }

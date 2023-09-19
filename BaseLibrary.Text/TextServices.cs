@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace BaseLibrary.Text;
+﻿namespace BaseLibrary.Text;
 
 public class TextServices : ITextServices
 {
@@ -244,5 +242,58 @@ public class TextServices : ITextServices
         if (string.IsNullOrEmpty(text))
             return text;
         return text.Replace(" ", "");
+    }
+    public (string nameResult, string sufix) GetNameAndSufixAvailable(string name, char? mode = null)
+    {
+        name = name.Trim();
+        string sufix = mode switch
+        {
+            'C' => "Copied",
+            'E' => "Exported",
+            'I' => "Imported",
+            'M' => "Moved",
+            _ => ""
+        };
+
+        int ind = name.Length - 1;
+        if (name[ind] == ')')
+        {
+            bool foundIndex = false;
+            while (ind >= 0 && (name[ind] == ')' || char.IsDigit(name[ind]) || name[ind] == '(' || name[ind] == ' '))
+            {
+                if (name[ind] == '(')
+                {
+                    foundIndex = true;
+                }
+                ind--;
+            }
+            ind++;
+            if (foundIndex && ind > 0)
+            {
+                name = name[..ind];
+            }
+        }
+        ind = name.Length - 1;
+        if (!string.IsNullOrWhiteSpace(sufix) && name.Contains(sufix))
+        {
+            int indSurfix = sufix.Length - 1;
+            while (ind >= 0 && ((indSurfix >= 0 && name[ind] == sufix[indSurfix]) || name[ind] == ' ' || name[ind] == '-'))
+            {
+                ind--;
+                indSurfix--;
+            }
+            ind++;
+            if (indSurfix < 0 && ind > 0)
+            {
+                name = name[..ind];
+            }
+        }
+        return (name, sufix);
+    }
+    public string CombineNameAndSufix(string name, string sufix, int index)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return name;
+        return string.Format("{0}{1}{2}", name, string.IsNullOrWhiteSpace(sufix) ? "" : " - " + sufix, index == 1 ? "" : " (" + index + ")");
     }
 }

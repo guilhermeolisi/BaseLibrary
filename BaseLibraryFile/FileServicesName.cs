@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using BaseLibrary.Text;
+using System.Text.RegularExpressions;
 
 namespace BaseLibrary;
 
@@ -40,22 +41,62 @@ public class FileServicesName : IFileServicesName
         if (string.IsNullOrWhiteSpace(fullPath))
             throw new ArgumentNullException(nameof(fullPath));
         string? dir = Path.GetDirectoryName(fullPath);
-        string fileName = Path.GetFileNameWithoutExtension(fullPath);
-        string exten = Path.GetExtension(fullPath);
-        string sufix = mode switch
-        {
-            'C' => "Copied",
-            'E' => "Exported",
-            'I' => "Imported",
-            'M' => "Moved",
-            _ => ""
-        };
         if (!Directory.Exists(dir))
             return fullPath;
+
+        string exten = Path.GetExtension(fullPath);
+
+        (string fileName, string sufix) = Path.GetFileNameWithoutExtension(fullPath).GetNameAndSufixAvailable(mode);
+
+        //string fileName = Path.GetFileNameWithoutExtension(fullPath).Trim();
+        //string sufix = mode switch
+        //{
+        //    'C' => "Copied",
+        //    'E' => "Exported",
+        //    'I' => "Imported",
+        //    'M' => "Moved",
+        //    _ => ""
+        //};
+
+        //int ind = fileName.Length - 1;
+        //if (fileName[ind] == ')')
+        //{
+        //    bool foundIndex = false;
+        //    while (ind >= 0 && (fileName[ind] == ')' || char.IsDigit(fileName[ind]) || fileName[ind] == '(' || fileName[ind] == ' '))
+        //    {
+        //        if (fileName[ind] == '(')
+        //        {
+        //            foundIndex = true;
+        //        }
+        //        ind--;
+        //    }
+        //    ind++;
+        //    if (foundIndex && ind > 0)
+        //    {
+        //        fileName = fileName[..ind];
+        //    }
+        //}
+        //ind = fileName.Length - 1;
+        //if (!string.IsNullOrWhiteSpace(sufix) && fileName.Contains(sufix))
+        //{
+        //    int indSurfix = sufix.Length - 1;
+        //    while (ind >= 0 && ((indSurfix >= 0 && fileName[ind] == sufix[indSurfix]) || fileName[ind] == ' ' || fileName[ind] == '-'))
+        //    {
+        //        ind--;
+        //        indSurfix--;
+        //    }
+        //    ind++;
+        //    if (indSurfix < 0 && ind > 0)
+        //    {
+        //        fileName = fileName[..ind];
+        //    }
+        //}
+
         int index = 1;
         while (File.Exists(fullPath))
         {
-            fullPath = Path.Combine(dir, string.Format("{0}{1}{2}{3}", fileName, string.IsNullOrWhiteSpace(sufix) ? "" : " - " + sufix, index == 1 ? "" : " (" + index + ")", exten));
+            //fullPath = Path.Combine(dir, string.Format("{0}{1}{2}{3}", fileName, string.IsNullOrWhiteSpace(sufix) ? "" : " - " + sufix, index == 1 ? "" : " (" + index + ")", exten));
+            fullPath = Path.Combine(dir, fileName.CombineNameAndSufix(sufix, index) + exten);
             index++;
         }
         return fullPath;
