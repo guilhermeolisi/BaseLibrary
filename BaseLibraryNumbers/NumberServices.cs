@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using static System.Math;
 
 namespace BaseLibrary.Numbers;
@@ -39,7 +34,15 @@ public class NumberServices : INumberServices
                 //}
             }
             else
-                return (value + 1).ToString(CultureInfo.InvariantCulture).Split('.')[1].Length;// preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
+            {
+#if DEBUG
+                var trash2 = (value + 1).ToString(CultureInfo.InvariantCulture);
+
+#endif
+                string[] temp = (value + 1).ToString(CultureInfo.InvariantCulture).Split('.');
+                return temp.Length == 2 ? temp[1].Length : 0;// preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
+                //return (value + 1).ToString(CultureInfo.InvariantCulture).Split('.')[1].Length;// preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
+            }
         }
         else
             return 0;
@@ -92,7 +95,12 @@ public class NumberServices : INumberServices
     public double RoundDecimal(double value, int decimals)
     {
         if (decimals >= 0)
-            return Round(value, decimals);
+        {
+            if (decimals > 15) //Precisa dessa verificação para evitar erro de arredondamento no Round, digitos deve ser no máximo 15
+                return value;
+            else
+                return Round(value, decimals);
+        }
         else
         {
             double temp = value / Pow(10.0, -decimals);
@@ -408,5 +416,5 @@ public class NumberServices : INumberServices
 
         return value;
     }
-    
+
 }
