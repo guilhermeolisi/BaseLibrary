@@ -1,7 +1,5 @@
-﻿using BaseLibrary;
-using Splat;
+﻿using Splat;
 using System.Reflection;
-using System.Runtime.ConstrainedExecution;
 
 namespace BaseLibrary;
 
@@ -103,7 +101,7 @@ public class ExceptionServices : IExceptionServices
             }
             else
             {
-                
+
             }
             VerifyLocalException(isAsync);
 
@@ -165,9 +163,9 @@ public class ExceptionServices : IExceptionServices
         try
         {
             if (isAsync)
-                return await emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now, message, isAsync);
+                return await emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now + ":" + DateTime.Now.Millisecond, message, isAsync);
             else
-                return emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now, message, isAsync).Result;
+                return emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now + ":" + DateTime.Now.Millisecond, message, isAsync).Result;
         }
         catch (Exception ex)
         {

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public class PoolTasks : IPoolTasks
 {
@@ -18,9 +11,20 @@ public class PoolTasks : IPoolTasks
         tasks.Enqueue(task);
 
         if (processTask is not null && !processTask.IsCompleted)
-            await processTask;
+            try
+            {
+                await processTask;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         if (tasks.Count == 0)
             return;
+        else if (processTask is not null)
+        {
+
+        }
 
         processTask = new(() =>
         {
@@ -29,16 +33,39 @@ public class PoolTasks : IPoolTasks
                 Task task = tasks.Dequeue();
                 if (task is null)
                     continue;
+
                 if (task.Status == TaskStatus.Created)
                 {
-                    task.Start();
+                    try
+                    {
+                        task.Start();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
                 }
                 if (task.Status == TaskStatus.Running)
-                    task.Wait();
+                    try
+                    {
+                        task.Wait();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
             }
         });
+
         processTask.Start();
-        await processTask;
+        try
+        {
+            await processTask;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
     public async Task AwaitATask(Task task)
     {
