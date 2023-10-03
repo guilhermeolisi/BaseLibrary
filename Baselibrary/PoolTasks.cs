@@ -76,7 +76,14 @@ public class PoolTasks : IPoolTasks
             await Task.Delay(20);
         }
         if (!task.IsCompleted)
-            await task;
+            try
+            {
+                await task;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
     }
     public async Task AwaitAllTasks()
     {
