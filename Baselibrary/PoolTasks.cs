@@ -2,7 +2,40 @@
 
 public class PoolTasks : IPoolTasks
 {
-    //public Task processTaskImport { get; private set; }
+    //Faz uma fila de tarefas e executa uma por uma
+    //Se uma tarefa for adicionada enquanto outra estiver sendo executada, a nova tarefa será executada em seguida
+    public void EnqueueTask(Task task)
+    {
+        tasks.Enqueue(task);
+        if (processTask is null || (processTask.Status != TaskStatus.Running && processTask.Status != TaskStatus.Created) /*processTask.IsCompleted*/)
+        {
+            processTask = Task.Run(() =>
+            {
+                while (tasks.Count > 0)
+                {
+                    Task task = tasks.Dequeue();
+                    if (task is null)
+                        continue;
+
+                    if (task.Status == TaskStatus.Created)
+                    {
+                        try
+                        {
+                            task.Start();
+                        }
+                        catch (Exception ex)
+                        {
+                            throw;
+                        }
+                    }
+                    Task.WaitAll(task);
+                }
+            });
+        }
+    }
+
+
+
     Task processTask;
 
     Queue<Task> tasks = new();
@@ -25,8 +58,7 @@ public class PoolTasks : IPoolTasks
         {
 
         }
-
-        processTask = new(() =>
+        processTask = Task.Run(() =>
         {
             while (tasks.Count > 0)
             {
@@ -45,19 +77,50 @@ public class PoolTasks : IPoolTasks
                         throw;
                     }
                 }
-                if (task.Status == TaskStatus.Running)
-                    try
-                    {
-                        task.Wait();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw;
-                    }
+                Task.WaitAll(task);
+                //if (task.Status == TaskStatus.Running)
+                //    try
+                //    {
+                //        task.Wait();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        throw;
+                //    }
             }
         });
+        //processTask = new(() =>
+        //{
+        //    while (tasks.Count > 0)
+        //    {
+        //        Task task = tasks.Dequeue();
+        //        if (task is null)
+        //            continue;
 
-        processTask.Start();
+        //        if (task.Status == TaskStatus.Created)
+        //        {
+        //            try
+        //            {
+        //                task.Start();
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        if (task.Status == TaskStatus.Running)
+        //            try
+        //            {
+        //                task.Wait();
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                throw;
+        //            }
+        //    }
+        //});
+        //if (processTask.Status == TaskStatus.Running)
+        //    processTask.Start();
         try
         {
             await processTask;
