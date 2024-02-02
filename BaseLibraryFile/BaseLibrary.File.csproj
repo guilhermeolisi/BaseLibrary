@@ -10,11 +10,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="File.TypeChecker" Version="4.0.0" />
 		<PackageReference Include="Splat" Version="14.8.12" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\FileTypeChecker\FileTypeChecker\FileTypeChecker.csproj" />
 		<ProjectReference Include="..\BaseLibrary.Text\BaseLibrary.Text.csproj" />
 		<ProjectReference Include="..\Baselibrary\BaseLibrary.General.csproj" />
 	</ItemGroup>
