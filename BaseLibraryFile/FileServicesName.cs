@@ -158,4 +158,56 @@ public class FileServicesName : IFileServicesName
         }
         return fileName;
     }
+    public bool IsFilePathValid(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return false;
+
+        try
+        {
+            Path.Combine(filePath);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        string fileNameWithoutExtenstion = null;
+        try
+        {
+            fileNameWithoutExtenstion = Path.GetFileNameWithoutExtension(filePath);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(fileNameWithoutExtenstion))
+            return false;
+
+        https://stackoverflow.com/questions/1395205/better-way-to-check-if-a-path-is-a-file-or-a-directory
+        // get the file attributes for file or directory
+        FileAttributes attr = File.GetAttributes(filePath);
+
+        return !attr.HasFlag(FileAttributes.Directory);// || attr.HasFlag(FileAttributes.Normal);
+    }
+    public bool IsDirectoryPathValid(string folderPath)
+    {
+        if (string.IsNullOrWhiteSpace(folderPath))
+            return false;
+        try
+        {
+            Path.Combine(folderPath);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+
+    https://stackoverflow.com/questions/1395205/better-way-to-check-if-a-path-is-a-file-or-a-directory
+        // get the file attributes for file or directory
+        FileAttributes attr = File.GetAttributes(folderPath);
+
+        return attr.HasFlag(FileAttributes.Directory);
+        // || attr.HasFlag(FileAttributes.Normal);
+    }
 }

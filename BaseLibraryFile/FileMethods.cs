@@ -44,4 +44,6 @@ public static class FileMethods
     public static DateTime FileLastModification(string filePath) => services.File.FileLastModification(filePath);
     public static void ExtractZipConserveTime(string zipPath, string extractPath) => services.File.ExtractZipConserveTime(zipPath, extractPath);
     public static void OpenFile(string filePath, sbyte OS) => services.File.OpenFile(filePath, OS);
+    public static bool IsFilePathValid(string filePath) => services.Name.IsFilePathValid(filePath);
+    public static bool IsDirectoryPathValid(string directoryPath) => services.Name.IsDirectoryPathValid(directoryPath);
 }

@@ -255,13 +255,15 @@ public class TextServices : ITextServices
             _ => ""
         };
 
-        int ind = name.Length - 1;
-        if (name[ind] == ')')
+        string nameResult = name.Substring(0);
+
+        int ind = nameResult.Length - 1;
+        bool foundIndex = false;
+        if (nameResult[ind] == ')')
         {
-            bool foundIndex = false;
-            while (ind >= 0 && (name[ind] == ')' || char.IsDigit(name[ind]) || name[ind] == '(' || name[ind] == ' '))
+            while (ind >= 0 && (nameResult[ind] == ')' || char.IsDigit(nameResult[ind]) || nameResult[ind] == '(' || nameResult[ind] == ' '))
             {
-                if (name[ind] == '(')
+                if (nameResult[ind] == '(')
                 {
                     foundIndex = true;
                 }
@@ -270,14 +272,15 @@ public class TextServices : ITextServices
             ind++;
             if (foundIndex && ind > 0)
             {
-                name = name[..ind];
+                nameResult = nameResult[..ind];
             }
         }
-        ind = name.Length - 1;
-        if (!string.IsNullOrWhiteSpace(sufix) && name.Contains(sufix))
+        foundIndex = false;
+        ind = nameResult.Length - 1;
+        if (!string.IsNullOrWhiteSpace(sufix) && nameResult.Contains(sufix))
         {
             int indSurfix = sufix.Length - 1;
-            while (ind >= 0 && ((indSurfix >= 0 && name[ind] == sufix[indSurfix]) || name[ind] == ' ' || name[ind] == '-'))
+            while (ind >= 0 && ((indSurfix >= 0 && nameResult[ind] == sufix[indSurfix]) || nameResult[ind] == ' ' || nameResult[ind] == '-'))
             {
                 ind--;
                 indSurfix--;
@@ -285,10 +288,15 @@ public class TextServices : ITextServices
             ind++;
             if (indSurfix < 0 && ind > 0)
             {
-                name = name[..ind];
+                nameResult = nameResult[..ind];
+                foundIndex = true;
             }
         }
-        return (name, sufix);
+        if (!foundIndex && nameResult != name)
+        {
+            nameResult = name.Substring(0);
+        }
+        return (nameResult, sufix);
     }
     public string CombineNameAndSufix(string name, string sufix, int index)
     {

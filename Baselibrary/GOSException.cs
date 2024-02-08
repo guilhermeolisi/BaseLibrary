@@ -1,28 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
 
 namespace BaseLibrary
 {
     public class GOSException : Exception
     {
-        public GOSException()
+        public bool CanContinue { get; private set; } = false;
+
+        public GOSException(bool canContinue)
         {
+            CanContinue = canContinue;
         }
 
-        public GOSException(string message) : base(message)
+        public GOSException(bool canContinue, string message) : base(message)
         {
+            CanContinue = canContinue;
         }
 
-        public GOSException(string message, Exception innerException) : base(message, innerException)
+        public GOSException(bool canContinue, string message, Exception innerException) : base(message, innerException)
         {
+            CanContinue = canContinue;
         }
 
-        protected GOSException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected GOSException(bool canContinue, SerializationInfo info, StreamingContext context) : base(info, context)
         {
+            CanContinue = canContinue;
         }
     }
 }

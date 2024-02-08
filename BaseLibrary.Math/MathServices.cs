@@ -219,4 +219,12 @@ public class MathServices : IMathServices
     {
         return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
     }
+    public double Hypotenuse(double x, double y)
+    {
+        return Sqrt(Pow(x, 2) + Pow(y, 2));
+    }
+    public double DistancePoints(double x1, double y1, double x2, double y2)
+    {
+        return Hypotenuse(x2 - x1, y2 - y1);
+    }
 }
