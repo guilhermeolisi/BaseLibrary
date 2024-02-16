@@ -1,15 +1,10 @@
-﻿using Splat;
-using System;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public interface IFileTXTIO
 {
     void SetStayBak(bool value);
     void SetPathFile(string? pathFile);
+    string? GetPathFile();
     void Closing();
     Exception eWrite { get; }
     //bool BeforeWrite();

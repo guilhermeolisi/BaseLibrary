@@ -5,6 +5,7 @@ namespace BaseLibrary;
 
 public class ExceptionServices : IExceptionServices
 {
+    private readonly string[] AssembliesName;
     private string fileExceptionsPostfix = " - Exceptions";
     private string fileNameExceptionSender = "SendingException";
     //private string emailSender, password, folder, emailTo;
@@ -13,8 +14,9 @@ public class ExceptionServices : IExceptionServices
     private IExceptionDetailsServices details;
     IEmailSender emailSender;
     IHTTPServices httpServices;
-    public ExceptionServices(string emailTo, string folder = null, IExceptionDetailsServices? details = null, IEmailSender? emailSender = null, IHTTPServices? httpServices = null, bool isConsole = false)
+    public ExceptionServices(string emailTo, string[] assembliesName, string folder = null, IExceptionDetailsServices? details = null, IEmailSender? emailSender = null, IHTTPServices? httpServices = null, bool isConsole = false)
     {
+        this.AssembliesName = assembliesName;
         this.folder = folder;// ?? throw new ArgumentNullException(nameof(folder));
         this.emailTo = emailTo ?? throw new ArgumentNullException(nameof(emailTo));
         this.details = details ?? Locator.Current.GetService<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(details));
@@ -83,7 +85,20 @@ public class ExceptionServices : IExceptionServices
             Console.WriteLine();
             Console.Write("A internal error is found. Trying to send to developer...");
         }
-        var program = Assembly.GetEntryAssembly()?.GetName();
+        Assembly? assembly = null;
+
+        foreach (var item in AssembliesName)
+        {
+            assembly = Assembly.Load(item);
+            if (assembly is not null)
+                break;
+        }
+        if (assembly is null)
+        {
+            assembly = Assembly.GetEntryAssembly();
+        }
+        var program = assembly?.GetName();
+
         Version version = program.Version;
         string? appName = program?.Name;
         string message =

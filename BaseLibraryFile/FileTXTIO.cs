@@ -54,6 +54,8 @@ public class FileTXTIO : IFileTXTIO
         }
         _pathFile = pathFile;
     }
+    public string? GetPathFile() => _pathFile;
+
     public void Closing()
     {
         if (_isStayBak && !string.IsNullOrWhiteSpace(_fileBak))
