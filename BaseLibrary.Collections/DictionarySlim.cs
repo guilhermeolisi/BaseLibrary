@@ -356,19 +356,6 @@ public class DictionarySlim<TKey, TValue> : IDictionary, IDictionary<TKey, TValu
         }
     }
 
-    public IDictionaryEnumerator GetEnumerator()
-    {
-        _lock.EnterReadLock();
-        try
-        {
-            return ((IDictionary)_dictionary).GetEnumerator();
-        }
-        finally
-        {
-            _lock.ExitReadLock();
-        }
-    }
-
     public void Remove(object key)
     {
         _lock.EnterWriteLock();
@@ -472,5 +459,51 @@ public class DictionarySlim<TKey, TValue> : IDictionary, IDictionary<TKey, TValu
             _lock.ExitReadLock();
         }
     }
+
+    public Dictionary<TKey, TValue>.Enumerator GetEnumerator()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return _dictionary.GetEnumerator();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+    IDictionaryEnumerator IDictionary.GetEnumerator()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            return ((IDictionary)_dictionary).GetEnumerator();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+    //IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<KeyValuePair<TKey, TValue>>)this).GetEnumerator();
+    //IDictionaryEnumerator IDictionary.GetEnumerator() => new Enumerator(this, Enumerator.DictEntry);
+    //public IDictionaryEnumerator GetEnumerator()
+    //{
+    //    _lock.EnterReadLock();
+    //    try
+    //    {
+    //        return ((IDictionary)_dictionary).GetEnumerator();
+    //    }
+    //    finally
+    //    {
+    //        _lock.ExitReadLock();
+    //    }
+    //}
+
+
+    //public Enumerator GetEnumerator() => new Enumerator(this, Enumerator.KeyValuePair);
+
+    //IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() =>
+    //    Count == 0 ? GenericEmptyEnumerator<KeyValuePair<TKey, TValue>>.Instance :
+    //    GetEnumerator();
     #endregion
 }

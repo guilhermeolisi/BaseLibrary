@@ -3,6 +3,11 @@ namespace BaseLibrary.Math;
 
 public class MathServices : IMathServices
 {
+    /// <summary>
+    /// Calculate the mean of a set of numbers
+    /// </summary>
+    /// <param name="x">A set o numbers</param>
+    /// <returns>Return the mean</returns>
     public double Mean(IEnumerable<double> x)
     {
         double sum = 0;
@@ -15,11 +20,22 @@ public class MathServices : IMathServices
 
         return sum / count;
     }
+    /// <summary>
+    /// Calculate the standard deviation of a set of numbers
+    /// </summary>
+    /// <param name="x">A set o numbers</param>
+    /// <returns>The standard deviation</returns>
     public double StandardDeviation(IEnumerable<double> x)
     {
         double mean = Mean(x);
         return StandardDeviation(x, mean);
     }
+    /// <summary>
+    /// Calculate the standard deviation of a set of numbers
+    /// </summary>
+    /// <param name="x">A set o numbers</param>
+    /// <param name="mean">The mean of the set of numbers</param>
+    /// <returns>The standard deviation</returns>
     public double StandardDeviation(IEnumerable<double> x, double mean)
     {
         double sum = 0;
@@ -32,29 +48,14 @@ public class MathServices : IMathServices
 
         return Sqrt(sum / (count));
     }
-    //public double Mean(double[] x)
-    //{
-    //    double sum = 0;
-    //    for (int i = 0; i < x.Length; i++)
-    //    {
-    //        sum += x[i];
-    //    }
-    //    return sum / x.Length;
-    //}
-    //public double StandardDeviation(double[] x)
-    //{
-    //    double mean = Mean(x);
-    //    return StandardDeviation(x, mean);
-    //}
-    //public double StandardDeviation(double[] x, double mean)
-    //{
-    //    double sum = 0;
-    //    for (int i = 0; i < x.Length; i++)
-    //    {
-    //        sum += Pow(x[i] - mean, 2);
-    //    }
-    //    return Sqrt(sum / (x.Length - 1));
-    //}
+    /// <summary>
+    /// Calculate the derivative of a set of numbers using the five-point stencil
+    /// </summary>
+    /// <param name="y"></param>
+    /// <param name="step"></param>
+    /// <param name="order"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public double[] DerivativeFivePoint(double[] y, double step, int order)
     {
         //https://en.wikipedia.org/wiki/Five-point_stencil
@@ -164,6 +165,13 @@ public class MathServices : IMathServices
 
         return (min.ToArray(), max.ToArray());
     }
+    /// <summary>
+    /// Find the minimum and maximum of a function using the derivative
+    /// </summary>
+    /// <param name="y"></param>
+    /// <param name="xMin"></param>
+    /// <param name="step"></param>
+    /// <returns></returns>
     public (double[] min, double[] max) FindMinMaxFromDerivative(double[] y, double xMin, double step)
     {
         double[] derivate = DerivativeFivePoint(y, step, 1);
@@ -192,6 +200,13 @@ public class MathServices : IMathServices
 
         return (min.ToArray(), max.ToArray());
     }
+    /// <summary>
+    /// Find the points where the concavity of a function changes
+    /// </summary>
+    /// <param name="y"></param>
+    /// <param name="xMin"></param>
+    /// <param name="step"></param>
+    /// <returns></returns>
     public double[] FindChangingConcavityFromDerivative(double[] y, double xMin, double step)
     {
         double[] derivate = DerivativeFivePoint(y, step, 2);
@@ -215,14 +230,37 @@ public class MathServices : IMathServices
 
         return result.ToArray();
     }
+    /// <summary>
+    /// Calculate the interpolation of a point between two points
+    /// </summary>
+    /// <param name="x1"></param>
+    /// <param name="y1"></param>
+    /// <param name="x2"></param>
+    /// <param name="y2"></param>
+    /// <param name="x"></param>
+    /// <returns></returns>
     public double Interpolation(in double x1, in double y1, in double x2, in double y2, in double x)
     {
         return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
     }
+    /// <summary>
+    /// Calculate the hypotenuse of a right triangle
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public double Hypotenuse(double x, double y)
     {
         return Sqrt(Pow(x, 2) + Pow(y, 2));
     }
+    /// <summary>
+    /// Calculate the distance between two points in a plane
+    /// </summary>
+    /// <param name="x1"></param>
+    /// <param name="y1"></param>
+    /// <param name="x2"></param>
+    /// <param name="y2"></param>
+    /// <returns></returns>
     public double DistancePoints(double x1, double y1, double x2, double y2)
     {
         return Hypotenuse(x2 - x1, y2 - y1);
