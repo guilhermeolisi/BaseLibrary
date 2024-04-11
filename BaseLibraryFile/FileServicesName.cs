@@ -5,13 +5,13 @@ namespace BaseLibrary;
 
 public class FileServicesName : IFileServicesName
 {
-
+    static readonly string regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+?)(\.(?<Extension>[^\\/|<>*:""?]+?))?$";
     public void InfoFromFilePath(in string filepath, ref string fileName, ref string folder, ref string extension)
     {
         if (string.IsNullOrWhiteSpace(filepath)) return;
 
-        string regexTemp = string.Empty;
-        regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+?)(\.(?<Extension>[^\\/|<>*:""?]+?))?$";
+        //string regexTemp = string.Empty;
+        //regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+?)(\.(?<Extension>[^\\/|<>*:""?]+?))?$";
         Match m = Regex.Match(filepath, regexTemp);
         fileName = m.Groups["FileName"].Value;
         folder = m.Groups["Folder"].Value;
@@ -21,8 +21,8 @@ public class FileServicesName : IFileServicesName
     {
         if (string.IsNullOrWhiteSpace(filepath)) return (null, null, null);
 
-        string regexTemp = string.Empty;
-        regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+)\.(?<Extension>[^\\/|<>*:""?]+?)$";
+        //string regexTemp = string.Empty;
+        //regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+)\.(?<Extension>[^\\/|<>*:""?]+?)$";
         Match m = Regex.Match(filepath, regexTemp);
         return (m.Groups["FileName"].Value, m.Groups["Folder"].Value, m.Groups["Extension"].Value);
     }
@@ -30,8 +30,8 @@ public class FileServicesName : IFileServicesName
     {
         if (string.IsNullOrWhiteSpace(filepath)) return;
 
-        string regexTemp = string.Empty;
-        regexTemp = @"^(?<FolderParent>.+)\\(?<FolderName>[^\\/|<>*:""?]+)$";
+        //string regexTemp = string.Empty;
+        //regexTemp = @"^(?<FolderParent>.+)\\(?<FolderName>[^\\/|<>*:""?]+)$";
         Match m = Regex.Match(filepath, regexTemp);
         actualFolder = m.Groups["FolderName"].Value;
         folderParent = m.Groups["FolderParent"].Value;
@@ -48,49 +48,6 @@ public class FileServicesName : IFileServicesName
 
         (string fileName, string sufix) = Path.GetFileNameWithoutExtension(fullPath).GetNameAndSufixAvailable(mode);
 
-        //string fileName = Path.GetFileNameWithoutExtension(fullPath).Trim();
-        //string sufix = mode switch
-        //{
-        //    'C' => "Copied",
-        //    'E' => "Exported",
-        //    'I' => "Imported",
-        //    'M' => "Moved",
-        //    _ => ""
-        //};
-
-        //int ind = fileName.Length - 1;
-        //if (fileName[ind] == ')')
-        //{
-        //    bool foundIndex = false;
-        //    while (ind >= 0 && (fileName[ind] == ')' || char.IsDigit(fileName[ind]) || fileName[ind] == '(' || fileName[ind] == ' '))
-        //    {
-        //        if (fileName[ind] == '(')
-        //        {
-        //            foundIndex = true;
-        //        }
-        //        ind--;
-        //    }
-        //    ind++;
-        //    if (foundIndex && ind > 0)
-        //    {
-        //        fileName = fileName[..ind];
-        //    }
-        //}
-        //ind = fileName.Length - 1;
-        //if (!string.IsNullOrWhiteSpace(sufix) && fileName.Contains(sufix))
-        //{
-        //    int indSurfix = sufix.Length - 1;
-        //    while (ind >= 0 && ((indSurfix >= 0 && fileName[ind] == sufix[indSurfix]) || fileName[ind] == ' ' || fileName[ind] == '-'))
-        //    {
-        //        ind--;
-        //        indSurfix--;
-        //    }
-        //    ind++;
-        //    if (indSurfix < 0 && ind > 0)
-        //    {
-        //        fileName = fileName[..ind];
-        //    }
-        //}
 
         int index = 1;
         while (File.Exists(fullPath))
@@ -171,7 +128,7 @@ public class FileServicesName : IFileServicesName
         {
             return false;
         }
-        string fileNameWithoutExtenstion = null;
+        string? fileNameWithoutExtenstion;
         try
         {
             fileNameWithoutExtenstion = Path.GetFileNameWithoutExtension(filePath);
@@ -183,11 +140,28 @@ public class FileServicesName : IFileServicesName
         if (string.IsNullOrWhiteSpace(fileNameWithoutExtenstion))
             return false;
 
-        https://stackoverflow.com/questions/1395205/better-way-to-check-if-a-path-is-a-file-or-a-directory
+        FileAttributes? attr = null;
+        //https://stackoverflow.com/questions/1395205/better-way-to-check-if-a-path-is-a-file-or-a-directory
         // get the file attributes for file or directory
-        FileAttributes attr = File.GetAttributes(filePath);
+        // o arquivo precisa existir
+        try
+        {
+            attr = File.GetAttributes(filePath);
+        }
+        catch (Exception ex)
+        {
 
-        return !attr.HasFlag(FileAttributes.Directory);// || attr.HasFlag(FileAttributes.Normal);
+        }
+        if (attr is not null)
+            return !attr.Value.HasFlag(FileAttributes.Directory);// || attr.HasFlag(FileAttributes.Normal);
+
+
+        // if has trailing slash then it's a directory
+        if (filePath.EndsWith(Path.DirectorySeparatorChar))
+            return false; // ends with slash
+
+        // if has extension then its a file; directory otherwise
+        return !string.IsNullOrWhiteSpace(Path.GetExtension(filePath));
     }
     public bool IsDirectoryPathValid(string folderPath)
     {
@@ -203,11 +177,27 @@ public class FileServicesName : IFileServicesName
         }
 
 
-    https://stackoverflow.com/questions/1395205/better-way-to-check-if-a-path-is-a-file-or-a-directory
+        FileAttributes? attr = null;
+        //https://stackoverflow.com/questions/1395205/better-way-to-check-if-a-path-is-a-file-or-a-directory
         // get the file attributes for file or directory
-        FileAttributes attr = File.GetAttributes(folderPath);
+        // o arquivo precisa existir
+        try
+        {
+            attr = File.GetAttributes(folderPath);
+        }
+        catch (Exception ex)
+        {
 
-        return attr.HasFlag(FileAttributes.Directory);
-        // || attr.HasFlag(FileAttributes.Normal);
+        }
+
+        if (attr is not null)
+            return attr.Value.HasFlag(FileAttributes.Directory);// || attr.HasFlag(FileAttributes.Normal);
+
+        // if has trailing slash then it's a directory
+        if (folderPath.EndsWith(Path.DirectorySeparatorChar))
+            return true; // ends with slash
+
+        // if has extension then its a file; directory otherwise
+        return string.IsNullOrWhiteSpace(Path.GetExtension(folderPath));
     }
 }
