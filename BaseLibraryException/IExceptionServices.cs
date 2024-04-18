@@ -1,7 +1,4 @@
-﻿using BaseLibrary;
-using System.Reflection;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public interface IExceptionServices
 {
@@ -10,4 +7,5 @@ public interface IExceptionServices
     Task SendException(Exception e, bool isAsync, string? messageExtra, string? OSversion);
     string GetExceptionText(Exception e, string? messageExtra);
     bool IsConnectedToInternet();
+    void SaveException(Exception e, string? messageExtra, string? OSversion);
 }

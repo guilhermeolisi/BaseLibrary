@@ -85,26 +85,28 @@ public class ExceptionServices : IExceptionServices
             Console.WriteLine();
             Console.Write("A internal error is found. Trying to send to developer...");
         }
-        Assembly? assembly = null;
+        //Assembly? assembly = null;
 
-        foreach (var item in AssembliesName)
-        {
-            assembly = Assembly.Load(item);
-            if (assembly is not null)
-                break;
-        }
-        if (assembly is null)
-        {
-            assembly = Assembly.GetEntryAssembly();
-        }
-        var program = assembly?.GetName();
+        //foreach (var item in AssembliesName)
+        //{
+        //    assembly = Assembly.Load(item);
+        //    if (assembly is not null)
+        //        break;
+        //}
+        //if (assembly is null)
+        //{
+        //    assembly = Assembly.GetEntryAssembly();
+        //}
 
-        Version version = program.Version;
-        string? appName = program?.Name;
-        string message =
-            appName + " " + version.ToString() + Environment.NewLine +
-            (string.IsNullOrWhiteSpace(OSversion) ? "" : OSversion) + Environment.NewLine +
-            GetExceptionText(e, messageExtra);
+        //var program = assembly?.GetName();
+        //Version version = program.Version;
+        //string? appName = program?.Name;
+        //string message =
+        //    appName + " " + version.ToString() + Environment.NewLine +
+        //    (string.IsNullOrWhiteSpace(OSversion) ? "" : OSversion) + Environment.NewLine +
+        //    GetExceptionText(e, messageExtra);
+
+        (string message, string appName) = GetMessageToSend(e, messageExtra, OSversion);
 
         if (await SendOnlineException(message, appName, isAsync) is GOSResult result && result.Success)
         {
@@ -132,6 +134,35 @@ public class ExceptionServices : IExceptionServices
                 SaveLocalException(messageException, fileNameExceptionSender, isAsync);
             }
         }
+    }
+    private (string message, string appName) GetMessageToSend(Exception e, string? messageExtra, string? OSversion)
+    {
+        Assembly? assembly = null;
+
+        foreach (var item in AssembliesName)
+        {
+            assembly = Assembly.Load(item);
+            if (assembly is not null)
+                break;
+        }
+        if (assembly is null)
+        {
+            assembly = Assembly.GetEntryAssembly();
+        }
+        var program = assembly?.GetName();
+
+        Version version = (program is null ? null : program.Version) ?? new Version();
+        string appName = (program is null ? null : program.Name) ?? "unknowApp";
+        string message =
+            appName + " " + version.ToString() + Environment.NewLine +
+            (string.IsNullOrWhiteSpace(OSversion) ? "" : OSversion) + Environment.NewLine +
+            GetExceptionText(e, messageExtra);
+        return (message, appName);
+    }
+    public void SaveException(Exception e, string? messageExtra, string? OSversion)
+    {
+        (string message, string appName) = GetMessageToSend(e, messageExtra, OSversion);
+        SaveLocalException(message, appName, false);
     }
     public bool IsConnectedToInternet() => httpServices.IsConnectedToInternet();
     public string GetExceptionText(Exception e, string? messageExtra)
