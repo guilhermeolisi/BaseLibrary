@@ -1,62 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public struct GOSResult
 {
     private bool _success;
 
-    public bool Success { get => Exception is null ? _success : false; private set => _success = value; }
-    public Exception Exception { get; private set; }
-    public string Message { get; private set; }
+    public bool Success { get => _success; private set => _success = value; }
+    public Exception? Exception { get; private set; }
+    public string? Message { get; private set; }
+    public byte Option { get; private set; }
     public GOSResult(bool success) : this()
     {
         Success = success;
         Exception = null;
         Message = null;
+        Option = 0;
     }
     public GOSResult(string message) : this()
     {
         Success = false;
         Exception = null;
         Message = message;
+        Option = 0;
     }
     public GOSResult(Exception exception) : this()
     {
         Success = false;
         Exception = exception;
         Message = null;
+        Option = 0;
     }
     public GOSResult(bool success, string message) : this()
     {
         Success = success;
         Exception = null;
         Message = message;
+        Option = 0;
     }
     public GOSResult(bool success, Exception exception) : this()
     {
         Success = success;
         Exception = exception;
         Message = null;
+        Option = 0;
     }
     public GOSResult(bool success, Exception exception, string message) : this()
     {
         Success = success;
         Exception = exception;
         Message = message;
+        Option = 0;
     }
-    public GOSResult(bool success, object _object) : this()
+    public GOSResult(bool success, Exception exception, string message, byte option) : this()
+    {
+        Success = success;
+        Exception = exception;
+        Message = message;
+        Option = option;
+    }
+    public GOSResult(bool success, byte option) : this()
     {
         Success = success;
         Exception = null;
         Message = null;
+        Option = option;
     }
-
+    public GOSResult(byte option) : this()
+    {
+        Success = false;
+        Exception = null;
+        Message = null;
+        Option = option;
+    }
     public override string ToString()
     {
         string result = (Success ? "Success" : "FAIL") +
