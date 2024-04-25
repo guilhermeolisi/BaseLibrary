@@ -13,7 +13,7 @@ public struct NumberESD : IComparable
     public double ESD = double.NaN;
     public string? Text { get; private set; } = null;
     public string? StringFormat { get; private set; } = null;
-    public string? NumberText { get => !HasValue ? null : !double.IsNaN(Value) ? NumberMethods.DoubleResultText(Value, ESD, StringFormat) : !string.IsNullOrWhiteSpace(Text) ? Text : "-"; }
+    public string? NumberText { get => !HasValue ? null : !double.IsNaN(Value) ? NumbersMethods.DoubleResultText(Value, ESD, StringFormat) : !string.IsNullOrWhiteSpace(Text) ? Text : "-"; }
     public bool HasValue { get; set; }
     public NumberESD()
     {

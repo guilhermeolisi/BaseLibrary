@@ -172,8 +172,8 @@ public class NumberServices : INumberServices
         {
 
             double esd = RoundAlgharisms(esdNull, 1);
-            orderEsd = OrderNumber(esd);
-            orderValue = OrderNumber(value);
+            orderEsd = ScaleOrderNumber(esd);
+            orderValue = ScaleOrderNumber(value);
             bool isGreatEsd = orderValue < orderEsd;
             //Processa ESD
             if (value == 0)
@@ -321,7 +321,7 @@ public class NumberServices : INumberServices
 
         return result;
     }
-    public int OrderNumber(double value)
+    public int ScaleOrderNumber(double value)
     {
         double result = Log10(Abs(value));
         if (result < 0)
@@ -416,5 +416,8 @@ public class NumberServices : INumberServices
 
         return value;
     }
-
+    public T Max<T>(T value, T max) where T : IComparable<T> => value.CompareTo(max) > 0 ? max : value;
+    public T Min<T>(T value, T min) where T : IComparable<T> => value.CompareTo(min) < 0 ? min : value;
+    public T Bigger<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) > 0 ? value1 : value2;
+    public T Smaller<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) < 0 ? value1 : value2;
 }

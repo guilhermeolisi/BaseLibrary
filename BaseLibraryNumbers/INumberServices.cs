@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Math;
-
-namespace BaseLibrary.Numbers;
+﻿namespace BaseLibrary.Numbers;
 
 public interface INumberServices
 {
@@ -38,8 +30,12 @@ public interface INumberServices
     double RoundAlgharisms(double value, uint algharims);
     string DoubleResultText(NumberESD value, string? arredonda = null);
     string DoubleResultText(double valueNull, double esdNull, string? arredonda = null);
-    int OrderNumber(double value);
+    int ScaleOrderNumber(double value);
     string GenerateCodeID(short legnth, bool isCaseSensitive);
     string OrdinalIntegerToString(int number);
     T Clamp<T>(T value, T min, T max) where T : IComparable<T>;
+    T Max<T>(T value, T max) where T : IComparable<T>;
+    T Min<T>(T value, T min) where T : IComparable<T>;
+    T Bigger<T>(T value1, T value2) where T : IComparable<T>;
+    T Smaller<T>(T value1, T value2) where T : IComparable<T>;
 }
