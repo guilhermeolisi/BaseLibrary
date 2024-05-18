@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace BaseLibrary.Collections;
 
@@ -48,15 +47,16 @@ public static class Extensions
     public static IList<TSource> GOSOrderBy<TSource, TKey>(this IList<TSource> source, Func<TSource, TKey> keySelector)
         where TKey : IComparable
     {
-        int i = 0;
-        while (i < source.Count - 1)
+        int i = 1;
+        while (i < source.Count)
         {
-            if (keySelector(source[i]).CompareTo(keySelector(source[i + 1])) > 0)
+
+            if (keySelector(source[i]).CompareTo(keySelector(source[i - 1])) < 0)
             {
                 int j = 0;
                 while (j < i)
                 {
-                    if (keySelector(source[j]).CompareTo(keySelector(source[i])) > 0)
+                    if (keySelector(source[i]).CompareTo(keySelector(source[j])) < 0)
                     {
                         TSource itemi = source[i];
                         source.RemoveAt(i);
@@ -207,7 +207,7 @@ public static class Extensions
         }
         return list;
     }
-    public static IEnumerable<T> GetOnlyDistinct<T,TComp>(this IEnumerable<T> list, Func<T, TComp> propToComp)
+    public static IEnumerable<T> GetOnlyDistinct<T, TComp>(this IEnumerable<T> list, Func<T, TComp> propToComp)
     {
         if (propToComp is null)
             throw new ArgumentNullException(nameof(propToComp));
