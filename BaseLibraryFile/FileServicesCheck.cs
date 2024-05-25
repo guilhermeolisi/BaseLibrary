@@ -65,7 +65,8 @@ public class FileServicesCheck : IFileServicesCheck
     }
     public bool CheckTextFileByEncoding(string filePath)
     {
-
+        if (!File.Exists(filePath))
+            return false;
         var result = TextFileEncodingDetector.DetectTextFileEncoding(filePath);
 
         return result is not null;
