@@ -5,15 +5,15 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HubLibraryVM", "HubLibraryVM\HubLibraryVM.csproj", "{AC17AE79-2C49-49DD-A1B1-823715CB4C9E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryConsole", "BaseLibraryConsole\BaseLibraryConsole.csproj", "{5F010AA3-B962-4867-99F7-2D9D32A2F38C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryConsole", "BaseLibraryConsole\BaseLibrary.Console.csproj", "{5F010AA3-B962-4867-99F7-2D9D32A2F38C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryFile", "BaseLibraryFile\BaseLibraryFile.csproj", "{C0609A29-E4C8-4747-9000-FE4C62AFF3EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryFile", "BaseLibraryFile\BaseLibrary.File.csproj", "{C0609A29-E4C8-4747-9000-FE4C62AFF3EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryHTTP", "BaseLibraryHTTP\BaseLibraryHTTP.csproj", "{FE2D23D5-7AEF-41DB-90BF-72D70242B3C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryHTTP", "BaseLibraryHTTP\BaseLibrary.HTTP.csproj", "{FE2D23D5-7AEF-41DB-90BF-72D70242B3C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryGeneral", "Baselibrary\BaseLibraryGeneral.csproj", "{F6002616-039F-4844-9F7C-DC2A840E76EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryGeneral", "Baselibrary\BaseLibrary.General.csproj", "{F6002616-039F-4844-9F7C-DC2A840E76EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryException", "BaseLibraryException\BaseLibraryException.csproj", "{67D73ADC-7B26-4A5E-B893-35BD4909620A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseLibraryException", "BaseLibraryException\BaseLibrary.Exception.csproj", "{67D73ADC-7B26-4A5E-B893-35BD4909620A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseDialogInterfaceInjection", "BaseDialogInterfaceInjection\BaseDialogInterfaceInjection.csproj", "{B21A2206-3141-4703-A06D-45689B6D4531}"
 EndProject
