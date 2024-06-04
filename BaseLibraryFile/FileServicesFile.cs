@@ -78,34 +78,19 @@ public class FileServicesFile : IFileServicesFile
                 case 0:
                     commandProcess = "cmd.exe";
                     argsProcess = "/C \"" + filePath + "\"";
-                    //commandProcess = "\"" + filePath + "\"";
                     break;
                 case 1:
                     commandProcess = "xdg-open";
-                    argsProcess = filePath;
+                    argsProcess = "\"" + filePath + "\"";
                     break;
                 case 2:
                     commandProcess = "open";
-                    argsProcess = filePath;
+                    argsProcess = "\"" + filePath + "\"";
                     break;
                 default:
                     break;
             }
-            //if (OS == 0)
-            //{
-            //    //commandProcess = "\"" + fileManual + "\"";// Path.Combine(sindarinFolder, "Sindarin manual.pdf");
-            //    commandProcess = "\"" + filePathManual + "\"";
-            //}
-            //else if (OS == 1)
-            //{
-            //    commandProcess = "xdg-open";
-            //    argsProcess = filePathManual;//fileManual;
-            //}
-            //else if (OS == 2)
-            //{
-            //    commandProcess = "open";
-            //    argsProcess = filePathManual;//fileManual;
-            //}
+            
             process.StartInfo = new()
             {
                 FileName = commandProcess,

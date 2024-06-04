@@ -116,6 +116,7 @@ public class FileServicesDirectory : IFileServicesDirectory
         if (string.IsNullOrWhiteSpace(goal))
             throw new ArgumentException(nameof(goal) + " parameter is empty");
 
+        //TODO fazer isto aqui de maneira recursiva com CreateAllPath
         string? tempPath = goal.Substring(0);
         Stack<string> folderToCreate = new();
         while (!string.IsNullOrWhiteSpace(tempPath) && !Directory.Exists(tempPath))
