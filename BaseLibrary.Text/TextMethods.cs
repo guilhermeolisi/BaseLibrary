@@ -17,5 +17,5 @@ public static class TextMethods
 
     public static (string nameResult, string sufix) GetNameAndSufixAvailable(this string text, char? mode = null) => services.GetNameAndSufixAvailable(text, mode);
     public static string CombineNameAndSufix(this string name, string sufix, int index) => services.CombineNameAndSufix(name, sufix, index);
-    public static bool IsNullOrWhiteSpace(this string text) => string.IsNullOrWhiteSpace(text);
+    public static bool IsNullOrWhiteSpace(this string? text) => string.IsNullOrWhiteSpace(text);
 }
