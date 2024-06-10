@@ -1,44 +1,104 @@
-﻿namespace BaseLibrary;
+﻿using System.Collections.Concurrent;
+
+namespace BaseLibrary;
 
 public class PoolTasks : IPoolTasks
 {
     //Faz uma fila de tarefas e executa uma por uma
     //Se uma tarefa for adicionada enquanto outra estiver sendo executada, a nova tarefa será executada em seguida
-    public void EnqueueTask(Task task)
-    {
-        tasks.Enqueue(task);
-        if (processTask is null || (processTask.Status != TaskStatus.Running && processTask.Status != TaskStatus.Created) /*processTask.IsCompleted*/)
-        {
-            processTask = Task.Run(() =>
-            {
-                while (tasks.Count > 0)
-                {
-                    Task task = tasks.Dequeue();
-                    if (task is null)
-                        continue;
+    //public void EnqueueTask(Task task)
+    //{
+    //    tasks.Enqueue(task);
+    //    if (processTask is null || (processTask.Status != TaskStatus.Running && processTask.Status != TaskStatus.Created) /*processTask.IsCompleted*/)
+    //    {
+    //        processTask = Task.Run(() =>
+    //        {
+    //            while (tasks.Count > 0)
+    //            {
+    //                Task? task;// = tasks.Dequeue();
+    //                if (!tasks.TryDequeue(out task))
+    //                    continue;
+    //                if (task is null)
+    //                    continue;
 
-                    if (task.Status == TaskStatus.Created)
+    //                if (task.Status == TaskStatus.Created)
+    //                {
+    //                    try
+    //                    {
+    //                        task.Start();
+    //                    }
+    //                    catch (Exception ex)
+    //                    {
+    //                        throw;
+    //                    }
+    //                }
+    //                try
+    //                {
+    //                    Task.WaitAll(task);
+    //                }
+    //                catch (Exception ex)
+    //                {
+    //                    throw;
+    //                }
+    //            }
+    //        });
+    //    }
+
+
+    //}
+    public async void EnqueueTask(Task task)
+    {
+
+        tasks.Enqueue(task);
+        lock (lookRunning)
+        {
+            if (isRunning)
+                return;
+            isRunning = true;
+        }
+        do
+        {
+            if (processTask is null || (processTask.Status != TaskStatus.Running && processTask.Status != TaskStatus.Created))
+            {
+                if (tasks.Count == 0)
+                    return;
+                if (!tasks.TryDequeue(out processTask))
+                    continue;
+                if (processTask is null)
+                    continue;
+                if (processTask.Status == TaskStatus.Created)
+                {
+                    try
                     {
-                        try
-                        {
-                            task.Start();
-                        }
-                        catch (Exception ex)
-                        {
-                            throw;
-                        }
+                        processTask.Start();
                     }
-                    Task.WaitAll(task);
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
                 }
-            });
+                try
+                {
+                    await processTask;
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+            }
+        } while (tasks.Count > 0);
+
+        lock (lookRunning)
+        {
+            isRunning = false;
         }
     }
+    bool isRunning = false;
+    object lookRunning = new();
 
+    Task? processTask;
 
-
-    Task processTask;
-
-    Queue<Task> tasks = new();
+    ConcurrentQueue<Task> tasks = new();
     public async Task StackTask(Task task)
     {
         tasks.Enqueue(task);
@@ -62,7 +122,10 @@ public class PoolTasks : IPoolTasks
         {
             while (tasks.Count > 0)
             {
-                Task task = tasks.Dequeue();
+                //Task task = tasks.Dequeue();
+                Task? task;
+                if (!tasks.TryDequeue(out task))
+                    continue;
                 if (task is null)
                     continue;
 
@@ -77,7 +140,14 @@ public class PoolTasks : IPoolTasks
                         throw;
                     }
                 }
-                Task.WaitAll(task);
+                try
+                {
+                    Task.WaitAll(task);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
                 //if (task.Status == TaskStatus.Running)
                 //    try
                 //    {
