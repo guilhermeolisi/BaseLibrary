@@ -6,6 +6,7 @@ public class PoolTasks : IPoolTasks
 {
     //Faz uma fila de tarefas e executa uma por uma
     //Se uma tarefa for adicionada enquanto outra estiver sendo executada, a nova tarefa será executada em seguida
+
     //public void EnqueueTask(Task task)
     //{
     //    tasks.Enqueue(task);
@@ -91,6 +92,7 @@ public class PoolTasks : IPoolTasks
         lock (lookRunning)
         {
             isRunning = false;
+            processTask = null;
         }
     }
     bool isRunning = false;
@@ -99,107 +101,6 @@ public class PoolTasks : IPoolTasks
     Task? processTask;
 
     ConcurrentQueue<Task> tasks = new();
-    public async Task StackTask(Task task)
-    {
-        tasks.Enqueue(task);
-
-        if (processTask is not null && !processTask.IsCompleted)
-            try
-            {
-                await processTask;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        if (tasks.Count == 0)
-            return;
-        else if (processTask is not null)
-        {
-
-        }
-        processTask = Task.Run(() =>
-        {
-            while (tasks.Count > 0)
-            {
-                //Task task = tasks.Dequeue();
-                Task? task;
-                if (!tasks.TryDequeue(out task))
-                    continue;
-                if (task is null)
-                    continue;
-
-                if (task.Status == TaskStatus.Created)
-                {
-                    try
-                    {
-                        task.Start();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw;
-                    }
-                }
-                try
-                {
-                    Task.WaitAll(task);
-                }
-                catch (Exception ex)
-                {
-                    throw;
-                }
-                //if (task.Status == TaskStatus.Running)
-                //    try
-                //    {
-                //        task.Wait();
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        throw;
-                //    }
-            }
-        });
-        //processTask = new(() =>
-        //{
-        //    while (tasks.Count > 0)
-        //    {
-        //        Task task = tasks.Dequeue();
-        //        if (task is null)
-        //            continue;
-
-        //        if (task.Status == TaskStatus.Created)
-        //        {
-        //            try
-        //            {
-        //                task.Start();
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        if (task.Status == TaskStatus.Running)
-        //            try
-        //            {
-        //                task.Wait();
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                throw;
-        //            }
-        //    }
-        //});
-        //if (processTask.Status == TaskStatus.Running)
-        //    processTask.Start();
-        try
-        {
-            await processTask;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
-    }
     public async Task AwaitATask(Task task)
     {
         if (task is null)
