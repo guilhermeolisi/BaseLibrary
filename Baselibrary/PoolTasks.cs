@@ -113,6 +113,10 @@ public class PoolTasks : IPoolTasks
             try
             {
                 await task;
+                //while (task.Status == TaskStatus.Running)
+                //{
+                //    await Task.Delay(20);
+                //}
             }
             catch (Exception ex)
             {
