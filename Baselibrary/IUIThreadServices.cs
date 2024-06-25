@@ -1,12 +1,13 @@
 ﻿
 
-namespace BaseLibrary
-{
-    public interface IUIThreadServices
-    {
-        bool IsOnUIThread { get; }
+namespace BaseLibrary;
 
-        void RunOnUIThread(Action action);
-        Task RunOnUIThreadAsync(Action action);
-    }
+public interface IUIThreadServices
+{
+    bool IsOnUIThread { get; }
+
+    void RunOnUIThread(Action action);
+    T RunOnUIThread<T>(Func<T> func);
+    Task RunOnUIThreadAsync(Action action);
+    Task<T> RunOnUIThreadAsync<T>(Func<T> func);
 }
