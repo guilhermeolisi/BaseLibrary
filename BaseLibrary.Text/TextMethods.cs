@@ -5,7 +5,10 @@ public static class TextMethods
     static ITextServices services = new TextServices();
 
     public static string FirstLetterToUpper(this string text) => services.FirstLetterToUpper(text);
-    public static string CamelCaseWithSpace(this string text) => services.CamelCaseWithSpace(text);
+    public static string FirstLetterToUpperStric(this string text) => services.FirstLetterToUpperStric(text);
+    public static string CamelCaseWithSpace(this string text) => services.CamelCaseToWithSpace(text);
+    public static string TextWithWhiteSpaceToCamelCase(this string text) => services.TextWithWhiteSpaceToCamelCase(text);
+    public static string TextWithWhiteSpaceToCamelCaseStrict(this string text) => services.TextWithWhiteSpaceToCamelCaseStrict(text);
     public static string TextToNumber(this string text) => services.TextToNumber(text);
     public static string TextToNumberBetweenSpaces(this string text) => services.TextToNumberBetweenSpaces(text);
     public static string NumberToText(this string text) => services.NumberToText(text);

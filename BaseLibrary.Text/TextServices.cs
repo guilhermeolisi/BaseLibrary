@@ -12,7 +12,38 @@ public class TextServices : ITextServices
         }
         return text;
     }
-    public string CamelCaseWithSpace(string text)
+    public string FirstLetterToUpperStric(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+        int ind = 0;
+        while (ind < text.Length)
+        {
+            if (char.IsLetter(text[ind]))
+            {
+                if (ind == 0 && char.IsLower(text[ind]))
+                {
+                    char c = text[ind];
+                    text = text.Remove(ind, 1);
+                    text = text.Insert(ind, char.ToUpper(c).ToString());
+                }
+                else if (ind != 0 && char.IsUpper(text[ind]))
+                {
+                    char c = text[ind];
+                    text = text.Remove(ind, 1);
+                    text = text.Insert(ind, char.ToLower(c).ToString());
+                }
+            }
+            ind++;
+        }
+        return text;
+    }
+    /// <summary>
+    /// Transform the pattern "CamelCase" to "Camel Case"
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public string CamelCaseToWithSpace(string text)
     {
         if (string.IsNullOrEmpty(text))
             return text;
@@ -24,6 +55,68 @@ public class TextServices : ITextServices
             {
                 text = text.Insert(ind, " ");
                 ind++;
+            }
+            ind++;
+        }
+        return text;
+    }
+    /// <summary>
+    /// Transform the pattern "Camel case" to "CamelCase"
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public string TextWithWhiteSpaceToCamelCase(string text)
+    {
+
+        if (string.IsNullOrEmpty(text))
+            return text;
+        int ind = 0;
+        while (ind < text.Length - 1)
+        {
+            if (text[ind] == ' ')
+            {
+                text = text.Remove(ind, 1);
+                char c = text[ind];
+                if (!char.IsUpper(c))
+                {
+                    text = text.Remove(ind, 1);
+                    text = text.Insert(ind, char.ToUpper(c).ToString());
+                }
+            }
+            ind++;
+        }
+        return text;
+    }
+    /// <summary>
+    /// Transform the pattern "Camel case" to "CamelCase"
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public string TextWithWhiteSpaceToCamelCaseStrict(string text)
+    {
+
+        if (string.IsNullOrEmpty(text))
+            return text;
+        int ind = 0;
+        while (ind < text.Length - 1)
+        {
+
+            if (text[ind] == ' ' || ind == 0)
+            {
+                if (text[ind] == ' ')
+                    text = text.Remove(ind, 1);
+                char c = text[ind];
+                if (!char.IsUpper(c))
+                {
+                    text = text.Remove(ind, 1);
+                    text = text.Insert(ind, char.ToUpper(c).ToString());
+                }
+            }
+            else if (char.IsLower(text[ind]))
+            {
+                char c = text[ind];
+                text = text.Remove(ind, 1);
+                text = text.Insert(ind, char.ToLower(c).ToString());
             }
             ind++;
         }
@@ -245,6 +338,8 @@ public class TextServices : ITextServices
     }
     public (string nameResult, string sufix) GetNameAndSufixAvailable(string name, char? mode = null)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            return (name, "");
         name = name.Trim();
         string sufix = mode switch
         {

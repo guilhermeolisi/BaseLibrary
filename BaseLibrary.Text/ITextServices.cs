@@ -3,7 +3,7 @@
 public interface ITextServices
 {
     string FirstLetterToUpper(string text);
-    string CamelCaseWithSpace(string text);
+    string CamelCaseToWithSpace(string text);
     string TextToNumber(string text);
     string TextToNumberBetweenSpaces(string text);
     string NumberToText(string text);
@@ -14,4 +14,7 @@ public interface ITextServices
     string RemoveSpaces(string text);
     (string nameResult, string sufix) GetNameAndSufixAvailable(string name, char? mode = null);
     string CombineNameAndSufix(string name, string sufix, int index);
+    string TextWithWhiteSpaceToCamelCaseStrict(string text);
+    string TextWithWhiteSpaceToCamelCase(string text);
+    string FirstLetterToUpperStric(string text);
 }
