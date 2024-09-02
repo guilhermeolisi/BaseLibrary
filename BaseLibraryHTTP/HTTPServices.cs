@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net.Mail;
 using System.Net.NetworkInformation;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 
 namespace BaseLibrary;
 
 public class HTTPServices : IHTTPServices
 {
-    public bool IsConnectedToInternetPing(string host)
+    public bool IsConnectedToInternetPing(string? host = null)
     {
         //Está retornando falso mesmo quando estou com conexão com internet, verificar se o host do google está correto
 

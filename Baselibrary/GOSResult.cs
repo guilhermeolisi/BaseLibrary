@@ -43,14 +43,14 @@ public struct GOSResult
         Message = null;
         Option = 0;
     }
-    public GOSResult(bool success, Exception exception, string message) : this()
+    public GOSResult(bool success, Exception? exception, string message) : this()
     {
         Success = success;
         Exception = exception;
         Message = message;
         Option = 0;
     }
-    public GOSResult(bool success, Exception exception, string message, byte option) : this()
+    public GOSResult(bool success, Exception? exception, string? message, byte option) : this()
     {
         Success = success;
         Exception = exception;
