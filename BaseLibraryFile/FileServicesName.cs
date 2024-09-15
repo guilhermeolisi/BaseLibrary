@@ -8,14 +8,22 @@ public class FileServicesName : IFileServicesName
     static readonly string regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+?)(\.(?<Extension>[^\\/|<>*:""?]+?))?$";
     public void InfoFromFilePath(in string filepath, ref string fileName, ref string folder, ref string extension)
     {
-        if (string.IsNullOrWhiteSpace(filepath)) return;
+        if (string.IsNullOrWhiteSpace(filepath)) 
+            //return;
+            throw new ArgumentNullException(nameof(filepath));
 
         //string regexTemp = string.Empty;
         //regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+?)(\.(?<Extension>[^\\/|<>*:""?]+?))?$";
-        Match m = Regex.Match(filepath, regexTemp);
-        fileName = m.Groups["FileName"].Value;
-        folder = m.Groups["Folder"].Value;
-        extension = m.Groups["Extension"].Value;
+
+        //Por algum motivo desconhecido, o regex não está funcionando no Linux
+        // Match m = Regex.Match(filepath, regexTemp);
+        // fileName = m.Groups["FileName"].Value;
+        // folder = m.Groups["Folder"].Value;
+        // extension = m.Groups["Extension"].Value;
+
+        fileName = Path.GetFileNameWithoutExtension(filepath);
+        folder = Path.GetDirectoryName(filepath);
+        extension = Path.GetExtension(filepath);
     }
     public (string?, string?, string?) InfoFromFilePath(in string filepath)
     {
