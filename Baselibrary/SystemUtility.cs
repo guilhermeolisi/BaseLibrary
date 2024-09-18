@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 
 namespace BaseLibrary;
 
@@ -146,6 +141,29 @@ public static class SystemUtility
                 break;
         }
         return result.Trim();
+    }
+    public static bool IsRunningInWSL()
+    {
+        try
+        {
+            // Verifica se o arquivo /proc/version existe
+            if (File.Exists("/proc/version"))
+            {
+                string versionInfo = File.ReadAllText("/proc/version");
+
+                // Verifica se o arquivo contém a string "Microsoft"
+                if (versionInfo.Contains("Microsoft"))
+                {
+                    return true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao verificar o ambiente: {ex.Message}");
+        }
+
+        return false;
     }
     /// <summary>
     /// https://stackoverflow.com/questions/2819934/detect-windows-version-in-net

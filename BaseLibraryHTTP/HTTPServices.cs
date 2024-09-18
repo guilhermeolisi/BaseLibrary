@@ -11,6 +11,13 @@ public class HTTPServices : IHTTPServices
     {
         //Está retornando falso mesmo quando estou com conexão com internet, verificar se o host do google está correto
 
+        bool isWSL = SystemUtility.IsRunningInWSL(); //o Ping não funciona no WSL
+
+        if (isWSL)
+        {
+            return false;
+        }
+
         Ping myPing = new Ping();
         if (string.IsNullOrWhiteSpace(host))
             host = "google.com";

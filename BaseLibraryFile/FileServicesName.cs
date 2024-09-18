@@ -8,7 +8,7 @@ public class FileServicesName : IFileServicesName
     static readonly string regexTemp = @"^(?<Folder>.+)\\(?<FileName>[^\\/|<>*:""?]+?)(\.(?<Extension>[^\\/|<>*:""?]+?))?$";
     public void InfoFromFilePath(in string filepath, ref string fileName, ref string folder, ref string extension)
     {
-        if (string.IsNullOrWhiteSpace(filepath)) 
+        if (string.IsNullOrWhiteSpace(filepath))
             //return;
             throw new ArgumentNullException(nameof(filepath));
 
@@ -24,6 +24,8 @@ public class FileServicesName : IFileServicesName
         fileName = Path.GetFileNameWithoutExtension(filepath);
         folder = Path.GetDirectoryName(filepath);
         extension = Path.GetExtension(filepath);
+        if (!string.IsNullOrWhiteSpace(extension) && extension[0] == '.')
+            extension = extension.Substring(1);
     }
     public (string?, string?, string?) InfoFromFilePath(in string filepath)
     {
