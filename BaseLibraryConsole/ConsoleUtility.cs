@@ -27,7 +27,7 @@ public static class ConsoleUtility
             Console.Write("\b");
         Console.Write(_twirl[progress % _twirl.Length]);
     }
-    public static bool ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped/*, System.Collections.ObjectModel.Collection<string> argList*/)
+    public static bool ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
     {
         string cmdEscaped = cmd.Replace("\"", "\\\"");
         var argsEscaped = args.Replace("\"", "\\\"");
