@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
@@ -23,8 +18,8 @@ public class ConsoleServices : IConsoleServices
         //else
         //    progress = ;
         if (update)
-            Console.Write((progress >= 0 ? "\b" : "") + _back + 
-                (progress >= 0 ? _twirl[progress % _twirl.Length] : "") + 
+            Console.Write((progress >= 0 ? "\b" : "") + _back +
+                (progress >= 0 ? _twirl[progress % _twirl.Length] : "") +
                 "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
         else
             Console.Write((progress >= 0 ? _twirl[progress % _twirl.Length] : "") +
@@ -36,11 +31,17 @@ public class ConsoleServices : IConsoleServices
             Console.Write("\b");
         Console.Write(_twirl[progress % _twirl.Length]);
     }
-    public GOSResult ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
+    public GOSResult ExecCommandLine(string cmd, string args, string workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
     {
         string cmdEscaped = cmd.Replace("\"", "\\\"");
         var argsEscaped = args.Replace("\"", "\\\"");
         string message = string.Empty;
+
+        if (workFolder is null)
+        {
+            workFolder = string.Empty;
+        }
+
         using (Process process = new())
         {
             process.StartInfo = new ProcessStartInfo
@@ -49,6 +50,7 @@ public class ConsoleServices : IConsoleServices
                 UseShellExecute = isShell,
                 CreateNoWindow = isQuite,
                 WindowStyle = isQuite ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+                WorkingDirectory = workFolder,
                 //FileName = "bash",//"/bin/bash"
                 //Arguments = $"-c \"{escapedArgs}\""
                 //FileName = cmdEscaped,

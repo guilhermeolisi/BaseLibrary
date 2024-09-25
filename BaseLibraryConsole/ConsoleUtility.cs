@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace BaseLibrary;
 
@@ -27,10 +22,15 @@ public static class ConsoleUtility
             Console.Write("\b");
         Console.Write(_twirl[progress % _twirl.Length]);
     }
-    public static bool ExecCommandLine(string cmd, string args, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
+    public static bool ExecCommandLine(string cmd, string args, string workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
     {
         string cmdEscaped = cmd.Replace("\"", "\\\"");
         var argsEscaped = args.Replace("\"", "\\\"");
+
+        if (workFolder is null)
+        {
+            workFolder = string.Empty;
+        }
 
         using (Process process = new())
         {
@@ -40,6 +40,7 @@ public static class ConsoleUtility
                 UseShellExecute = isShell,
                 CreateNoWindow = isQuite,
                 WindowStyle = isQuite ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+                WorkingDirectory = workFolder,
                 //FileName = "bash",//"/bin/bash"
                 //Arguments = $"-c \"{escapedArgs}\""
                 //FileName = cmdEscaped,
