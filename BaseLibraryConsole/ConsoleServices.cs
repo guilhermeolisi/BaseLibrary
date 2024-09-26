@@ -31,17 +31,22 @@ public class ConsoleServices : IConsoleServices
             Console.Write("\b");
         Console.Write(_twirl[progress % _twirl.Length]);
     }
-    public GOSResult ExecCommandLine(string cmd, string args, string workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
+    public GOSResult ExecCommandLine(string cmd, string? args, string? workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
     {
-        string cmdEscaped = cmd.Replace("\"", "\\\"");
-        var argsEscaped = args.Replace("\"", "\\\"");
-        string message = string.Empty;
-
+        if (args is null)
+        {
+            args = string.Empty;
+        }
         if (workFolder is null)
         {
             workFolder = string.Empty;
         }
 
+        string cmdEscaped = cmd.Replace("\"", "\\\"");
+        var argsEscaped = args.Replace("\"", "\\\"");
+        string message = string.Empty;
+
+        
         using (Process process = new())
         {
             process.StartInfo = new ProcessStartInfo
@@ -66,7 +71,7 @@ public class ConsoleServices : IConsoleServices
                 //    Console.Write("Executing " + cmd + "...");
                 //}
                 process.Start();
-                if (process.StartInfo.RedirectStandardOutput)
+                if (process.StartInfo.RedirectStandardOutput && !isAsync)
                 {
                     message = process.StandardOutput.ReadToEnd();
 
@@ -77,7 +82,7 @@ public class ConsoleServices : IConsoleServices
                 if (!isAsync)
                 {
                     process.WaitForExit();
-                    message = "Exit code: " + process.ExitCode + Environment.NewLine + message;
+                    message = "Exit code: " + process.ExitCode + (string.IsNullOrWhiteSpace(message) ? "" : Environment.NewLine + message);
                     if (!isQuite && process.ExitCode != 0)
                         Console.Write(message);
                 }

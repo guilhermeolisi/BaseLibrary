@@ -12,7 +12,7 @@ public interface IConsoleServices
 {
     void WriteProgressBar(int percent, int progress = -1, bool update = false);
     void WriteProgress(int progress, bool update = false);
-    GOSResult ExecCommandLine(string cmd, string args, string workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped);
+    GOSResult ExecCommandLine(string cmd, string? args, string? workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped);
     bool DialogYesNo(string message);
     /// <summary>
     /// 0: White; 1: Green; 2: Yellow; 3: Red
