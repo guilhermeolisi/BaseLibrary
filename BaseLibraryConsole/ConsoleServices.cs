@@ -46,12 +46,12 @@ public class ConsoleServices : IConsoleServices
         var argsEscaped = args.Replace("\"", "\\\"");
         string message = string.Empty;
 
-        
+
         using (Process process = new())
         {
             process.StartInfo = new ProcessStartInfo
             {
-                RedirectStandardOutput = isShell ? false : true,
+                RedirectStandardOutput = !isShell,
                 UseShellExecute = isShell,
                 CreateNoWindow = isQuite,
                 WindowStyle = isQuite ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
