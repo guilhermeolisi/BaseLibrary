@@ -1,4 +1,5 @@
-﻿using static System.Math;
+﻿using System.Diagnostics;
+using static System.Math;
 namespace BaseLibrary.Math;
 
 public class MathServices : IMathServices
@@ -264,5 +265,29 @@ public class MathServices : IMathServices
     public double DistancePoints(double x1, double y1, double x2, double y2)
     {
         return Hypotenuse(x2 - x1, y2 - y1);
+    }
+    public double ClausenIntegralSerie(double x, double error = 1E-10)
+    {
+        // Lima 2017 - Clausen Integral
+        // https://en.wikipedia.org/wiki/Clausen_function
+        double result = 0;
+        double resultOld = 1E10;
+        int n = 1;
+        while (Abs(result - resultOld) > error)
+        {
+            resultOld = result;
+            result += Sin(n * x) / Pow(n, 2);
+            n++;
+        }
+        //chega a precisar de 3000 iterações para convergir
+        Debug.WriteLine($"Clausen IntegralSerie n = {n}");
+        return result;
+    }
+    public double ClausenIntegral(double x)
+    {
+        // Implementar o cálculo de ClausenIntegral por polinomio de Chebyshev dado por Kolbig 1995
+        // enquanto isso fazer os calculos com ClausenIntegralSerie
+        return ClausenIntegralSerie(x);
+        return 0;
     }
 }

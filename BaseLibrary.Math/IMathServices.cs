@@ -2,6 +2,7 @@
 
 public interface IMathServices
 {
+    double ClausenIntegralSerie(double x, double error = 1E-10);
     public double[] DerivativeFivePoint(double[] y, double step, int order);
     double DistancePoints(double x1, double y1, double x2, double y2);
     double[] FindChangingConcavityFromDerivative(double[] y, double xMin, double step);
