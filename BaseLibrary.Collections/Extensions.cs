@@ -237,4 +237,15 @@ public static class Extensions
         }
         return list;
     }
+    public static int Count(this IEnumerable list)
+    {
+        if (list is ICollection collection)
+            return collection.Count;
+        int count = 0;
+        foreach (var item in list)
+        {
+            count++;
+        }
+        return count;
+    }
 }
