@@ -248,4 +248,32 @@ public static class Extensions
         }
         return count;
     }
+    public static void RemoveLast(this IList list)
+    {
+        if (list.Count > 0)
+            list.RemoveAt(list.Count - 1);
+    }
+    public static void RemoveExtras(this IList list, int max)
+    {
+        if (list.Count > max)
+        {
+            for (int i = list.Count - 1; i >= max; i--)
+            {
+                list.RemoveAt(i);
+            }
+        }
+    }
+    //public static void RemoveLast<T>(this IEnumerable<T> list)
+    //{
+    //    if (list is IList<T> list2)
+    //    {
+    //        if (list2.Count > 0)
+    //            list2.RemoveAt(list2.Count - 1);
+    //    }
+    //    else
+    //    {
+
+
+    //    }
+    //}
 }
