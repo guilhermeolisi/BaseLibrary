@@ -10,6 +10,7 @@ public static class NumbersMethods
     /// <param name="value"></param>
     /// <returns></returns>
     public static bool IsOdd(this int value) => numberServices.IsOdd(value);
+    public static bool IsEven(this int value) => numberServices.IsEven(value);
     /// <summary>
     /// Conta o número de casas decimais de um número, zeros a esquerda depois da vírgula não é considerado
     /// </summary>

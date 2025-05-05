@@ -1,10 +1,9 @@
-﻿namespace BaseLibrary
+﻿namespace BaseLibrary;
+
+public interface IPoolTasks
 {
-    public interface IPoolTasks
-    {
-        void EnqueueTask(Task task);
-        Task AwaitATask(Task task);
-        Task AwaitAllTasks();
-        void WaitAllTasks();
-    }
+    void EnqueueTask(Task task);
+    Task AwaitATask(Task task);
+    Task AwaitAllTasks();
+    void WaitAllTasks();
 }

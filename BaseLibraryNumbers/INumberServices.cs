@@ -9,6 +9,12 @@ public interface INumberServices
     /// <returns></returns>
     bool IsOdd(int value);
     /// <summary>
+    /// retorna se o inteiro é par
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    bool IsEven(int value);
+    /// <summary>
     /// Conta o número de casas decimais de um número, zeros a esquerda depois da vírgula não é considerado
     /// </summary>
     /// <param name="value"></param>

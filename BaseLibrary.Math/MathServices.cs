@@ -49,6 +49,14 @@ public class MathServices : IMathServices
 
         return Sqrt(sum / (count));
     }
+    public double SphereVolumeRadius(double radius)
+    {
+        return (4.0 / 3.0) * PI * Pow(radius, 3);
+    }
+    public double SphereVolumeDiameter(double diameter)
+    {
+        return (1.0 / 6.0) * PI * Pow(diameter, 3);
+    }
     /// <summary>
     /// Calculate the derivative of a set of numbers using the five-point stencil
     /// </summary>

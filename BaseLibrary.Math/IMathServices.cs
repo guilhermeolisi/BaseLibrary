@@ -10,4 +10,6 @@ public interface IMathServices
     (double[] min, double[] max) FindMinMaxFromDerivative(double[] y, double xMin, double step);
     double Hypotenuse(double x, double y);
     double Interpolation(in double x1, in double y1, in double x2, in double y2, in double x);
+    double SphereVolumeDiameter(double diameter);
+    double SphereVolumeRadius(double radius);
 }

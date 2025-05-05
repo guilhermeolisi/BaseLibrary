@@ -12,6 +12,12 @@ public class NumberServices : INumberServices
     /// <returns></returns>
     public bool IsOdd(int value) => value % 2 != 0;
     /// <summary>
+    /// retorna se o inteiro é par
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public bool IsEven(int value) => value % 2 == 0;
+    /// <summary>
     /// Conta o número de casas decimais de um número, zeros a esquerda depois da vírgula não é considerado
     /// </summary>
     /// <param name="value"></param>

@@ -93,10 +93,10 @@ public class ColorServices : IColorServices
     /// <param name="b"></param>
     /// <param name="factorChange"></param>
     /// <returns></returns>
-    public (int, int, int) DarkenColor(int r, int g, int b, double factorChange)
+    public (int, int, int) RGBDarkenColor(int r, int g, int b, double factorChange)
     {
         var (h, s, l) = RgbToHsl(r, g, b);
-        l *= (1 + factorChange); // reduzir a luminosidade
+        l *= factorChange; // reduzir a luminosidade
         return HslToRgb(h, s, l);
     }
 
@@ -108,10 +108,19 @@ public class ColorServices : IColorServices
     /// <param name="b"></param>
     /// <param name="factorChange"></param>
     /// <returns></returns>
-    public (int, int, int) LightenColor(int r, int g, int b, double factorChange)
+    public (int, int, int) RGBLightenColor(int r, int g, int b, double factorChange)
     {
         var (h, s, l) = RgbToHsl(r, g, b);
-        l += (1 - l) * (1 - factorChange); // aumentar a luminosidade
+        l += (1 - l) * factorChange; // aumentar a luminosidade
+        return HslToRgb(h, s, l);
+    }
+    public (int, int, int) RGBLightnessChange(int r, int g, int b, double factorChange)
+    {
+        var (h, s, l) = RgbToHsl(r, g, b);
+        if (factorChange < 0)
+            l *= factorChange; // reduzir a luminosidade
+        else
+            l += (1 - l) * factorChange; // aumentar a luminosidade
         return HslToRgb(h, s, l);
     }
 }
