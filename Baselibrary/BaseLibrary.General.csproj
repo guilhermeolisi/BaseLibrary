@@ -13,4 +13,8 @@
 		<Optimize>true</Optimize>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\BaseLibraryNumbers\BaseLibrary.Numbers.csproj" />
+	</ItemGroup>
+
 </Project>
