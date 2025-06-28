@@ -16,4 +16,6 @@ public interface IFileServicesDirectory
     void CreatAllPath(string goal);
     void RenameAllWhithoutSpaces(string folder);
     int CountTotalFiles(string folder, string? pattern = null, string[]? excludePattern = null);
+    void SetAttributesNormal(string folder);
+    void SetAttributesNormal(DirectoryInfo dir);
 }

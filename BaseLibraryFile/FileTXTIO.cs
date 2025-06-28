@@ -83,12 +83,17 @@ public class FileTXTIO : IFileTXTIO
 
     public bool BeforeWrite()
     {
+        if (eWrite is not null)
+        {
+            eWrite = null!;
+        }
+
         if (_pathFile is null)
         {
             eWrite = new ArgumentNullException("File name");
             return false;
         }
-        //TODO Verificar o ascesso ao arquivo original
+        // Verifica o ascesso ao arquivo original
         if (!VerifyFilesAcess(false))
         {
             return false;
@@ -292,6 +297,10 @@ public class FileTXTIO : IFileTXTIO
     #region Read
     public bool BeforeReader()
     {
+        if (eRead is not null)
+        {
+            eRead = null!;
+        }
         if (_pathFile is null)
         {
             eRead = new FileNotFoundException("Path file is null");

@@ -192,4 +192,19 @@ public class FileServicesDirectory : IFileServicesDirectory
         }
         return result;
     }
+    public void SetAttributesNormal(string folder)
+    {
+        DirectoryInfo dir = new DirectoryInfo(folder);
+        SetAttributesNormal(dir);
+    }
+    public void SetAttributesNormal(DirectoryInfo dir)
+    {
+        if (!dir.Exists)
+            return;
+        foreach (var sub in dir.GetDirectories())
+            SetAttributesNormal(sub);
+        foreach (var f in dir.GetFiles())
+            f.Attributes = FileAttributes.Normal;
+        dir.Attributes = FileAttributes.Normal;
+    }
 }

@@ -10,6 +10,8 @@ public static class FileMethods
     public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs, bool preserveTime) => services.Directory.DirectoryCopy(sourceDirName, destDirName, copySubDirs, preserveTime);
     public static void DirectoryClear(string sourceDirName) => services.Directory.DirectoryClear(sourceDirName);
     public static void CreatAllPath(string goal) => services.Directory.CreatAllPath(goal);
+    public static void SetAttributesNormal(string folder) => services.Directory.SetAttributesNormal(folder);
+
     /// <summary>
     /// Verifica se é um arquivo zip
     /// </summary>
