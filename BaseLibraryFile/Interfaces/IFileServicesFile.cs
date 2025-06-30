@@ -3,6 +3,7 @@
     public interface IFileServicesFile
     {
         void CopyConserveTime(string original, string destination, bool preservetime = true);
+        void CopyDecriptingFile(string sourcePath, string destinationFolder, string appFolder);
         void ExtractZipConserveTime(string zipPath, string extractPath);
         DateTime FileLastModification(string filePath);
         /// <summary>
@@ -17,5 +18,6 @@
         /// <param name="filePath">File Path to open</param>
         /// <param name="OS">0: Windows, 1: Linux, 2: macOS</param>
         void OpenFile(string filePath, sbyte OS);
+        bool VerifyIfEncrypted(string filePath);
     }
 }

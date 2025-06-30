@@ -104,4 +104,59 @@ public class FileServicesFile : IFileServicesFile
             process.Start();
         }
     }
+    public bool VerifyIfEncrypted(string filePath)
+    {
+        FileAttributes attrs = File.GetAttributes(filePath);
+
+        bool fileIsEncrypted = (attrs & FileAttributes.Encrypted) != 0;
+        return fileIsEncrypted;
+
+    }
+    
+    public void CopyDecriptingFile(string sourcePath, string destinationFolder, string anEFSFolder)
+    {
+        string fileName = Path.GetFileName(sourcePath);
+        string filePathApp = Path.Combine(anEFSFolder, fileName);
+        string filePathDestination = Path.Combine(destinationFolder, fileName);
+        //Copia para a pasta App que supostamente seria no disco encriptografado
+        try 
+        {
+            File.Copy(sourcePath, filePathApp, true);
+        }
+        catch (Exception ex)
+        {
+
+        }
+        // Descriptografa o arquivo copiado
+        try { 
+            File.Decrypt(filePathApp);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception if decryption fails
+            throw new InvalidOperationException("Failed to decrypt the file after copying.", ex);
+        }
+
+        // Copia o arquivo descriptografado para a pasta de destino
+        try 
+        {
+            File.Copy(filePathApp, filePathDestination, true);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception if copy fails
+            throw new InvalidOperationException("Failed to copy the decrypted file to the destination folder.", ex);
+        }
+
+        // Remove o arquivo da pasta App
+        try 
+        {
+            File.Delete(filePathApp);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception if deletion fails
+            throw new InvalidOperationException("Failed to delete the temporary file in the App folder.", ex);
+        }
+    }
 }

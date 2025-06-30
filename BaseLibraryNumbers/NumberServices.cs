@@ -171,7 +171,7 @@ public class NumberServices : INumberServices
 
         double esdTemp;
         string esdAlgarism = string.Empty;
-        string result;
+        string result = string.Empty;
         int orderEsd = int.MinValue;
         int orderValue = int.MinValue;
         if (!double.IsNaN(esdNull) && esdNull != 0)
@@ -227,57 +227,73 @@ public class NumberServices : INumberServices
             {
                 string[] part;
                 part = value.ToString(("E" + (CountAlgharisms(value, true) - 1)), CultureInfo.InvariantCulture).Split('E', StringSplitOptions.RemoveEmptyEntries);
-                if (orderValue > 4)
+                if (part.Length > 0)
                 {
-                    int algharism = orderValue - orderEsd + 1;
-                    if (algharism < 0)
-                        algharism = 0;
+                    if (orderValue > 4)
+                    {
+                        int algharism = orderValue - orderEsd + 1;
+                        if (algharism < 0)
+                            algharism = 0;
+                        else
+                        {
+                            int nozero = part[0].Length;
+                            if (part[0].Contains('.'))
+                                nozero--;
+                            if (part[0].Contains('-') || part[0].Contains('+'))
+                                nozero--;
+                            if (algharism > nozero)
+                                part[0] = part[0] + new string('0', algharism - nozero);
+                        }
+                    }
                     else
                     {
-                        int nozero = part[0].Length;
-                        if (part[0].Contains('.'))
-                            nozero--;
-                        if (part[0].Contains('-') || part[0].Contains('+'))
-                            nozero--;
-                        if (algharism > nozero)
-                            part[0] = part[0] + new string('0', algharism - nozero);
+
+                        if (orderValue < orderEsd)
+                        {
+                            if (!isGreatEsd)
+                            {
+                                //Nunca deve entrar aqui
+                                esdAlgarism = esdAlgarism + new string('0', orderEsd - orderValue);
+                            }
+                        }
+                        else if (orderValue > orderEsd)
+                        {
+                            int nozero = part[0].Length;
+                            if (part[0].Contains('.'))
+                                nozero--;
+                            if (part[0].Contains('-') || part[0].Contains('+'))
+                                nozero--;
+                            if (nozero < orderValue - orderEsd + 1)
+                            {
+                                if (!part[0].Contains('.'))
+                                    part[0] += '.';
+                                part[0] = part[0] + new string('0', (orderValue - orderEsd + 1) - nozero);
+                            }
+
+                        }
                     }
                 }
                 else
                 {
-
-                    if (orderValue < orderEsd)
-                    {
-                        if (!isGreatEsd)
-                        {
-                            //Nunca deve entrar aqui
-                            esdAlgarism = esdAlgarism + new string('0', orderEsd - orderValue);
-                        }
-                    }
-                    else if (orderValue > orderEsd)
-                    {
-                        int nozero = part[0].Length;
-                        if (part[0].Contains('.'))
-                            nozero--;
-                        if (part[0].Contains('-') || part[0].Contains('+'))
-                            nozero--;
-                        if (nozero < orderValue - orderEsd + 1)
-                        {
-                            if (!part[0].Contains('.'))
-                                part[0] += '.';
-                            part[0] = part[0] + new string('0', (orderValue - orderEsd + 1) - nozero);
-                        }
-
-                    }
+                    //TODO verificar o que fazer quando entrar aqui
                 }
-                int ind = 0;
-                if (part[1][ind] == '+' || part[1][ind] == '-')
-                    ind++;
-                while (part[1][ind] == '0')
-                    part[1] = part[1].Remove(ind, 1);
-                //string temp = "F"+ algharism.ToString();
-                esdAlgarism = string.IsNullOrWhiteSpace(esdAlgarism) ? "" : "(" + esdAlgarism + ")";
-                result = string.Format("{0}{1}E{2}", part[0], esdAlgarism, part[1]);
+
+                if (part.Length < 2)
+                {
+                    int ind = 0;
+                    if (part[1][ind] == '+' || part[1][ind] == '-')
+                        ind++;
+                    while (part[1][ind] == '0')
+                        part[1] = part[1].Remove(ind, 1);
+
+                    //string temp = "F"+ algharism.ToString();
+                    esdAlgarism = string.IsNullOrWhiteSpace(esdAlgarism) ? "" : "(" + esdAlgarism + ")";
+                    result = string.Format("{0}{1}E{2}", part[0], esdAlgarism, part[1]);
+                }
+                else
+                {
+                    //TODO verificar o que fazer quando entrar aqui
+                }
             }
             else
             {
