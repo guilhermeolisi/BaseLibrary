@@ -4,6 +4,7 @@
     {
         void CopyConserveTime(string original, string destination, bool preservetime = true);
         void CopyDecriptingFile(string sourcePath, string destinationFolder, string appFolder);
+        void CopyFileCarefulEncription(string sourcePath, string destinationFolder, string anEFSFolder);
         void ExtractZipConserveTime(string zipPath, string extractPath);
         DateTime FileLastModification(string filePath);
         /// <summary>

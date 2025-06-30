@@ -90,7 +90,7 @@ public class FileServicesFile : IFileServicesFile
                 default:
                     break;
             }
-            
+
             process.StartInfo = new()
             {
                 FileName = commandProcess,
@@ -112,14 +112,23 @@ public class FileServicesFile : IFileServicesFile
         return fileIsEncrypted;
 
     }
-    
+    /// <summary>
+    /// Tem que ser usado dentro de um Try Catch
+    /// </summary>
+    /// <param name="sourcePath"></param>
+    /// <param name="destinationFolder"></param>
+    /// <param name="anEFSFolder"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     public void CopyDecriptingFile(string sourcePath, string destinationFolder, string anEFSFolder)
     {
+        if (string.IsNullOrWhiteSpace(anEFSFolder))
+            throw new ArgumentException("The EFS folder path cannot be null or empty.", nameof(anEFSFolder));
+
         string fileName = Path.GetFileName(sourcePath);
         string filePathApp = Path.Combine(anEFSFolder, fileName);
         string filePathDestination = Path.Combine(destinationFolder, fileName);
         //Copia para a pasta App que supostamente seria no disco encriptografado
-        try 
+        try
         {
             File.Copy(sourcePath, filePathApp, true);
         }
@@ -128,7 +137,8 @@ public class FileServicesFile : IFileServicesFile
 
         }
         // Descriptografa o arquivo copiado
-        try { 
+        try
+        {
             File.Decrypt(filePathApp);
         }
         catch (Exception ex)
@@ -138,7 +148,7 @@ public class FileServicesFile : IFileServicesFile
         }
 
         // Copia o arquivo descriptografado para a pasta de destino
-        try 
+        try
         {
             File.Copy(filePathApp, filePathDestination, true);
         }
@@ -149,7 +159,7 @@ public class FileServicesFile : IFileServicesFile
         }
 
         // Remove o arquivo da pasta App
-        try 
+        try
         {
             File.Delete(filePathApp);
         }
@@ -157,6 +167,40 @@ public class FileServicesFile : IFileServicesFile
         {
             // Handle exception if deletion fails
             throw new InvalidOperationException("Failed to delete the temporary file in the App folder.", ex);
+        }
+    }
+    /// <summary>
+    /// Precisa estar dentro de um Try Catch
+    /// </summary>
+    /// <param name="sourcePath"></param>
+    /// <param name="destinationFolder"></param>
+    /// <param name="anEFSFolder"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void CopyFileCarefulEncription(string sourcePath, string destinationFolder, string anEFSFolder)
+    {
+        bool isEncrypted = false;
+        try
+        {
+            File.Copy(sourcePath, destinationFolder, true);
+        }
+        catch (IOException ex)
+        {
+            isEncrypted = VerifyIfEncrypted(sourcePath);
+            if (!isEncrypted)
+            {
+                throw new IOException("Failed to copy the file to the destination folder.", ex);
+            }
+        }
+        if (isEncrypted)
+        {
+            try
+            {
+                CopyDecriptingFile(sourcePath, destinationFolder, anEFSFolder);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to copy the encrypted file carefully.", ex);
+            }
         }
     }
 }
