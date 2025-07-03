@@ -278,7 +278,7 @@ public class NumberServices : INumberServices
                     //TODO verificar o que fazer quando entrar aqui
                 }
 
-                if (part.Length < 2)
+                if (part.Length >= 2)
                 {
                     int ind = 0;
                     if (part[1][ind] == '+' || part[1][ind] == '-')
