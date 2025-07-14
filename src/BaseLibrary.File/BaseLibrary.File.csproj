@@ -16,7 +16,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\BaseLibrary.Text\BaseLibrary.Text.csproj" />
-		<ProjectReference Include="..\Baselibrary\BaseLibrary.General.csproj" />
+		<ProjectReference Include="..\BaseLibrary.General\BaseLibrary.General.csproj" />
 	</ItemGroup>
 
 </Project>

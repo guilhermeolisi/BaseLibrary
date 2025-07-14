@@ -4,17 +4,17 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Platforms>AnyCPU;x86;x64;ARM32;ARM64</Platforms>
+		<Platforms>AnyCPU;x64;x86;ARM32;ARM64</Platforms>
 		<RootNamespace>BaseLibrary</RootNamespace>
 		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<Optimize>true</Optimize>
-	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Splat" Version="15.4.1" />
+	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\BaseLibraryNumbers\BaseLibrary.Numbers.csproj" />
+		<ProjectReference Include="..\BaseLibrary.General\BaseLibrary.General.csproj" />
 	</ItemGroup>
 
 </Project>

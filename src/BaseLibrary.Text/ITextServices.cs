@@ -17,4 +17,5 @@ public interface ITextServices
     string TextWithWhiteSpaceToCamelCaseStrict(string text);
     string TextWithWhiteSpaceToCamelCase(string text);
     string FirstLetterToUpperStric(string text);
+    int Count(string text, char letter);
 }

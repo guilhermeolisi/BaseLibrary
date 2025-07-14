@@ -4,14 +4,12 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Platforms>AnyCPU;x64;x86;ARM32;ARM64</Platforms>
-		<RootNamespace>BaseLibrary</RootNamespace>
+		<Platforms>AnyCPU;x86;x64;ARM64</Platforms>
 		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BaseLibraryFile\BaseLibrary.File.csproj" />
-		<ProjectReference Include="..\BaseLibraryHTTP\BaseLibrary.HTTP.csproj" />
+		<ProjectReference Include="..\BaseLibrary.General\BaseLibrary.General.csproj" />
 	</ItemGroup>
 
 </Project>
