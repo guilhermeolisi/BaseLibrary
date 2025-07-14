@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BaseLibraryHTTP\BaseLibrary.HTTP.csproj" />
+		<ProjectReference Include="..\BaseLibrary.HTTP\BaseLibrary.HTTP.csproj" />
 	</ItemGroup>
 
 </Project>
