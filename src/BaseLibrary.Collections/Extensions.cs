@@ -263,6 +263,17 @@ public static class Extensions
             }
         }
     }
+    public static bool IsNullOrEmpty(this IEnumerable? list)
+    {
+        if (list is null)
+            return true;
+        if (list is ICollection collection)
+            return collection.Count == 0;
+        var enumerator = list.GetEnumerator();
+        return !enumerator.MoveNext();
+    }
+    public static bool IsNotNullOrEmpty(this IEnumerable? list) => !list.IsNullOrEmpty();
+
     //public static void RemoveLast<T>(this IEnumerable<T> list)
     //{
     //    if (list is IList<T> list2)

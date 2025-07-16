@@ -44,6 +44,7 @@ public static class NumbersMethods
 
     #region double Methods Extentions
     public static bool IsNaN(this double value) => double.IsNaN(value);
+    public static bool IsNotNaN(this double value) => !double.IsNaN(value);
     public static bool IsInfinity(this double value) => double.IsInfinity(value);
     public static bool IsPositiveInfinity(this double value) => double.IsPositiveInfinity(value);
     public static bool IsNegativeInfinity(this double value) => double.IsNegativeInfinity(value);

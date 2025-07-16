@@ -36,18 +36,28 @@ public class NumberServices : INumberServices
             {
                 //if ()
                 //{
-                return value.ToString(CultureInfo.InvariantCulture).Split('.')[1].Length;
+
                 //}
+                string[] temp = value.ToString(CultureInfo.InvariantCulture).Split('.');
+                return temp.Length < 2 ? 0 : temp[1].Length;
             }
             else
             {
 #if DEBUG
-                var trash2 = (value + 1).ToString(CultureInfo.InvariantCulture);
+                var trash2 = (Abs(value) + 1).ToString(CultureInfo.InvariantCulture);
+                if (Abs(Abs(value) + 1 - 1 - value) > 1E-12)
+                {
+
+                }
 
 #endif
-                string[] temp = (value + 1).ToString(CultureInfo.InvariantCulture).Split('.');
-                return temp.Length == 2 ? temp[1].Length : 0;// preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
-                //return (value + 1).ToString(CultureInfo.InvariantCulture).Split('.')[1].Length;// preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
+                //string[] temp = (value + 1).ToString(CultureInfo.InvariantCulture).Split('.'); // preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
+                string[] temp = value.ToString("F15", CultureInfo.InvariantCulture).Split('.'); // F15 é por que o padrão de precisão do double é 15 casas decimais, assim não perdemos precisão
+                if (temp.Length < 2)
+                    return 0;
+                string temp2 = temp[1].TrimEnd('0');
+                return temp2.Length;
+                //return (value + 1).ToString(CultureInfo.InvariantCulture).Split('.')[1].Length;
             }
         }
         else
