@@ -34,12 +34,8 @@ public class NumberServices : INumberServices
         {
             if (Abs(value) >= 1)
             {
-                //if ()
-                //{
-
-                //}
                 string[] temp = value.ToString(CultureInfo.InvariantCulture).Split('.');
-                return temp.Length < 2 ? 0 : temp[1].Length;
+                return temp.Length < 2 ? 0 : temp[1].Length > 15 ? 15 : temp[1].Length;
             }
             else
             {
@@ -51,23 +47,15 @@ public class NumberServices : INumberServices
                 }
 
 #endif
-                //string[] temp = (value + 1).ToString(CultureInfo.InvariantCulture).Split('.'); // preciso acrescentar +1 para evitar que numeros menores que 0 sejam 
                 string[] temp = value.ToString("F15", CultureInfo.InvariantCulture).Split('.'); // F15 é por que o padrão de precisão do double é 15 casas decimais, assim não perdemos precisão
                 if (temp.Length < 2)
                     return 0;
                 string temp2 = temp[1].TrimEnd('0');
                 return temp2.Length;
-                //return (value + 1).ToString(CultureInfo.InvariantCulture).Split('.')[1].Length;
             }
         }
         else
             return 0;
-        //int res = 0;
-        //while (d != (long)d) {
-        //    res++;
-        //    d = d * 10;// o problema desse método é que ele faz operações matemáticas e isso pode alterar o número também e dar resultados errados.
-        //}
-        //return res;
     }
     /// <summary>
     /// Conta o número de algarismos significativos, zeros a direita e a esquerda são desconsiderados
