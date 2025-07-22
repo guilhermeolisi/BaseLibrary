@@ -10,5 +10,5 @@ namespace BaseLibrary;
 
 public interface IEmailSender
 {
-    Task<GOSResult> SendEmail(string emailTo, string subject, string message, bool isAsync);
+    Task<GOSResult> SendMessage(string emailTo, string subject, string message, bool isAsync);
 }

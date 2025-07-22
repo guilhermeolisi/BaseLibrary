@@ -11,15 +11,15 @@ public class ExceptionServices : IExceptionServices
     //private string emailSender, password, folder, emailTo;
     private string folder, emailTo;
     private bool isConsole;
-    private IExceptionDetailsServices details;
+    private IExceptionDetailsServices exceptionDetails;
     IEmailSender emailSender;
     IHTTPServices httpServices;
-    public ExceptionServices(string emailTo, string[] assembliesName, string folder = null, IExceptionDetailsServices? details = null, IEmailSender? emailSender = null, IHTTPServices? httpServices = null, bool isConsole = false)
+    public ExceptionServices(string emailTo, string[] assembliesName, string folder = null, IExceptionDetailsServices? exceptionDetails = null, IEmailSender? emailSender = null, IHTTPServices? httpServices = null, bool isConsole = false)
     {
         this.AssembliesName = assembliesName;
         this.folder = folder;// ?? throw new ArgumentNullException(nameof(folder));
         this.emailTo = emailTo ?? throw new ArgumentNullException(nameof(emailTo));
-        this.details = details ?? Locator.Current.GetService<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(details));
+        this.exceptionDetails = exceptionDetails ?? Locator.Current.GetService<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(exceptionDetails));
         this.emailSender = emailSender ?? Locator.Current.GetService<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
 
         this.httpServices = httpServices ?? Locator.Current.GetService<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
@@ -69,7 +69,7 @@ public class ExceptionServices : IExceptionServices
                     }
                     if (result.Exception is not null)
                     {
-                        string messageException = details.ToDetailedString(result.Exception);
+                        string messageException = exceptionDetails.ToDetailedString(result.Exception);
                         SaveLocalException(messageException, fileNameExceptionSender, isAsync);
                     }
                 }
@@ -130,7 +130,7 @@ public class ExceptionServices : IExceptionServices
             SaveLocalException(message, appName, isAsync);
             if (result.Exception is not null)
             {
-                string messageException = details.ToDetailedString(result.Exception);
+                string messageException = exceptionDetails.ToDetailedString(result.Exception);
                 SaveLocalException(messageException, fileNameExceptionSender, isAsync);
             }
         }
@@ -159,7 +159,7 @@ public class ExceptionServices : IExceptionServices
             GetExceptionText(e, messageExtra);
         return (message, appName);
     }
-    public void SaveException(Exception e, string? messageExtra, string? OSversion)
+    private void SaveException(Exception e, string? messageExtra, string? OSversion)
     {
         (string message, string appName) = GetMessageToSend(e, messageExtra, OSversion);
         SaveLocalException(message, appName, false);
@@ -172,7 +172,7 @@ public class ExceptionServices : IExceptionServices
         Version? ver = program?.Version;
         string message = "[" + DateTime.Now + "]" + Environment.NewLine + "Program: " + appName + Environment.NewLine +
             "Version: " + ver?.ToString() + Environment.NewLine +
-            details.ToDetailedString(e) +
+            exceptionDetails.ToDetailedString(e) +
             (!string.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
         return message;
     }
@@ -209,9 +209,9 @@ public class ExceptionServices : IExceptionServices
         try
         {
             if (isAsync)
-                return await emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now + ":" + DateTime.Now.Millisecond, message, isAsync);
+                return await emailSender.SendMessage(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now + ":" + DateTime.Now.Millisecond, message, isAsync);
             else
-                return emailSender.SendEmail(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now + ":" + DateTime.Now.Millisecond, message, isAsync).Result;
+                return emailSender.SendMessage(emailTo, $"[#X@{appName.ToUpper()}] " + DateTime.Now + ":" + DateTime.Now.Millisecond, message, isAsync).Result;
         }
         catch (Exception ex)
         {

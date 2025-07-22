@@ -22,7 +22,7 @@ public class EmailSenderSendGrid : IEmailSender
         client = new SendGridClient(apiKey);
         emailFrom = new(emailSender);
     }
-    public async Task<GOSResult> SendEmail(string emailTo, string subject, string message, bool isAsync)
+    public async Task<GOSResult> SendMessage(string emailTo, string subject, string message, bool isAsync)
     {
 
         if (!httpServices.IsConnectedToInternet())
