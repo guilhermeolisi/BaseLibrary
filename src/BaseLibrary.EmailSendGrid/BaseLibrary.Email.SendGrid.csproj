@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BaseLibrary.DependencyInjection\BaseLibrary.DependencyInjection.csproj" />
     <ProjectReference Include="..\BaseLibrary.HTTP\BaseLibrary.HTTP.csproj" />
   </ItemGroup>
 

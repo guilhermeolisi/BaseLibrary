@@ -1,6 +1,6 @@
-﻿using SendGrid.Helpers.Mail;
+﻿using BaseLibrary.DependencyInjection;
 using SendGrid;
-using Splat;
+using SendGrid.Helpers.Mail;
 
 namespace BaseLibrary;
 
@@ -13,7 +13,7 @@ public class EmailSenderSendGrid : IEmailSender
     public EmailSenderSendGrid(string emailSender, string apiKey, IHTTPServices? httpServices = null)
     {
         this.emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
-        this.httpServices = httpServices ?? Locator.Current.GetService<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
+        this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
         CreateObjects(apiKey);
     }
     private void CreateObjects(string apiKey)

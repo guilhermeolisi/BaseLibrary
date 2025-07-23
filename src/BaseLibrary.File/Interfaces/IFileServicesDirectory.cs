@@ -1,12 +1,4 @@
-﻿using FileTypeChecker;
-using FileTypeChecker.Abstracts;
-using FileTypeChecker.Extensions;
-using Splat;
-using System.IO.Compression;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public interface IFileServicesDirectory
 {

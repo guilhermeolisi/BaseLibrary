@@ -1,26 +1,19 @@
 ﻿using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
-using Splat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace BaseLibrary;
 
 public class MenssageAzureTrackTrace : IEmailSender
 {
-    private string azureKey;
-    private IHTTPServices? httpServices;
+    //private string azureKey;
+    //private IHTTPServices? httpServices;
     private TelemetryClient telemetryClient;
     public MenssageAzureTrackTrace(string azureKey, IHTTPServices? httpServices = null)
     {
-        this.azureKey = azureKey ?? throw new ArgumentNullException(nameof(azureKey));
-        this.httpServices = httpServices ?? Locator.Current.GetService<IHTTPServices>()
-            ?? throw new ArgumentNullException(nameof(httpServices));
+        //this.azureKey = azureKey ?? throw new ArgumentNullException(nameof(azureKey));
+        //this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()
+        //    ?? throw new ArgumentNullException(nameof(httpServices));
 
         var config = TelemetryConfiguration.CreateDefault();
         config.ConnectionString = azureKey;
@@ -51,10 +44,10 @@ public class MenssageAzureTrackTrace : IEmailSender
             {
                 { "subject", subject },
                 { "local time", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff") },
-                
+
             });
         }
-        
+
 
         return new GOSResult(true);
     }

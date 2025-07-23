@@ -1,4 +1,4 @@
-﻿using Splat;
+﻿using BaseLibrary.DependencyInjection;
 using System.Text;
 
 namespace BaseLibrary;
@@ -23,7 +23,7 @@ public class FileTXTIO : IFileTXTIO
 
     public FileTXTIO(/*string? pathFile = null, bool isStayBak = false, int delay = 250, */IFileServices? fileServices = null)
     {
-        this.fileServices = fileServices ?? Locator.Current!.GetService<IFileServices>()!;
+        this.fileServices = fileServices ?? Locator.ConstanteContainer.Resolve<IFileServices>()!;
 
         //_delay = delay;
         //_pathFile = pathFile;

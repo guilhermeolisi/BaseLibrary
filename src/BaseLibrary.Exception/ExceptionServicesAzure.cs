@@ -1,13 +1,7 @@
-﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Channel;
+﻿using BaseLibrary.DependencyInjection;
+using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
-using Splat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BaseLibrary;
 
@@ -22,9 +16,9 @@ public class ExceptionServicesAzure : IExceptionServices
     {
         this.azureKey = azurKey ?? throw new ArgumentNullException(nameof(azurKey));
         this.assembliesName = assembliesName ?? throw new ArgumentNullException(nameof(assembliesName));
-        this.exceptionDetails = exceptionDetails ?? Locator.Current.GetService<IExceptionDetailsServices>()
+        this.exceptionDetails = exceptionDetails ?? Locator.ConstanteContainer.Resolve<IExceptionDetailsServices>()
             ?? throw new ArgumentNullException(nameof(exceptionDetails));
-        this.httpServices = httpServices ?? Locator.Current.GetService<IHTTPServices>()
+        this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()
             ?? throw new ArgumentNullException(nameof(httpServices));
 
         var config = TelemetryConfiguration.CreateDefault();

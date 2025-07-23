@@ -1,4 +1,4 @@
-﻿using Splat;
+﻿using BaseLibrary.DependencyInjection;
 using System.Diagnostics;
 using System.IO.Compression;
 
@@ -9,7 +9,7 @@ public class FileServicesFile : IFileServicesFile
     IFileServicesDirectory directory;
     public FileServicesFile(IFileServicesDirectory? directory = null)
     {
-        this.directory = directory ?? Locator.Current!.GetService<IFileServicesDirectory>()! ?? new FileServicesDirectory();
+        this.directory = directory ?? Locator.ConstanteContainer.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
     }
     public void CopyConserveTime(string original, string destination, bool preservetime = true)
     {

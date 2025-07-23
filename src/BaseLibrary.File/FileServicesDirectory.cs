@@ -1,15 +1,4 @@
-﻿using FileTypeChecker;
-using FileTypeChecker.Abstracts;
-using FileTypeChecker.Extensions;
-using Splat;
-using System.Diagnostics.Tracing;
-using System.Drawing;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace BaseLibrary;
+﻿namespace BaseLibrary;
 
 public class FileServicesDirectory : IFileServicesDirectory
 {

@@ -1,4 +1,5 @@
-﻿using Splat;
+﻿
+using BaseLibrary.DependencyInjection;
 
 namespace BaseLibrary;
 
@@ -11,11 +12,11 @@ public class FileServices : IFileServices
     public IFileServicesFile File { get; }
     public FileServices(IFileServicesText? _servicesText = null, IFileServicesDirectory? _servicesDirectory = null, IFileServicesCheck? _servicesCheck = null, IFileServicesName? _servicesName = null, IFileServicesFile file = null)
     {
-        Text = _servicesText ?? Locator.Current!.GetService<IFileServicesText>()! ?? new FileServicesText();
-        Directory = _servicesDirectory ?? Locator.Current!.GetService<IFileServicesDirectory>()! ?? new FileServicesDirectory();
-        Check = _servicesCheck ?? Locator.Current!.GetService<IFileServicesCheck>()! ?? new FileServicesCheck();
-        Name = _servicesName ?? Locator.Current!.GetService<IFileServicesName>()! ?? new FileServicesName();
-        File = file ?? Locator.Current!.GetService<IFileServicesFile>()! ?? new FileServicesFile();
+        Text = _servicesText ?? Locator.ConstanteContainer!.Resolve<IFileServicesText>()! ?? new FileServicesText();
+        Directory = _servicesDirectory ?? Locator.ConstanteContainer!.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
+        Check = _servicesCheck ?? Locator.ConstanteContainer!.Resolve<IFileServicesCheck>()! ?? new FileServicesCheck();
+        Name = _servicesName ?? Locator.ConstanteContainer!.Resolve<IFileServicesName>()! ?? new FileServicesName();
+        File = file ?? Locator.ConstanteContainer!.Resolve<IFileServicesFile>()! ?? new FileServicesFile();
     }
 
 
