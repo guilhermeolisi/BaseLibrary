@@ -1,6 +1,6 @@
 ﻿namespace BaseLibrary.Text;
 
-public static class TextMethods
+public static class TextExtensions
 {
     static ITextServices services = new TextServices();
 
@@ -23,6 +23,8 @@ public static class TextMethods
     public static int Count(this string text, char character) => services.Count(text, character);
     public static bool IsNullOrWhiteSpace(this string? text) => string.IsNullOrWhiteSpace(text);
     public static bool IsNotNullOrWhiteSpace(this string? text) => !string.IsNullOrWhiteSpace(text);
+    public static bool IsNone(this char value) => value == '\0';
+    public static bool IsNotNone(this char value) => value != '\0';
     public static string Join(this IEnumerable<string> strings, string separator) => string.Join(separator, strings);
     public static char ToUpper(this char letter) => char.ToUpper(letter);
     public static char ToLower(this char letter) => char.ToLower(letter);
