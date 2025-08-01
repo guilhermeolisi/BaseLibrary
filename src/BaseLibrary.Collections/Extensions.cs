@@ -253,15 +253,19 @@ public static class Extensions
         if (list.Count > 0)
             list.RemoveAt(list.Count - 1);
     }
-    public static void RemoveExtras(this IList list, int max)
+    public static void RemoveExtras(this IList list, int total)
     {
-        if (list.Count > max)
+        while (list.Count > total)
         {
-            for (int i = list.Count - 1; i >= max; i--)
-            {
-                list.RemoveAt(i);
-            }
+            list.RemoveLast();
         }
+        //if (list.Count > indMax)
+        //{
+        //    for (int i = list.Count - 1; i >= indMax; i--)
+        //    {
+        //        list.RemoveAt(i);
+        //    }
+        //}
     }
     public static bool IsNullOrEmpty(this IEnumerable? list)
     {
@@ -273,6 +277,7 @@ public static class Extensions
         return !enumerator.MoveNext();
     }
     public static bool IsNotNullOrEmpty(this IEnumerable? list) => !list.IsNullOrEmpty();
+
 
     //public static void RemoveLast<T>(this IEnumerable<T> list)
     //{

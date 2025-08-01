@@ -44,4 +44,5 @@ public interface INumberServices
     T Min<T>(T value, T min) where T : IComparable<T>;
     T Bigger<T>(T value1, T value2) where T : IComparable<T>;
     T Smaller<T>(T value1, T value2) where T : IComparable<T>;
+    int RandomOneOrMinusOne();
 }

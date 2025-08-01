@@ -426,6 +426,14 @@ public class NumberServices : INumberServices
         }
         return str;
     }
+    public int RandomOneOrMinusOne()
+    {
+#if DEBUG
+        int sign = (Random.Shared.Next(2) << 1) - 1;
+#endif
+        //return Rand.Next(0, 2) == 0 ? 1 : -1;
+        return (Random.Shared.Next(2) << 1) - 1;
+    }
     public T Clamp<T>(T value, T min, T max) where T : IComparable<T>
     {
         //https://stackoverflow.com/questions/3176602/how-to-force-a-number-to-be-in-a-range-in-c

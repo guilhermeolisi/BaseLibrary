@@ -25,7 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\BaseLibrary.Colors\BaseLibrary.Colors.csproj" />
     <ProjectReference Include="..\..\src\BaseLibrary.DependencyInjection\BaseLibrary.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\src\BaseLibrary.General\BaseLibrary.General.csproj" />
     <ProjectReference Include="..\..\src\BaseLibrary.Numbers\BaseLibrary.Numbers.csproj" />
   </ItemGroup>
 

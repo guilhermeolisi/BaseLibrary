@@ -2,6 +2,14 @@
 
 public static class ObjectProcess
 {
+    public static T CloneThis<T>(this T source) where T : class, new()
+    {
+        if (source is null)
+            return null;
+        var destination = new T();
+        source.CopyTo(destination);
+        return destination;
+    }
     public static void CopyTo<T>(this T source, T destination)
     {
         if (source is null)
