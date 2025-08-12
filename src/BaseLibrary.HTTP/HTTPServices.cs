@@ -33,6 +33,10 @@ public class HTTPServices : IHTTPServices
                 return true;
             }
         }
+        catch (PlatformNotSupportedException ex)
+        {
+            return IsConnectedToInternet();
+        }
         catch (Exception ex)
         {
             return false;
