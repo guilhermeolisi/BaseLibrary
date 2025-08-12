@@ -5,6 +5,11 @@ namespace BaseLibrary;
 
 public class ConsoleServices : IConsoleServices
 {
+    StringBuilder? internalLog = null;
+
+    public void InitizaliseInternalLog() => internalLog = new();
+    public string? GetInternalLog() => internalLog?.ToString();
+
     //https://www.codeproject.com/Tips/5255878/A-Console-Progress-Bar-in-Csharp
     const char _block = '■';
     const string _back = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"; //total: 17
@@ -92,9 +97,82 @@ public class ConsoleServices : IConsoleServices
                 Console.WriteLine(e.ToString());
                 return new GOSResult(false, e, message);
             }
-        };
+        }
+        ;
         //Console.WriteLine();
         return new GOSResult(true, null, message);
+    }
+    public GOSResult RunProcess(string fileName, string arguments, string? workFolder, bool useShellWindow)
+    {
+        StringBuilder sb = new();
+        //dotnet publish SindarinProgram.csproj -p:PublishProfile=windowsx64
+        using (Process process = new())
+        {
+            // redirect the output
+            //process.StartInfo.RedirectStandardOutput = true;
+            //process.StartInfo.RedirectStandardError = true;
+
+            process.StartInfo = new()
+            {
+                FileName = fileName,
+                WorkingDirectory = workFolder,
+                //ArgumentList = { "publish", "Nimloth.Desktop.csproj", "-p:PublishProfile=" + name },
+                Arguments = arguments,
+                CreateNoWindow = !useShellWindow,
+                UseShellExecute = useShellWindow,
+                //WindowStyle = ProcessWindowStyle.Normal
+                RedirectStandardOutput = !useShellWindow,
+                RedirectStandardError = !useShellWindow,
+            };
+            if (workFolder is not null)
+                process.StartInfo.WorkingDirectory = workFolder;
+
+            if (!useShellWindow)
+            {
+                process.OutputDataReceived += (sender, args) => sb.AppendLine(args.Data);
+                process.ErrorDataReceived += (sender, args) => sb.AppendLine($"ERR: {args.Data}");
+            }
+            process.Start();
+
+            //string message = process.StandardOutput.ReadToEnd();
+            //string messageerror = process.StandardError.ReadToEnd();
+
+            if (!useShellWindow)
+            {
+                // start our event pumps
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
+
+            process.WaitForExit();
+
+            string trash = sb.ToString();
+
+            if (process.ExitCode == 0)
+            {
+                //console.WriteLine(" done", 1);
+            }
+            else
+            {
+                WriteLine("Exit Code error: " + process.ExitCode);
+
+                if (!useShellWindow)
+                {
+                    //WriteLine(sb.ToString());
+
+                    //Console.WriteLine("Output: " + message);
+                    //Console.WriteLine("Error: " + messageerror);
+                    //Console.WriteLine("--------");
+                    //Console.WriteLine("Output: " + process.StandardOutput.ReadToEnd());
+                    //Console.WriteLine("--------");
+                    //Console.WriteLine("Error: " + process.StandardError.ReadToEnd());
+                }
+                return new(false, sb.ToString());
+            }
+        }
+
+        return new(true, sb.ToString());
+
     }
     public bool DialogYesNo(string message)
     {
@@ -132,7 +210,7 @@ public class ConsoleServices : IConsoleServices
         Console.WriteLine();
         return answer;
     }
-    public void Write(string str, int color = 0)
+    public void Write(string str, int color = 0, StringBuilder? sb = null)
     {
         if (color != 0)
         {
@@ -142,17 +220,30 @@ public class ConsoleServices : IConsoleServices
                 Console.ForegroundColor = ConsoleColor.Yellow;
             else if (color == 3)
                 Console.ForegroundColor = ConsoleColor.Red;
+            else if (color == 4)
+                Console.ForegroundColor = ConsoleColor.Gray;
         }
         Console.Write(str);
+
+        sb?.Append(str);
+        internalLog?.Append(str);
+
         if (color != 0)
         {
             Console.ResetColor();
         }
     }
-    public void WriteLine(string str = "", int color = 0)
+    public void WriteLine(string str = "", int color = 0, StringBuilder? sb = null)
     {
-        Write(str, color);
+        Write(str, color, sb);
         Console.WriteLine();
+        sb?.AppendLine();
+        internalLog?.AppendLine();
+    }
+    public void Clear()
+    {
+        Console.Clear();
+        internalLog.Clear();
     }
     public void EraseAndWrite(int eraseLength, string str, int color = 0)
     {
