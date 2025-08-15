@@ -8,12 +8,14 @@ public struct GOSResult
     public Exception? Exception { get; private set; }
     public string? Message { get; private set; }
     public byte Option { get; private set; }
+    public object? Object { get; private set; }
     public GOSResult(bool success) : this()
     {
         Success = success;
         Exception = null;
         Message = null;
         Option = 0;
+        Object = null;
     }
     public GOSResult(string message) : this()
     {
@@ -21,6 +23,7 @@ public struct GOSResult
         Exception = null;
         Message = message;
         Option = 0;
+        Object = null;
     }
     public GOSResult(Exception exception) : this()
     {
@@ -28,6 +31,7 @@ public struct GOSResult
         Exception = exception;
         Message = null;
         Option = 0;
+        Object = null;
     }
     public GOSResult(bool success, string message) : this()
     {
@@ -35,6 +39,7 @@ public struct GOSResult
         Exception = null;
         Message = message;
         Option = 0;
+        Object = null;
     }
     public GOSResult(bool success, Exception exception) : this()
     {
@@ -42,6 +47,7 @@ public struct GOSResult
         Exception = exception;
         Message = null;
         Option = 0;
+        Object = null;
     }
     public GOSResult(bool success, Exception? exception, string message) : this()
     {
@@ -49,6 +55,7 @@ public struct GOSResult
         Exception = exception;
         Message = message;
         Option = 0;
+        Object = null;
     }
     public GOSResult(bool success, Exception? exception, string? message, byte option) : this()
     {
@@ -56,6 +63,15 @@ public struct GOSResult
         Exception = exception;
         Message = message;
         Option = option;
+        Object = null;
+    }
+    public GOSResult(bool success, Exception? exception, string? message, byte option, object obj) : this()
+    {
+        Success = success;
+        Exception = exception;
+        Message = message;
+        Option = option;
+        Object = obj;
     }
     public GOSResult(bool success, byte option) : this()
     {
@@ -63,6 +79,7 @@ public struct GOSResult
         Exception = null;
         Message = null;
         Option = option;
+        Object = null;
     }
     public GOSResult(byte option) : this()
     {
@@ -70,6 +87,7 @@ public struct GOSResult
         Exception = null;
         Message = null;
         Option = option;
+        Object = null;
     }
     public override string ToString()
     {
