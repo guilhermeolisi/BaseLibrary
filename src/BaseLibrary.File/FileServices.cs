@@ -12,11 +12,11 @@ public class FileServices : IFileServices
     public IFileServicesFile File { get; }
     public FileServices(IFileServicesText? _servicesText = null, IFileServicesDirectory? _servicesDirectory = null, IFileServicesCheck? _servicesCheck = null, IFileServicesName? _servicesName = null, IFileServicesFile file = null)
     {
-        Text = _servicesText ?? Locator.ConstanteContainer!.Resolve<IFileServicesText>()! ?? new FileServicesText();
-        Directory = _servicesDirectory ?? Locator.ConstanteContainer!.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
-        Check = _servicesCheck ?? Locator.ConstanteContainer!.Resolve<IFileServicesCheck>()! ?? new FileServicesCheck();
-        Name = _servicesName ?? Locator.ConstanteContainer!.Resolve<IFileServicesName>()! ?? new FileServicesName();
-        File = file ?? Locator.ConstanteContainer!.Resolve<IFileServicesFile>()! ?? new FileServicesFile();
+        Text = _servicesText ?? Locator.ConstantContainer!.Resolve<IFileServicesText>()! ?? new FileServicesText();
+        Directory = _servicesDirectory ?? Locator.ConstantContainer!.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
+        Check = _servicesCheck ?? Locator.ConstantContainer!.Resolve<IFileServicesCheck>()! ?? new FileServicesCheck();
+        Name = _servicesName ?? Locator.ConstantContainer!.Resolve<IFileServicesName>()! ?? new FileServicesName();
+        File = file ?? Locator.ConstantContainer!.Resolve<IFileServicesFile>()! ?? new FileServicesFile();
     }
 
 

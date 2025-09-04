@@ -19,10 +19,10 @@ public class ExceptionServices : IExceptionServices
         this.AssembliesName = assembliesName;
         this.folder = folder;// ?? throw new ArgumentNullException(nameof(folder));
         this.emailTo = emailTo ?? throw new ArgumentNullException(nameof(emailTo));
-        this.exceptionDetails = exceptionDetails ?? Locator.ConstanteContainer.Resolve<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(exceptionDetails));
-        this.emailSender = emailSender ?? Locator.ConstanteContainer.Resolve<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
+        this.exceptionDetails = exceptionDetails ?? Locator.ConstantContainer.Resolve<IExceptionDetailsServices>()! ?? throw new ArgumentNullException(nameof(exceptionDetails));
+        this.emailSender = emailSender ?? Locator.ConstantContainer.Resolve<IEmailSender>()! ?? throw new ArgumentNullException(nameof(emailSender));
 
-        this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
+        this.httpServices = httpServices ?? Locator.ConstantContainer.Resolve<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
         this.isConsole = isConsole;
     }
     public void SetFolder(string folder)

@@ -16,9 +16,9 @@ public class ExceptionServicesAzure : IExceptionServices
     {
         this.azureKey = azurKey ?? throw new ArgumentNullException(nameof(azurKey));
         this.assembliesName = assembliesName ?? throw new ArgumentNullException(nameof(assembliesName));
-        this.exceptionDetails = exceptionDetails ?? Locator.ConstanteContainer.Resolve<IExceptionDetailsServices>()
+        this.exceptionDetails = exceptionDetails ?? Locator.ConstantContainer.Resolve<IExceptionDetailsServices>()
             ?? throw new ArgumentNullException(nameof(exceptionDetails));
-        this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()
+        this.httpServices = httpServices ?? Locator.ConstantContainer.Resolve<IHTTPServices>()
             ?? throw new ArgumentNullException(nameof(httpServices));
 
         var config = TelemetryConfiguration.CreateDefault();

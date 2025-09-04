@@ -399,7 +399,7 @@ public class TextServices : ITextServices
             return name;
         return string.Format("{0}{1}{2}", name, string.IsNullOrWhiteSpace(sufix) ? "" : " - " + sufix, index == 1 ? "" : " (" + index + ")");
     }
-    public int Count( string text, char letter)
+    public int Count(string text, char letter)
     {
         if (string.IsNullOrEmpty(text))
             return 0;

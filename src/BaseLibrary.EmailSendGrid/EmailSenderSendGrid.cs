@@ -13,7 +13,7 @@ public class EmailSenderSendGrid : IEmailSender
     public EmailSenderSendGrid(string emailSender, string apiKey, IHTTPServices? httpServices = null)
     {
         this.emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
-        this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
+        this.httpServices = httpServices ?? Locator.ConstantContainer.Resolve<IHTTPServices>()! ?? throw new ArgumentNullException(nameof(httpServices));
         CreateObjects(apiKey);
     }
     private void CreateObjects(string apiKey)

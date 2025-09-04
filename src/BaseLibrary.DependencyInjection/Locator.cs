@@ -8,7 +8,7 @@ public static class Locator
     {
         get => _mutableContainer;
     }
-    public static IContainer ConstanteContainer
+    public static IContainer ConstantContainer
     {
         get => _constantContainer;
     }

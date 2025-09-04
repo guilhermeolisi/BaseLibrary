@@ -23,7 +23,7 @@ public class FileTXTIO : IFileTXTIO
 
     public FileTXTIO(/*string? pathFile = null, bool isStayBak = false, int delay = 250, */IFileServices? fileServices = null)
     {
-        this.fileServices = fileServices ?? Locator.ConstanteContainer.Resolve<IFileServices>()!;
+        this.fileServices = fileServices ?? Locator.ConstantContainer.Resolve<IFileServices>()!;
 
         //_delay = delay;
         //_pathFile = pathFile;

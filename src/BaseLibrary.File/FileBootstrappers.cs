@@ -14,7 +14,7 @@ public class FileBootstrappers
     {
         IContainer container;
 
-        container = Locator.ConstanteContainer;
+        container = Locator.ConstantContainer;
 
         container.RegisterSingleton<IFileServicesText>(new FileServicesText());
         container.RegisterSingleton<IFileServicesCheck>(new FileServicesCheck());

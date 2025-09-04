@@ -9,7 +9,7 @@ public class FileServicesFile : IFileServicesFile
     IFileServicesDirectory directory;
     public FileServicesFile(IFileServicesDirectory? directory = null)
     {
-        this.directory = directory ?? Locator.ConstanteContainer.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
+        this.directory = directory ?? Locator.ConstantContainer.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
     }
     public void CopyConserveTime(string original, string destination, bool preservetime = true)
     {
