@@ -194,6 +194,12 @@ public class ColorServices : IColorServices
         l *= factorChange; // reduzir a luminosidade
         return HSLToRGB(h, s, l);
     }
+    public (byte, byte, byte) RGBChangeLightness(byte r, byte g, byte b, double newLightness)
+    {
+        var (h, s, l) = RGBToHSL(r, g, b);
+        l = newLightness;
+        return HSLToRGB(h, s, l);
+    }
 
     /// <summary>
     /// Método para clarear uma cor
@@ -307,7 +313,7 @@ public class ColorServices : IColorServices
         }
         double bestHue = Min(moreDistanceHue[0], moreDistanceHue[1]) + HueDistance(moreDistanceHue[0], moreDistanceHue[1]) / 2;
 
-        // Garantir que hava mudança mínima de hue antes de mudar saturação e luminosidade
+        // Garantir que haja mudança mínima de hue antes de mudar saturação e luminosidade
         if (bestScore > (360 / toMuchCount) * 1.2)
         {
             satVar = 0;

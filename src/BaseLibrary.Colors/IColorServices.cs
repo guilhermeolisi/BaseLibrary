@@ -15,5 +15,6 @@
         double HueDistance(double h1, double h2);
         (byte r, byte g, byte b) GenerateNewColor(byte[][] existingColorsRGB);
         (byte r, byte g, byte b) GenerateNewColor(byte[][] existingColorsRGB, int countMore);
+        (byte, byte, byte) RGBChangeLightness(byte r, byte g, byte b, double newLightness);
     }
 }

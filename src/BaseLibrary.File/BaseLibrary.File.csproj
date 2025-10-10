@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="File.TypeChecker" Version="4.1.1" />
+		<PackageReference Include="File.TypeChecker" Version="4.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
