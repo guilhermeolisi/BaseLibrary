@@ -411,5 +411,38 @@ public class TextServices : ITextServices
         }
         return count;
     }
-
+    public bool ContainsLetter(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return false;
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (char.IsAsciiLetter(text[i]))
+                return true;
+        }
+        return false;
+    }
+    public bool ContainsDigit(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return false;
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (char.IsDigit(text[i]))
+                return true;
+        }
+        return false;
+    }
+    public long CountLetterAndDigit(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return 0;
+        long count = 0;
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (char.IsAsciiLetterOrDigit(text[i]))
+                count++;
+        }
+        return count;
+    }
 }

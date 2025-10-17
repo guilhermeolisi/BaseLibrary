@@ -1,4 +1,6 @@
-﻿namespace BaseLibrary;
+﻿using System.Text;
+
+namespace BaseLibrary;
 
 public interface IFileServicesCheck
 {
@@ -7,4 +9,6 @@ public interface IFileServicesCheck
     bool CheckTextFileByEncoding(string filePath); 
     bool CheckTextFile(string filePath);
     bool CheckImageFile(string path);
+    Encoding? DetectTextFileEncoding(string filePath);
+    Encoding? DetectTextFileEncodingGOS(string filePath);
 }

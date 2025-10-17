@@ -18,4 +18,7 @@ public interface ITextServices
     string TextWithWhiteSpaceToCamelCase(string text);
     string FirstLetterToUpperStric(string text);
     int Count(string text, char letter);
+    bool ContainsLetter(string text);
+    bool ContainsDigit(string text);
+    long CountLetterAndDigit(string text);
 }

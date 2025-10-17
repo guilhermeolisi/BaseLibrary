@@ -28,5 +28,8 @@ public static class TextExtensions
     public static string Join(this IEnumerable<string> strings, string separator) => string.Join(separator, strings);
     public static char ToUpper(this char letter) => char.ToUpper(letter);
     public static char ToLower(this char letter) => char.ToLower(letter);
+    public static bool ContainsLetter(this string text) => services.ContainsLetter(text);
+    public static bool ContainsDigit(this string text) => services.ContainsDigit(text);
+    public static long CountLetterAndDigit(this string text) => services.CountLetterAndDigit(text);
 
 }

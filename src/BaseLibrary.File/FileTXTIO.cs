@@ -346,7 +346,30 @@ public class FileTXTIO : IFileTXTIO
     }
     public StreamReader GetStreamReader()
     {
-        return new StreamReader(_pathFile);
+        //Verifica a codificação do arquivo
+        Encoding? encoding = fileServices.Check.DetectTextFileEncoding(_pathFile!);
+#if DEBUG
+        if (encoding != Encoding.UTF8 && Path.GetExtension(_pathFile)?.ToUpper() != ".XML")
+        {
+        }
+        var temp = new StreamReader(_pathFile!, detectEncodingFromByteOrderMarks: true).CurrentEncoding;
+        if (encoding is null)
+        {
+            var temp2 = fileServices.Check.DetectTextFileEncodingGOS(_pathFile!);
+        }
+#endif
+        if (encoding is null && Path.GetExtension(_pathFile)?.ToUpper() != ".XML")
+        {
+            encoding = fileServices.Check.DetectTextFileEncodingGOS(_pathFile!);
+        }
+        if (encoding is null)
+        {
+            return new StreamReader(_pathFile!, detectEncodingFromByteOrderMarks: true);
+        }
+        else
+        {
+            return new StreamReader(_pathFile!, encoding ?? Encoding.UTF8);
+        }
     }
     public bool ProcessReaderException(Exception ex)
     {

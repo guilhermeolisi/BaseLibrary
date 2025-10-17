@@ -1,7 +1,9 @@
-﻿using FileTypeChecker;
+﻿using BaseLibrary.Text;
+using FileTypeChecker;
 using FileTypeChecker.Abstracts;
 using FileTypeChecker.Extensions;
 using System.IO.Compression;
+using System.Text;
 
 namespace BaseLibrary;
 
@@ -70,6 +72,66 @@ public class FileServicesCheck : IFileServicesCheck
         var result = TextFileEncodingDetector.DetectTextFileEncoding(filePath);
 
         return result is not null;
+    }
+    public Encoding? DetectTextFileEncoding(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return null;
+        var result = TextFileEncodingDetector.DetectTextFileEncoding(filePath);
+
+        return result;
+    }
+    public Encoding? DetectTextFileEncodingGOS(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return null;
+        Encoding? result = null;
+        List<EncodingInfo> encondings = [];
+        //using (FileStream textfileStream = File.OpenRead(filePath))
+        //{
+        //}
+        foreach (var info in Encoding.GetEncodings())
+        {
+            string text = File.ReadAllText(filePath, info.GetEncoding());
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                result = Encoding.UTF8;
+                break;
+            }
+            if ((text.ContainsLetter() || text.ContainsDigit()) && !text.Contains('�'))
+            {
+                encondings.Add(info);
+            }
+        }
+        if (result is null && encondings.Count > 0)
+        {
+            long lastLetterDigit = 0;
+            (long count, bool hasCaratere)[] infoTemp = new (long count, bool hasCaratere)[encondings.Count];
+            for (int i = 0; i < encondings.Count; i++)
+            {
+                string text = File.ReadAllText(filePath, encondings[i].GetEncoding());
+
+                long count = text.CountLetterAndDigit();
+
+                if (count >= lastLetterDigit)
+                {
+                    lastLetterDigit = count;
+                    infoTemp[i] = (count, text.Contains('±'));
+                }
+            }
+            var max = infoTemp.Max(x => x.count);
+            var has = infoTemp.Any(x => x.hasCaratere);
+            for (int i = 0; i < infoTemp.Length; i++)
+            {
+                if (infoTemp[i].count == max && (!has || infoTemp[i].hasCaratere))
+                {
+                    result = encondings[i].GetEncoding();
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
     public bool CheckTextFile(string filePath)
     {
