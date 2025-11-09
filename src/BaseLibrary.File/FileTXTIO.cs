@@ -352,10 +352,15 @@ public class FileTXTIO : IFileTXTIO
         if (encoding != Encoding.UTF8 && Path.GetExtension(_pathFile)?.ToUpper() != ".XML")
         {
         }
-        var temp = new StreamReader(_pathFile!, detectEncodingFromByteOrderMarks: true).CurrentEncoding;
+        Encoding temp2;
+        using (var temp = new StreamReader(_pathFile!, detectEncodingFromByteOrderMarks: true))
+        {
+            temp2 = temp.CurrentEncoding;
+        }
+        Encoding? temp3;
         if (encoding is null)
         {
-            var temp2 = fileServices.Check.DetectTextFileEncodingGOS(_pathFile!);
+            temp3 = fileServices.Check.DetectTextFileEncodingGOS(_pathFile!);
         }
 #endif
         if (encoding is null && Path.GetExtension(_pathFile)?.ToUpper() != ".XML")

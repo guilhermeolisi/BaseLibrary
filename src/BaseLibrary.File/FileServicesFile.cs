@@ -203,4 +203,74 @@ public class FileServicesFile : IFileServicesFile
             }
         }
     }
+    private static readonly TimeSpan delayVerification = TimeSpan.FromMilliseconds(300);
+    /// <summary>
+    /// Attempts to delete the specified file, retrying up to three times waiting 500 milliseconds if an <see cref="IOException"/> occurs.
+    /// </summary>
+    /// <remarks>If the file does not exist, the method completes without performing any action. If an <see
+    /// cref="IOException"/> occurs during the deletion, the method retries up to three times before rethrowing the
+    /// exception.</remarks>
+    /// <param name="filePath">The full path of the file to delete. The path must not be null or empty.</param>
+    public void TryDeleteFile(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            throw new ArgumentException("The string can not be null or empty", nameof(filePath));
+
+        int retryCount = 3;
+        TimeSpan delay = delayVerification;
+        while (IsFileLocked(filePath))
+        {
+            Thread.Sleep(delay);
+            delay = delay * 2;
+            retryCount--;
+            if (retryCount <= 0)
+                throw new IOException("The file is locked and cannot be deleted: " + filePath);
+        }
+
+        // Acho que não se pode usar o if (File.Exists(filePath)) aqui por que pode causar IOException em condições de corrida:
+        // https://learn.microsoft.com/en-us/dotnet/standard/io/common-i-o-tasks
+        // https://learn.microsoft.com/en-us/dotnet/api/system.io.file.exists?view=net-9.0
+        File.Delete(filePath); //Se o arquivo não existir, não lança exception: see https://learn.microsoft.com/en-us/dotnet/api/system.io.file.delete?view=net-9.0
+
+        //int retryCount = 3;
+        //while (retryCount > 0)
+        //{
+        //    try
+        //    {
+        //        // Acho que não se pode usar o if (File.Exists(filePath)) aqui por que pode causar IOException em condições de corrida:
+        //        // https://learn.microsoft.com/en-us/dotnet/standard/io/common-i-o-tasks
+        //        // https://learn.microsoft.com/en-us/dotnet/api/system.io.file.exists?view=net-9.0
+        //        File.Delete(filePath); //Se o arquivo não existir, não lança exception: see https://learn.microsoft.com/en-us/dotnet/api/system.io.file.delete?view=net-9.0
+        //    }
+        //    catch (IOException) when (retryCount > 1) // tem que ser maior que 1 se não o exception não throw por causa do while
+        //    {
+        //        Thread.Sleep(500);
+        //        retryCount--;
+        //    }
+        //}
+    }
+    public bool IsFileLocked(string pathFile)
+    {
+        FileStream stream = null;
+
+        try
+        {
+            stream = new FileStream(pathFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (IOException)
+        {
+            //the file is unavailable because it is:
+            //still being written to
+            //or being processed by another thread
+            //or does not exist (has already been processed)
+            return true;
+        }
+        finally
+        {
+            stream?.Close();
+        }
+
+        //file is not locked
+        return false;
+    }
 }

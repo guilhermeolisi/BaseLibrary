@@ -87,9 +87,6 @@ public class FileServicesCheck : IFileServicesCheck
             return null;
         Encoding? result = null;
         List<EncodingInfo> encondings = [];
-        //using (FileStream textfileStream = File.OpenRead(filePath))
-        //{
-        //}
         foreach (var info in Encoding.GetEncodings())
         {
             string text = File.ReadAllText(filePath, info.GetEncoding());
@@ -144,6 +141,12 @@ public class FileServicesCheck : IFileServicesCheck
             using (var fileStream = File.OpenRead(path))
             {
                 var isRecognizableType = FileTypeValidator.IsTypeRecognizable(fileStream);
+#if DEBUG
+                if (Path.GetExtension(path).Equals(".svg", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    // Do something specific for SVG files
+                }
+#endif
 
                 if (!isRecognizableType)
                 {

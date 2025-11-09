@@ -25,11 +25,14 @@ public interface IFileServicesFile
     /// <param name="filePath"></param>
     /// <returns>file size in bytes</returns>
     long FileSize(string filePath);
+    bool IsFileLocked(string pathFile);
+
     /// <summary>
     /// Open file in a external program
     /// </summary>
     /// <param name="filePath">File Path to open</param>
     /// <param name="OS">0: Windows, 1: Linux, 2: macOS</param>
     void OpenFile(string filePath, sbyte OS);
+    void TryDeleteFile(string filePath);
     bool VerifyIfEncrypted(string filePath);
 }

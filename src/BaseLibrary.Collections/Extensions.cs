@@ -277,8 +277,69 @@ public static class Extensions
         return !enumerator.MoveNext();
     }
     public static bool IsNotNullOrEmpty(this IEnumerable? list) => !list.IsNullOrEmpty();
+    public static bool IsEqual(this IList<int> main, IList<int> second)
+    {
+        if (main.IsNullOrEmpty() || second.IsNullOrEmpty())
+            return false;
 
 
+        if (main.Count != second.Count)
+            return false;
+        bool isEqual = true;
+        for (int i = 0; i < main.Count; i++)
+        {
+            if (main[i] != second[i])
+            {
+                isEqual = false;
+                break;
+            }
+        }
+        if (isEqual)
+            return true;
+
+        return false;
+    }
+    public static bool HasEqual(this IEnumerable<IList<int>> main, IList<int> second)
+    {
+        if (main.IsNullOrEmpty() || second.IsNullOrEmpty())
+            return false;
+
+        foreach (var item in main)
+        {
+            if (item.Count != second.Count)
+                continue;
+            bool isEqual = true;
+            for (int i = 0; i < item.Count; i++)
+            {
+                if (item[i] != second[i])
+                {
+                    isEqual = false;
+                    break;
+                }
+            }
+            if (isEqual)
+                return true;
+        }
+        return false;
+    }
+    public static IList<double> InverseSign(this IList<double> enumerable)
+    {
+        double[] array = new double[enumerable.Count];
+        for (int i = 0; i < enumerable.Count; i++)
+        {
+            array[i] = -1 * enumerable[i];
+        }
+        return array;
+    }
+    public static IList<int> InvertSign(this IList<int> enumerable)
+    {
+        int[] array = new int[enumerable.Count];
+        for (int i = 0; i < enumerable.Count; i++)
+        {
+            array[i] = -1 * enumerable[i];
+        }
+        return array;
+    }
     //public static void RemoveLast<T>(this IEnumerable<T> list)
     //{
     //    if (list is IList<T> list2)
