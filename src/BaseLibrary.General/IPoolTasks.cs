@@ -1,9 +1,11 @@
 ﻿namespace BaseLibrary;
 
-public interface IPoolTasks
+public interface ITaskQueue
 {
-    void EnqueueTask(Task task);
-    Task AwaitATask(Task task);
-    Task AwaitAllTasks();
-    void WaitAllTasks();
+    Task Enqueue(Action work);
+    Task Enqueue(Func<Task> work);
+    Task<T> Enqueue<T>(Func<Task<T>> work);
+    Task<T> Enqueue<T>(Func<T> work);
+    Task WaitAllAsync();
+    void WaitAll();
 }

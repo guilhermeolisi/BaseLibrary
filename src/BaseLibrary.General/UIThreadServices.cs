@@ -41,7 +41,7 @@ public class UIThreadServices : IUIThreadServices
                 waitHandle.Set();
             }, null);
 
-            waitHandle.WaitOne();
+            waitHandle.WaitOne(5000);
             return result;
         }
     }

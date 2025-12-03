@@ -298,4 +298,12 @@ public class MathServices : IMathServices
         return ClausenIntegralSerie(x);
         return 0;
     }
+    public double RadiansToDegrees(double radians)
+    {
+        return radians * (180.0 / PI);
+    }
+    public double DegreesToRadians(double degrees)
+    {
+        return degrees * (PI / 180.0);
+    }
 }

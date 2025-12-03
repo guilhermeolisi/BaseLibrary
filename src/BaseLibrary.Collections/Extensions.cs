@@ -259,13 +259,6 @@ public static class Extensions
         {
             list.RemoveLast();
         }
-        //if (list.Count > indMax)
-        //{
-        //    for (int i = list.Count - 1; i >= indMax; i--)
-        //    {
-        //        list.RemoveAt(i);
-        //    }
-        //}
     }
     public static bool IsNullOrEmpty(this IEnumerable? list)
     {
@@ -277,7 +270,16 @@ public static class Extensions
         return !enumerator.MoveNext();
     }
     public static bool IsNotNullOrEmpty(this IEnumerable? list) => !list.IsNullOrEmpty();
-    public static bool IsEqual(this IList<int> main, IList<int> second)
+    /// <summary>
+    /// Determines whether two read-only lists of integers are equal by comparing their elements in order.
+    /// </summary>
+    /// <remarks>The comparison is performed element by element in sequence. If either list is <see langword="null"/>
+    /// or empty, the method returns <see langword="false"/>.</remarks>
+    /// <param name="main">The first list to compare. Cannot be <see langword="null"/> or empty.</param>
+    /// <param name="second">The second list to compare. Cannot be <see langword="null"/> or empty.</param>
+    /// <returns><see langword="true"/> if both lists have the same number of elements and all corresponding elements are equal;
+    /// otherwise, <see langword="false"/>.</returns>
+    public static bool IsEqual(this IReadOnlyList<int> main, IReadOnlyList<int> second)
     {
         if (main.IsNullOrEmpty() || second.IsNullOrEmpty())
             return false;
@@ -299,6 +301,68 @@ public static class Extensions
 
         return false;
     }
+    public static bool IsAllEqual(this IEnumerable<int> main, IEnumerable<int> second)
+    {
+        if (main.IsNullOrEmpty() || second.IsNullOrEmpty())
+            return false;
+        if (main.Count() != second.Count())
+            return false;
+        bool isEqual = true;
+        foreach (var itemMain in main)
+        {
+            bool has = false;
+            foreach (var itemSecond in second)
+            {
+                if (itemMain == itemSecond)
+                {
+                    has = true;
+                    break;
+                }
+            }
+            if (!has)
+            {
+                isEqual = false;
+                break;
+            }
+        }
+        return isEqual;
+    }
+    public static bool IsAllEqual(this IReadOnlyList<int> main, IReadOnlyList<int> second)
+    {
+        if (main.IsNullOrEmpty() || second.IsNullOrEmpty())
+            return false;
+        if (main.Count != second.Count)
+            return false;
+        bool isEqual = true;
+        for (int i = 0; i < main.Count; i++)
+        {
+            bool has = false;
+            for (int j = 0; j < second.Count; j++)
+            {
+                if (main[i] == second[j])
+                {
+                    has = true;
+                    break;
+                }
+            }
+            if (!has)
+            {
+                isEqual = false;
+                break;
+            }
+        }
+        return isEqual;
+    }
+    /// <summary>
+    /// Determines whether the specified sequence of lists contains a list that is equal to the given list.
+    /// </summary>
+    /// <remarks>Two lists are considered equal if they have the same number of elements and each
+    /// corresponding element is equal. If either <paramref name="main"/> or <paramref name="second"/> is <see
+    /// langword="null"/> or empty, the method returns <see langword="false"/>.</remarks>
+    /// <param name="main">The sequence of lists to search. Each list in the sequence is compared to <paramref name="second"/>.</param>
+    /// <param name="second">The list to compare against each list in <paramref name="main"/>.</param>
+    /// <returns><see langword="true"/> if <paramref name="main"/> contains a list that is equal to <paramref name="second"/>;
+    /// otherwise, <see langword="false"/>.</returns>
     public static bool HasEqual(this IEnumerable<IList<int>> main, IList<int> second)
     {
         if (main.IsNullOrEmpty() || second.IsNullOrEmpty())
@@ -340,17 +404,4 @@ public static class Extensions
         }
         return array;
     }
-    //public static void RemoveLast<T>(this IEnumerable<T> list)
-    //{
-    //    if (list is IList<T> list2)
-    //    {
-    //        if (list2.Count > 0)
-    //            list2.RemoveAt(list2.Count - 1);
-    //    }
-    //    else
-    //    {
-
-
-    //    }
-    //}
 }
