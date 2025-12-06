@@ -11,6 +11,8 @@ public static class NumbersMethods
     /// <returns></returns>
     public static bool IsOdd(this int value) => numberServices.IsOdd(value);
     public static bool IsEven(this int value) => numberServices.IsEven(value);
+    public static bool IsOdd(this byte value) => numberServices.IsOdd(value);
+    public static bool IsEven(this byte value) => numberServices.IsEven(value);
     /// <summary>
     /// Conta o número de casas decimais de um número, zeros a esquerda depois da vírgula não é considerado
     /// </summary>
