@@ -254,6 +254,15 @@ public class ColorServices : IColorServices
 
         return RGBLightnessChange(r, g, b, factor);
     }
+    public (byte, byte, byte) RGBSaturationChange(byte r, byte g, byte b, double factorChange)
+    {
+        var (h, s, l) = RGBToHSL(r, g, b);
+        if (factorChange < 0)
+            s *= (1 - Abs(factorChange)); // reduzir a saturação
+        else
+            s += (1 - s) * factorChange; // aumentar a saturação
+        return HSLToRGB(h, s, l);
+    }
     public (byte r, byte g, byte b) GenerateNewColor(byte[][] existingColorsRGB, int countMore)
     {
         if (countMore < 1)
@@ -340,5 +349,103 @@ public class ColorServices : IColorServices
             diff = 360 - diff; // distância mínima no círculo de cores
         }
         return diff;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="stopsColors"></param>
+    /// <param name="count"></param>
+    /// <param name="space">0: RGBLinear; 1: HSL</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public IList<(byte R, byte G, byte B)> GenerateGradient(IReadOnlyList<(byte R, byte G, byte B)> stopsColors, int count, byte space)
+    {
+        // https://chatgpt.com/c/6884ed02-669c-832b-99de-5516a362b83b
+        if (stopsColors == null) throw new ArgumentNullException(nameof(stopsColors));
+        if (stopsColors.Count < 2) throw new ArgumentException("Use pelo menos 2 stops.", nameof(stopsColors));
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+        if (count == 1) return new List<(byte R, byte G, byte B)> { stopsColors[0] };
+
+        var result = new List<(byte R, byte G, byte B)>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            double u = (double)i / (count - 1);          // 0..1
+            result.Add(GradientSample(stopsColors, u, space));
+        }
+
+        return result;
+    }
+
+    private (byte R, byte G, byte B) GradientSample(IReadOnlyList<(byte R, byte G, byte B)> stopsColors, double u, byte space)
+    {
+
+        u = Clamp01(u);
+
+        int segCount = stopsColors.Count - 1;
+        double x = u * segCount;
+
+        int seg = (int)Math.Floor(x);
+        if (seg >= segCount) seg = segCount - 1;
+
+        double t = x - seg;
+
+        (byte R, byte G, byte B) a = stopsColors[seg];
+        (byte R, byte G, byte B) b = stopsColors[seg + 1];
+
+        return LerpLinearRgb(a, b, t);
+        //return space switch
+        //{
+        //    0 => LerpLinearRgb(a, b, t),
+        //    _ => LerpHsl(a, b, t),
+        //};
+    }
+
+    // -------------------------
+    // Interpolação em Linear RGB
+    // -------------------------
+    private (byte R, byte G, byte B) LerpLinearRgb((byte R, byte G, byte B) a, (int R, int G, int B) b, double t)
+    {
+        // sRGB [0..1] -> Linear [0..1]
+        double ar = SrgbToLinear(a.R / 255.0);
+        double ag = SrgbToLinear(a.G / 255.0);
+        double ab = SrgbToLinear(a.B / 255.0);
+
+        double br = SrgbToLinear(b.R / 255.0);
+        double bg = SrgbToLinear(b.G / 255.0);
+        double bb = SrgbToLinear(b.B / 255.0);
+
+        // Lerp em linear
+        double rr = Lerp(ar, br, t);
+        double rg = Lerp(ag, bg, t);
+        double rb = Lerp(ab, bb, t);
+
+        // Linear -> sRGB [0..1]
+        byte R = ToByte(LinearToSrgb(rr) * 255.0);
+        byte G = ToByte(LinearToSrgb(rg) * 255.0);
+        byte B = ToByte(LinearToSrgb(rb) * 255.0);
+
+        return (R, G, B);
+    }
+
+    private double SrgbToLinear(double c)
+        => (c <= 0.04045) ? (c / 12.92) : Math.Pow((c + 0.055) / 1.055, 2.4);
+
+    private double LinearToSrgb(double c)
+        => (c <= 0.0031308) ? (12.92 * c) : (1.055 * Math.Pow(c, 1.0 / 2.4) - 0.055);
+    // -------------------------
+    // Helpers
+    // -------------------------
+    private static double Lerp(double a, double b, double t) => a + (b - a) * t;
+
+    private static double Clamp01(double v) => v < 0 ? 0 : (v > 1 ? 1 : v);
+    private static byte ToByte(double v)
+    {
+        byte x = (byte)Math.Round(v);
+        if (x < 0) return 0;
+        if (x > 255) return 255;
+        return x;
     }
 }

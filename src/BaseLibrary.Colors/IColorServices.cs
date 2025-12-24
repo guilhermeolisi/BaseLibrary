@@ -1,4 +1,5 @@
-﻿namespace BaseLibrary
+﻿
+namespace BaseLibrary
 {
     public interface IColorServices
     {
@@ -16,5 +17,7 @@
         (byte r, byte g, byte b) GenerateNewColor(byte[][] existingColorsRGB);
         (byte r, byte g, byte b) GenerateNewColor(byte[][] existingColorsRGB, int countMore);
         (byte, byte, byte) RGBChangeLightness(byte r, byte g, byte b, double newLightness);
+        IList<(byte R, byte G, byte B)> GenerateGradient(IReadOnlyList<(byte R, byte G, byte B)> stopsColors, int count, byte space);
+        (byte, byte, byte) RGBSaturationChange(byte r, byte g, byte b, double factorChange);
     }
 }

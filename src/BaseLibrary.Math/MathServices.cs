@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using static System.Math;
 namespace BaseLibrary.Math;
 
@@ -9,6 +10,7 @@ public class MathServices : IMathServices
     /// </summary>
     /// <param name="x">A set o numbers</param>
     /// <returns>Return the mean</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double Mean(IEnumerable<double> x)
     {
         double sum = 0;
@@ -26,6 +28,7 @@ public class MathServices : IMathServices
     /// </summary>
     /// <param name="x">A set o numbers</param>
     /// <returns>The standard deviation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double StandardDeviation(IEnumerable<double> x)
     {
         double mean = Mean(x);
@@ -37,25 +40,29 @@ public class MathServices : IMathServices
     /// <param name="x">A set o numbers</param>
     /// <param name="mean">The mean of the set of numbers</param>
     /// <returns>The standard deviation</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double StandardDeviation(IEnumerable<double> x, double mean)
     {
         double sum = 0;
         int count = 0;
         foreach (var item in x)
         {
-            sum += Pow(item - mean, 2);
+            double temp = item - mean;
+            sum += temp * temp; //Pow(item - mean, 2);
             count++;
         }
 
         return Sqrt(sum / (count));
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double SphereVolumeRadius(double radius)
     {
-        return (4.0 / 3.0) * PI * Pow(radius, 3);
+        return (4.0 / 3.0) * PI * radius * radius * radius;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double SphereVolumeDiameter(double diameter)
     {
-        return (1.0 / 6.0) * PI * Pow(diameter, 3);
+        return (1.0 / 6.0) * PI * diameter * diameter * diameter;
     }
     /// <summary>
     /// Calculate the derivative of a set of numbers using the five-point stencil
@@ -65,6 +72,7 @@ public class MathServices : IMathServices
     /// <param name="order"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double[] DerivativeFivePoint(double[] y, double step, int order)
     {
         //https://en.wikipedia.org/wiki/Five-point_stencil
@@ -111,7 +119,8 @@ public class MathServices : IMathServices
                             j == 1 ? +16 :
                             -1)
                             * y[i + j]
-                            / (12 * Pow(step, 2));
+                            // / (12 * Pow(step, 2));
+                            / (12 * step * step);
                     }
                 }
                 break;
@@ -129,7 +138,8 @@ public class MathServices : IMathServices
                            j == 1 ? -2 :
                            +1)
                            * y[i + j]
-                           / (2 * Pow(step, 3));
+                            // / (2 * Pow(step, 3));
+                            / (2 * step * step * step);
                     }
                 }
                 break;
@@ -147,7 +157,8 @@ public class MathServices : IMathServices
                            j == 1 ? -4 :
                            +1)
                            * y[i + j]
-                           / (Pow(step, 4));
+                            // / (Pow(step, 4));
+                            / (step * step * step * step);
                     }
                 }
                 break;
@@ -155,6 +166,7 @@ public class MathServices : IMathServices
 
         return result;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (double[] min, double[] max) FindMinMax(double[] y, double xMin, double step)
     {
         List<double> min = new();
@@ -181,6 +193,7 @@ public class MathServices : IMathServices
     /// <param name="xMin"></param>
     /// <param name="step"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (double[] min, double[] max) FindMinMaxFromDerivative(double[] y, double xMin, double step)
     {
         double[] derivate = DerivativeFivePoint(y, step, 1);
@@ -216,6 +229,7 @@ public class MathServices : IMathServices
     /// <param name="xMin"></param>
     /// <param name="step"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double[] FindChangingConcavityFromDerivative(double[] y, double xMin, double step)
     {
         double[] derivate = DerivativeFivePoint(y, step, 2);
@@ -248,6 +262,7 @@ public class MathServices : IMathServices
     /// <param name="y2"></param>
     /// <param name="x"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double Interpolation(in double x1, in double y1, in double x2, in double y2, in double x)
     {
         return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
@@ -258,9 +273,10 @@ public class MathServices : IMathServices
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double Hypotenuse(double x, double y)
     {
-        return Sqrt(Pow(x, 2) + Pow(y, 2));
+        return Sqrt(x * x + y * y);
     }
     /// <summary>
     /// Calculate the distance between two points in a plane
@@ -270,10 +286,13 @@ public class MathServices : IMathServices
     /// <param name="x2"></param>
     /// <param name="y2"></param>
     /// <returns></returns>
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double DistancePoints(double x1, double y1, double x2, double y2)
     {
         return Hypotenuse(x2 - x1, y2 - y1);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double ClausenIntegralSerie(double x, double error = 1E-10)
     {
         // Lima 2017 - Clausen Integral
@@ -284,13 +303,14 @@ public class MathServices : IMathServices
         while (Abs(result - resultOld) > error)
         {
             resultOld = result;
-            result += Sin(n * x) / Pow(n, 2);
+            result += Sin(n * x) / (n * n);
             n++;
         }
         //chega a precisar de 3000 iterações para convergir
         Debug.WriteLine($"Clausen IntegralSerie n = {n}");
         return result;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double ClausenIntegral(double x)
     {
         // Implementar o cálculo de ClausenIntegral por polinomio de Chebyshev dado por Kolbig 1995
@@ -298,12 +318,5 @@ public class MathServices : IMathServices
         return ClausenIntegralSerie(x);
         return 0;
     }
-    public double RadiansToDegrees(double radians)
-    {
-        return radians * (180.0 / PI);
-    }
-    public double DegreesToRadians(double degrees)
-    {
-        return degrees * (PI / 180.0);
-    }
+
 }

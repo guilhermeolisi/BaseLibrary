@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 using static System.Math;
 
 namespace BaseLibrary.Numbers;
@@ -436,6 +437,7 @@ public class NumberServices : INumberServices
         //return Rand.Next(0, 2) == 0 ? 1 : -1;
         return (Random.Shared.Next(2) << 1) - 1;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Clamp<T>(T value, T min, T max) where T : IComparable<T>
     {
         //https://stackoverflow.com/questions/3176602/how-to-force-a-number-to-be-in-a-range-in-c
@@ -446,8 +448,12 @@ public class NumberServices : INumberServices
 
         return value;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Max<T>(T value, T max) where T : IComparable<T> => value.CompareTo(max) > 0 ? max : value;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Min<T>(T value, T min) where T : IComparable<T> => value.CompareTo(min) < 0 ? min : value;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Bigger<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) > 0 ? value1 : value2;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Smaller<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) < 0 ? value1 : value2;
 }
