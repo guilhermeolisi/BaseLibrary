@@ -21,9 +21,24 @@ public class ExceptionServicesAzure : IExceptionServices
         this.httpServices = httpServices ?? Locator.ConstantContainer.Resolve<IHTTPServices>()
             ?? throw new ArgumentNullException(nameof(httpServices));
 
-        var config = TelemetryConfiguration.CreateDefault();
-        config.ConnectionString = azureKey;
+        //A recomendação da microsoft é uma nova instância e não reutilizar a mesma, mas isso pode ser um problema para o desempenho, então estou usando a mesma instância, mas criando uma nova configuração para cada instância, para evitar problemas de concorrência.
+        var config = new TelemetryConfiguration
+        {
+            ConnectionString = azureKey
+        };
         this.telemetryClient = new TelemetryClient(config);
+
+        //try
+        //{
+        //    var config = TelemetryConfiguration.CreateDefault();
+        //    config.ConnectionString = azureKey;
+        //    this.telemetryClient = new TelemetryClient(config);
+        //}
+        //catch (Exception ex)
+        //{
+        //    Console.WriteLine("Error initializing Application Insights TelemetryClient: " + ex.Message);
+        //    throw;
+        //}
     }
     public string GetExceptionText(Exception e, string? messageExtra)
     {

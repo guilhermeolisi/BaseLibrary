@@ -15,9 +15,15 @@ public class MenssageAzureTrackTrace : IEmailSender
         //this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()
         //    ?? throw new ArgumentNullException(nameof(httpServices));
 
-        var config = TelemetryConfiguration.CreateDefault();
-        config.ConnectionString = azureKey;
+        //A recomendação da microsoft é uma nova instância e não reutilizar a mesma, mas isso pode ser um problema para o desempenho, então estou usando a mesma instância, mas criando uma nova configuração para cada instância, para evitar problemas de concorrência.
+        var config = new TelemetryConfiguration
+        {
+            ConnectionString = azureKey
+        };
         this.telemetryClient = new TelemetryClient(config);
+        //var config = TelemetryConfiguration.CreateDefault();
+        //config.ConnectionString = azureKey;
+        //this.telemetryClient = new TelemetryClient(config);
     }
     public async Task<GOSResult> SendMessage(string emailTo, string subject, string message, bool isAsync)
     {
