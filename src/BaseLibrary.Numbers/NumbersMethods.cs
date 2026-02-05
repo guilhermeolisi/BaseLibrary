@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using static System.Math;
 
 namespace BaseLibrary.Numbers;
 
@@ -72,6 +73,19 @@ public static class NumbersMethods
     //public static int Min(this int value1, int value2) => Math.Min(value1, value2);
     public static double Abs(this double value) => Math.Abs(value);
     public static int Abs(this int value) => Math.Abs(value);
+    public static bool IsInteger(this double x)
+    {
+        double integer = Round(x);
+        if (Abs(x - integer) < 1E-12)
+            return true;
+#if DEBUG
+        if (Abs(x - integer) > 1E-10)
+        {
+
+        }
+#endif
+        return false;
+    }
     #endregion
 
 }

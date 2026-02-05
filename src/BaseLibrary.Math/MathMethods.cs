@@ -9,7 +9,8 @@ public static class MathMethods
     //public static double Mean(this IEnumerable<double> x) => mathServices.Mean(x);
     //public static double StandardDeviation(this IEnumerable<double> x) => mathServices.StandardDeviation(x);
     //public static double StandardDeviation(IEnumerable<double> x, double mean) => mathServices.StandardDeviation(x, mean);
-    //public static double SphereVolumeRadius(double radius) => mathServices.SphereVolumeRadius(radius);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double SphereVolumeRadius(double radius) => mathServices.SphereVolumeRadius(radius);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double SphereVolumeDiameter(double diameter) => mathServices.SphereVolumeDiameter(diameter);
     //public static double Hypotenuse(double x, double y) => mathServices.Hypotenuse(x, y);
@@ -59,4 +60,17 @@ public static class MathMethods
     {
         return radius * Cos(theta);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double CosPhi2Directions(double x0, double y0, double z0, double x1, double y1, double z1)
+    {
+        return (x0 * x1 + y0 * y1 + z0 * z1) / (Sqrt(x0 * x0 + y0 * y0 + z0 * z0) * Sqrt(x1 * x1 + y1 * y1 + z1 * z1));
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double RemoveZeroNegative(this double value)
+    {
+        if (value != 0 || double.IsPositive(value))
+            return value;
+        return 0.0;
+    }
+
 }

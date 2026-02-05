@@ -26,38 +26,15 @@ public readonly record struct Point3D(double X, double Y, double Z)
     public static Point3D operator /(Point3D a, double scalar) => new Point3D(a.X / scalar, a.Y / scalar, a.Z / scalar);
     public static Point3D operator *(double scalar, Point3D a) => new Point3D(a.X * scalar, a.Y * scalar, a.Z * scalar);
     public static Point3D operator /(double scalar, Point3D a) => new Point3D(a.X / scalar, a.Y / scalar, a.Z / scalar);
-    public static double Dot(Point3D a, Point3D b)
-    {
-        return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
-    }
-    public static Point3D Cross(Point3D a, Point3D b)
-    {
-        return new Point3D(
-            Round(a.Y * b.Z - a.Z * b.Y, 14),
-            Round(a.Z * b.X - a.X * b.Z, 14),
-            Round(a.X * b.Y - a.Y * b.X, 14)
-        );
-    }
-    public static double Length(Point3D v)
-    {
-        return Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
-    }
-    public static Point3D Normalize(Point3D v)
-    {
-        double n = Length(v);
-        if (n < 1e-14)
-            throw new InvalidOperationException("Vetor of length zero.");
 
-        return new Point3D(v.X / n, v.Y / n, v.Z / n);
-    }
     public static Point3D NormalFromAPlane3Points(Point3D a, Point3D b, Point3D c)
     {
         Point3D u = b - a;
         Point3D v = c - a;
 
-        Point3D n = Cross(u, v); // não normalizado
+        Point3D n = u.Cross(v); // não normalizado
 
-        double len = Length(n);
+        double len = n.Length();
         if (len < 1e-14)
             throw new ArgumentException("Os 3 pontos são colineares ou quase colineares; plano indefinido.");
 
@@ -68,7 +45,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
     {
         // planeNormal deve ser unitário
         Point3D diff = point - planePoint;
-        return Dot(planeNormal, diff);
+        return planeNormal.Dot(diff);
     }
     //public static Point3D ProjectPointOntoPlane(Point3D p, Point3D p0, Point3D nUnit)
     //{
