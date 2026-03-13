@@ -55,12 +55,12 @@ public class MathServices : IMathServices
         return Sqrt(sum / (count));
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public double SphereVolumeRadius(double radius)
+    public double SphereVolumeFromRadius(double radius)
     {
         return (4.0 / 3.0) * PI * radius * radius * radius;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public double SphereVolumeDiameter(double diameter)
+    public double SphereVolumeFromDiameter(double diameter)
     {
         return (1.0 / 6.0) * PI * diameter * diameter * diameter;
     }

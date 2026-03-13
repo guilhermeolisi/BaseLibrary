@@ -10,9 +10,9 @@ public static class MathMethods
     //public static double StandardDeviation(this IEnumerable<double> x) => mathServices.StandardDeviation(x);
     //public static double StandardDeviation(IEnumerable<double> x, double mean) => mathServices.StandardDeviation(x, mean);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double SphereVolumeRadius(double radius) => mathServices.SphereVolumeRadius(radius);
+    public static double SphereVolumeFromRadius(double radius) => mathServices.SphereVolumeFromRadius(radius);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double SphereVolumeDiameter(double diameter) => mathServices.SphereVolumeDiameter(diameter);
+    public static double SphereVolumeFromDiameter(double diameter) => mathServices.SphereVolumeFromDiameter(diameter);
     //public static double Hypotenuse(double x, double y) => mathServices.Hypotenuse(x, y);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double DistancePoints(double x1, double y1, double x2, double y2) => mathServices.DistancePoints(x1, y1, x2, y2);

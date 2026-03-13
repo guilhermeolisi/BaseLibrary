@@ -11,6 +11,9 @@ public readonly record struct Point3D(double X, double Y, double Z)
         if (arr.Length != 3)
             throw new ArgumentException("Array must have exactly 3 elements.");
     }
+    public Point3D() : this(double.NaN, double.NaN, double.NaN)
+    {
+    }
     public PointSpherical ToSpherical()
     {
         double radius = RadiusFromPointCartesian(X, Y, Z); // Sqrt(X * X + Y * Y + Z * Z);
@@ -19,7 +22,11 @@ public readonly record struct Point3D(double X, double Y, double Z)
         return new PointSpherical(radius, theta, phi);
     }
     public double[] PointToArray() => [X, Y, Z];
-
+    public double DistanceToOtherPoint(Point3D point2)
+    {
+        Point3D diff = this - point2;
+        return diff.Length();
+    }
     public static Point3D operator +(Point3D a, Point3D b) => new Point3D(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
     public static Point3D operator -(Point3D a, Point3D b) => new Point3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
     public static Point3D operator *(Point3D a, double scalar) => new Point3D(a.X * scalar, a.Y * scalar, a.Z * scalar);
@@ -47,6 +54,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
         Point3D diff = point - planePoint;
         return planeNormal.Dot(diff);
     }
+    
     //public static Point3D ProjectPointOntoPlane(Point3D p, Point3D p0, Point3D nUnit)
     //{
     //    // d = n · (p - p0) (distância assinada)

@@ -39,4 +39,28 @@ public static class Functions
         double sigma = Sqrt(Log(Pow(sd / mean, 2) + 1));
         return (Log(mean) - Pow(sigma, 2) / 2.0, sigma);
     }
+    /// <summary>
+    /// Calculates the maximum possible radius of a cross-section of a cylinder, given its height, diameter, and
+    /// orientation parameters.
+    /// </summary>
+    /// <remarks>This method is useful for determining the largest possible cross-sectional radius of a
+    /// cylinder when it is arbitrarily oriented in space. The calculation accounts for both the cylinder's dimensions
+    /// and its rotation angles.</remarks>
+    /// <param name="H">The height of the cylinder. Must be a positive value.</param>
+    /// <param name="D">The diameter of the cylinder. Must be a positive value.</param>
+    /// <param name="polar">The polar angle, in radians, specifying the orientation of the cross-section relative to the cylinder's axis.</param>
+    /// <param name="azimutal">The azimuthal angle, in radians, specifying the orientation of the cross-section around the cylinder's axis.</param>
+    /// <param name="polarRot">The polar rotation angle, in radians, representing the cylinder's rotation about its axis.</param>
+    /// <param name="azimutalRot">The azimuthal rotation angle, in radians, representing the cylinder's rotation around its axis.</param>
+    /// <returns>The maximum radius, as a double, of the cross-section of the cylinder for the specified orientation. The value
+    /// is constrained by the cylinder's height and diameter.</returns>
+    public static double CylinderRadius(double H, double D, double polar, double azimutal, double polarRot, double azimutalRot)
+    {
+        // https://chatgpt.com/c/69922192-0a30-832c-8070-6b042d303232
+        //equação sem rotação:
+        // r = Min(D / 2 / Sin(polar), H / 2 / Abs(Cos(polar)));
+        double cosGamma = Cos(polar) * Cos(polarRot) + Sin(polar) * Sin(polarRot) * Cos(azimutal - azimutalRot);
+        double sinGamma = Sqrt(1 - Pow(cosGamma, 2));
+        return Min(D / 2 / sinGamma, H / 2 / Abs(cosGamma));
+    }
 }

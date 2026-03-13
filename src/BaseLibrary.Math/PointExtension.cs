@@ -17,6 +17,13 @@ public static class PointExtension
             Round(a.X * b.Y - a.Y * b.X, 14)
         );
     }
+    public static double SquaredDistance(this Point3D a, Point3D b)
+    {
+        double dx = a.X - b.X;
+        double dy = a.Y - b.Y;
+        double dz = a.Z - b.Z;
+        return dx * dx + dy * dy + dz * dz;
+    }
     public static double Length(this Point3D v)
     {
         return Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
