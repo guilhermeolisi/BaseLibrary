@@ -17,6 +17,8 @@ public interface IFileServicesFile
     void CopyConserveTime(string original, string destination, bool preservetime = true);
     void CopyDecriptingFile(string sourcePath, string destinationFolder, string appFolder);
     void CopyFileCarefulEncription(string sourcePath, string destinationFolder, string anEFSFolder);
+    void CopyFileSafeLinux(string source, string dest, bool overwrite);
+    Task CopyFileSafeLinuxAsync(string source, string dest, bool overwrite, CancellationToken cancellationToken = default);
     void ExtractZipConserveTime(string zipPath, string extractPath);
     DateTime FileLastModification(string filePath);
     /// <summary>

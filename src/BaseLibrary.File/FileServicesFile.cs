@@ -203,6 +203,21 @@ public class FileServicesFile : IFileServicesFile
             }
         }
     }
+    public async Task CopyFileSafeLinuxAsync(string source, string dest, bool overwrite, CancellationToken cancellationToken = default)
+    {
+        const int bufferSize = 81920;
+        await using var src = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: true);
+        await using var dst = new FileStream(dest, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.Write, FileShare.None, bufferSize, useAsync: true);
+        await src.CopyToAsync(dst, cancellationToken);
+    }
+
+    public void CopyFileSafeLinux(string source, string dest, bool overwrite)
+    {
+        const int bufferSize = 81920;
+        using var src = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize);
+        using var dst = new FileStream(dest, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.Write, FileShare.None, bufferSize);
+        src.CopyTo(dst);
+    }
     private static readonly TimeSpan delayVerification = TimeSpan.FromMilliseconds(300);
     /// <summary>
     /// Attempts to delete the specified file, retrying up to three times waiting 500 milliseconds if an <see cref="IOException"/> occurs.

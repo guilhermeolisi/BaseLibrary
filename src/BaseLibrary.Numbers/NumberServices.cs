@@ -4,27 +4,48 @@ using static System.Math;
 
 namespace BaseLibrary.Numbers;
 
+/// <summary>
+/// Fornece serviços utilitários para operações matemáticas e manipulação de números.
+/// </summary>
 public class NumberServices : INumberServices
 {
     /// <summary>
-    /// retorna se o inteiro é impar
+    /// Verifica se um número inteiro é ímpar.
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <param name="value">O valor inteiro a ser verificado.</param>
+    /// <returns>Retorna <c>true</c> se o valor for ímpar; caso contrário, <c>false</c>.</returns>
     public bool IsOdd(int value) => value % 2 != 0;
+    
+    /// <summary>
+    /// Verifica se um byte é ímpar.
+    /// </summary>
+    /// <param name="value">O valor byte a ser verificado.</param>
+    /// <returns>Retorna <c>true</c> se o valor for ímpar; caso contrário, <c>false</c>.</returns>
     public bool IsOdd(byte value) => value % 2 != 0;
+    
     /// <summary>
-    /// retorna se o inteiro é par
+    /// Verifica se um número inteiro é par.
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <param name="value">O valor inteiro a ser verificado.</param>
+    /// <returns>Retorna <c>true</c> se o valor for par; caso contrário, <c>false</c>.</returns>
     public bool IsEven(int value) => value % 2 == 0;
-    public bool IsEven(byte value) => value % 2 == 0;
+    
     /// <summary>
-    /// Conta o número de casas decimais de um número, zeros a esquerda depois da vírgula não é considerado
+    /// Verifica se um byte é par.
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns>valor negativo significa a quantidade de zero antes da virgula</returns>
+    /// <param name="value">O valor byte a ser verificado.</param>
+    /// <returns>Retorna <c>true</c> se o valor for par; caso contrário, <c>false</c>.</returns>
+    public bool IsEven(byte value) => value % 2 == 0;
+    
+    /// <summary>
+    /// Conta o número de casas decimais de um número double.
+    /// Zeros à esquerda após a vírgula não são considerados.
+    /// </summary>
+    /// <param name="value">O valor double para contar as casas decimais.</param>
+    /// <returns>
+    /// O número de casas decimais. Valor negativo significa a quantidade de zeros antes da vírgula.
+    /// Retorna 0 se o valor for NaN ou inteiro. Máximo de 15 casas decimais devido à precisão do double.
+    /// </returns>
     public int CountDecimal(double value)
     {
         //outra possibilidade para contar as casas decimais é
@@ -61,10 +82,13 @@ public class NumberServices : INumberServices
             return 0;
     }
     /// <summary>
-    /// Conta o número de algarismos significativos, zeros a direita e a esquerda são desconsiderados
+    /// Conta o número de algarismos significativos de um número double.
     /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <param name="value">O valor double para contar os algarismos.</param>
+    /// <param name="removeZeroRigth">Se <c>true</c>, remove zeros à direita; se <c>false</c>, mantém zeros à direita mas remove à esquerda.</param>
+    /// <returns>
+    /// O número de algarismos significativos. Retorna 0 se o valor for NaN, e 1 se o valor for 0.
+    /// </returns>
     public int CountAlgharisms(double value, bool removeZeroRigth)
     {
         if (double.IsNaN(value))
@@ -94,11 +118,14 @@ public class NumberServices : INumberServices
         }
     }
     /// <summary>
-    /// Arredonda de acordo com o número de casas decimais
+    /// Arredonda um número double de acordo com o número de casas decimais especificado.
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="decimals">Negativo indica a quantidade de casas antes da vígula que será zero</param>
-    /// <returns></returns>
+    /// <param name="value">O valor a ser arredondado.</param>
+    /// <param name="decimals">
+    /// O número de casas decimais. Valor positivo indica casas após a vírgula.
+    /// Valor negativo indica a quantidade de casas antes da vírgula que será zero.
+    /// </param>
+    /// <returns>O valor arredondado. Se decimals &gt; 15, retorna o valor original sem arredondamento.</returns>
     public double RoundDecimal(double value, int decimals)
     {
         if (decimals >= 0)
@@ -120,6 +147,12 @@ public class NumberServices : INumberServices
             return temp * Pow(10.0, -decimals);
         }
     }
+    /// <summary>
+    /// Arredonda um número double mantendo um número específico de algarismos significativos.
+    /// </summary>
+    /// <param name="value">O valor a ser arredondado.</param>
+    /// <param name="algharims">O número de algarismos significativos a manter.</param>
+    /// <returns>O valor arredondado com o número especificado de algarismos significativos. Retorna NaN se o valor for NaN, e 0 se o valor for 0.</returns>
     public double RoundAlgharisms(double value, uint algharims)
     {
         if (double.IsNaN(value))
@@ -148,7 +181,24 @@ public class NumberServices : INumberServices
             return RoundDecimal(value, firstAlgharism + (int)algharims - 1);
         }
     }
+    /// <summary>
+    /// Converte um valor numérico com erro padrão (ESD) em texto formatado.
+    /// </summary>
+    /// <param name="value">O objeto NumberESD contendo o valor e o erro padrão.</param>
+    /// <param name="arredonda">Formato opcional de arredondamento customizado.</param>
+    /// <returns>Uma string representando o valor com o erro padrão entre parênteses quando aplicável.</returns>
     public string DoubleResultText(NumberESD value, string? arredonda = null) => DoubleResultText(value.Value, value.ESD, arredonda);
+    
+    /// <summary>
+    /// Converte um valor numérico com erro padrão (ESD) em texto formatado com notação científica quando apropriado.
+    /// </summary>
+    /// <param name="valueNull">O valor numérico principal.</param>
+    /// <param name="esdNull">O erro padrão do desvio (ESD - Estimated Standard Deviation).</param>
+    /// <param name="arredonda">Formato opcional de arredondamento customizado.</param>
+    /// <returns>
+    /// Uma string representando o valor formatado com o ESD entre parênteses.
+    /// Usa notação científica para valores muito grandes (&gt;10^4) ou muito pequenos (&lt;10^-3).
+    /// </returns>
     public string DoubleResultText(double valueNull, double esdNull, string? arredonda = null)
     {
 #if DEBUG
@@ -344,6 +394,11 @@ public class NumberServices : INumberServices
 
         return result;
     }
+    /// <summary>
+    /// Calcula a ordem de grandeza (potência de 10) de um número.
+    /// </summary>
+    /// <param name="value">O valor para calcular a ordem de grandeza.</param>
+    /// <returns>O expoente inteiro da potência de 10 mais próxima do valor. Por exemplo, para 1234 retorna 3, para 0.0056 retorna -3.</returns>
     public int ScaleOrderNumber(double value)
     {
         double result = Log10(Abs(value));
@@ -359,7 +414,20 @@ public class NumberServices : INumberServices
             return (int)result;
         }
     }
+    /// <summary>
+    /// Gerador de números aleatórios usado pelos métodos da classe.
+    /// </summary>
     public Random Rand = new();
+    
+    /// <summary>
+    /// Gera um código identificador alfanumérico aleatório.
+    /// </summary>
+    /// <param name="legnth">O comprimento do código a ser gerado.</param>
+    /// <param name="isCaseSensitive">
+    /// Se <c>true</c>, usa caracteres 0-9, A-Z e a-z (62 caracteres possíveis).
+    /// Se <c>false</c>, usa apenas 0-9 e A-Z (36 caracteres possíveis).
+    /// </param>
+    /// <returns>Uma string aleatória com o comprimento especificado contendo caracteres alfanuméricos.</returns>
     public string GenerateCodeID(short legnth, bool isCaseSensitive)
     {
         char[] codeTemp = new char[legnth];
@@ -408,6 +476,11 @@ public class NumberServices : INumberServices
 
         return new string(codeTemp);
     }
+    /// <summary>
+    /// Converte um número inteiro em sua forma ordinal em inglês (1st, 2nd, 3rd, etc.).
+    /// </summary>
+    /// <param name="number">O número inteiro a ser convertido.</param>
+    /// <returns>Uma string representando o número ordinal (ex: "1st", "2nd", "3rd", "4th").</returns>
     public string OrdinalIntegerToString(int number)
     {
         string str = number.ToString();
@@ -429,6 +502,10 @@ public class NumberServices : INumberServices
         }
         return str;
     }
+    /// <summary>
+    /// Gera aleatoriamente o valor 1 ou -1.
+    /// </summary>
+    /// <returns>Retorna 1 ou -1 com probabilidade igual (50% cada).</returns>
     public int RandomOneOrMinusOne()
     {
 #if DEBUG
@@ -437,6 +514,14 @@ public class NumberServices : INumberServices
         //return Rand.Next(0, 2) == 0 ? 1 : -1;
         return (Random.Shared.Next(2) << 1) - 1;
     }
+    /// <summary>
+    /// Limita um valor entre um mínimo e um máximo especificados.
+    /// </summary>
+    /// <typeparam name="T">O tipo do valor, que deve implementar IComparable&lt;T&gt;.</typeparam>
+    /// <param name="value">O valor a ser limitado.</param>
+    /// <param name="min">O valor mínimo permitido.</param>
+    /// <param name="max">O valor máximo permitido.</param>
+    /// <returns>O valor limitado entre min e max. Se o valor for menor que min, retorna min. Se for maior que max, retorna max. Caso contrário, retorna o próprio valor.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Clamp<T>(T value, T min, T max) where T : IComparable<T>
     {
@@ -448,12 +533,43 @@ public class NumberServices : INumberServices
 
         return value;
     }
+    /// <summary>
+    /// Retorna o menor valor entre o valor fornecido e um máximo.
+    /// </summary>
+    /// <typeparam name="T">O tipo do valor, que deve implementar IComparable&lt;T&gt;.</typeparam>
+    /// <param name="value">O valor a ser comparado.</param>
+    /// <param name="max">O valor máximo permitido.</param>
+    /// <returns>O valor original se for menor ou igual ao máximo; caso contrário, retorna o máximo.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Max<T>(T value, T max) where T : IComparable<T> => value.CompareTo(max) > 0 ? max : value;
+    
+    /// <summary>
+    /// Retorna o maior valor entre o valor fornecido e um mínimo.
+    /// </summary>
+    /// <typeparam name="T">O tipo do valor, que deve implementar IComparable&lt;T&gt;.</typeparam>
+    /// <param name="value">O valor a ser comparado.</param>
+    /// <param name="min">O valor mínimo permitido.</param>
+    /// <returns>O valor original se for maior ou igual ao mínimo; caso contrário, retorna o mínimo.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Min<T>(T value, T min) where T : IComparable<T> => value.CompareTo(min) < 0 ? min : value;
+    
+    /// <summary>
+    /// Retorna o maior valor entre dois valores fornecidos.
+    /// </summary>
+    /// <typeparam name="T">O tipo dos valores, que deve implementar IComparable&lt;T&gt;.</typeparam>
+    /// <param name="value1">O primeiro valor a comparar.</param>
+    /// <param name="value2">O segundo valor a comparar.</param>
+    /// <returns>O maior valor entre value1 e value2.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Bigger<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) > 0 ? value1 : value2;
+    
+    /// <summary>
+    /// Retorna o menor valor entre dois valores fornecidos.
+    /// </summary>
+    /// <typeparam name="T">O tipo dos valores, que deve implementar IComparable&lt;T&gt;.</typeparam>
+    /// <param name="value1">O primeiro valor a comparar.</param>
+    /// <param name="value2">O segundo valor a comparar.</param>
+    /// <returns>O menor valor entre value1 e value2.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Smaller<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) < 0 ? value1 : value2;
 }

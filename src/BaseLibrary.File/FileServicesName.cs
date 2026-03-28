@@ -69,7 +69,7 @@ public class FileServicesName : IFileServicesName
         return fullPath;
     }
     static readonly char[] forbiden = ['/', '\\', '>', '<', ':', '*', '?', '"', '|'];
-    public string CutCharacterFileForbiden(string fileName, bool cut)
+    public string CutCharacterFileForbiden(string fileName, bool cutLong = false)
     {
         if (fileName is null)
             throw new ArgumentNullException(nameof(fileName));
@@ -77,7 +77,7 @@ public class FileServicesName : IFileServicesName
         {
             fileName = "unnamed";
         }
-        if (cut && fileName.Length > 40) //por que este número? 40
+        if (cutLong && fileName.Length > 40) //por que este número? 40
             fileName = fileName[0..39];
         int ind = 0;
 
