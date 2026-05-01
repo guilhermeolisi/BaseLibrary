@@ -15,6 +15,7 @@ public class FileTXTIO : IFileTXTIO
     private string? _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
 
     private bool _isStayBak;
+    private bool _preserveBakOnRestoreFailure;
     private Task<bool>? tryWriteTask;
     private DateTime? lastWriteAttempt;
     public Exception eWrite { get; private set; }
@@ -236,7 +237,7 @@ public class FileTXTIO : IFileTXTIO
         bool hasAcess = false;
         if (File.Exists(_fileBak))
         {
-            if (!_isStayBak)
+            if (!_isStayBak && !_preserveBakOnRestoreFailure)
             {
                 while (!hasAcess)
                 {
@@ -338,6 +339,7 @@ public class FileTXTIO : IFileTXTIO
         // BUG FIX: clear stale retry state so the previous failure timestamp cannot cause
         // an immediate timeout on the very first exception of a new read call
         lastReadAttempt = null;
+        _preserveBakOnRestoreFailure = false;
 
         if (_pathFile is null)
         {
@@ -442,7 +444,7 @@ public class FileTXTIO : IFileTXTIO
                     {
                         // Restoration failed: preserve the bak so AfterWriteOrReader() does not delete the
                         // last good copy, and surface the error so the caller knows the original is not restored.
-                        _isStayBak = true;
+                        _preserveBakOnRestoreFailure = true;
                         eRead = restoreEx;
                         lastReadAttempt = null;
                         return false; // stop retrying — backup was read but original could not be restored
