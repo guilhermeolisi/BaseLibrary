@@ -1,4 +1,6 @@
-﻿namespace BaseLibrary;
+﻿using System.Runtime.ExceptionServices;
+
+namespace BaseLibrary;
 
 public class UIThreadServices : IUIThreadServices
 {
@@ -21,7 +23,30 @@ public class UIThreadServices : IUIThreadServices
         }
         else
         {
-            uiContext?.Post(_ => action(), null);
+            Exception? caughtException = null;
+            var waitHandle = new ManualResetEvent(false);
+
+            uiContext.Post(_ =>
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    caughtException = ex;
+                }
+                finally
+                {
+                    waitHandle.Set();
+                }
+            }, null);
+
+            if (!waitHandle.WaitOne(5000))
+                throw new TimeoutException("RunOnUIThread timed out waiting for the UI thread.");
+
+            if (caughtException is not null)
+                ExceptionDispatchInfo.Capture(caughtException).Throw();
         }
     }
     public T RunOnUIThread<T>(Func<T> func)
@@ -32,16 +57,32 @@ public class UIThreadServices : IUIThreadServices
         }
         else
         {
-            T result = default;
+            T result = default!;
+            Exception? caughtException = null;
             var waitHandle = new ManualResetEvent(false);
 
             uiContext.Post(_ =>
             {
-                result = func();
-                waitHandle.Set();
+                try
+                {
+                    result = func();
+                }
+                catch (Exception ex)
+                {
+                    caughtException = ex;
+                }
+                finally
+                {
+                    waitHandle.Set();
+                }
             }, null);
 
-            waitHandle.WaitOne(5000);
+            if (!waitHandle.WaitOne(5000))
+                throw new TimeoutException("RunOnUIThread<T> timed out waiting for the UI thread.");
+
+            if (caughtException is not null)
+                ExceptionDispatchInfo.Capture(caughtException).Throw();
+
             return result;
         }
     }
