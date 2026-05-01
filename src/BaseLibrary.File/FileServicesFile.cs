@@ -169,6 +169,8 @@ public class FileServicesFile : IFileServicesFile
             throw new ArgumentException("The source path cannot be null or empty.", nameof(sourcePath));
         if (!File.Exists(sourcePath))
             throw new FileNotFoundException("The source file does not exist.", sourcePath);
+        if (string.IsNullOrWhiteSpace(destinationFolder))
+            throw new ArgumentException("The destination folder path cannot be null or empty.", nameof(destinationFolder));
         if (string.IsNullOrWhiteSpace(anEFSFolder))
             throw new ArgumentException("The EFS folder path cannot be null or empty.", nameof(anEFSFolder));
 

@@ -556,6 +556,26 @@ public class FileServicesFileTests : IDisposable
         act.Should().Throw<ArgumentException>().WithParameterName("anEFSFolder");
     }
 
+    [Fact]
+    public void CopyDecriptingFile_NullDestinationFolder_ThrowsArgumentException()
+    {
+        var src = CreateFile("decrypt_null_dest_src.txt");
+
+        var act = () => _sut.CopyDecriptingFile(src, null!, TmpPath("efs_folder"));
+
+        act.Should().Throw<ArgumentException>().WithParameterName("destinationFolder");
+    }
+
+    [Fact]
+    public void CopyDecriptingFile_WhitespaceDestinationFolder_ThrowsArgumentException()
+    {
+        var src = CreateFile("decrypt_ws_dest_src.txt");
+
+        var act = () => _sut.CopyDecriptingFile(src, "   ", TmpPath("efs_folder"));
+
+        act.Should().Throw<ArgumentException>().WithParameterName("destinationFolder");
+    }
+
     // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
