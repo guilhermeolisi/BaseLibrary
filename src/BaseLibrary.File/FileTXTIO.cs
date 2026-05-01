@@ -16,7 +16,8 @@ public class FileTXTIO : IFileTXTIO
     private Task<bool>? tryWriteTask;
     private DateTime? lastWriteAttempt;
     public Exception eWrite { get; private set; }
-    private static DateTime? lastReadAttempt;
+    // BUG FIX: was static — shared across all instances causing concurrency issues
+    private DateTime? lastReadAttempt;
 
     public string TextResult { get; private set; }
     public Exception eRead { get; private set; }
@@ -83,10 +84,10 @@ public class FileTXTIO : IFileTXTIO
 
     public bool BeforeWrite()
     {
-        if (eWrite is not null)
-        {
-            eWrite = null!;
-        }
+        eWrite = null!;
+        // BUG FIX: clear stale retry state so the previous failure timestamp cannot cause
+        // an immediate timeout on the very first IOException of a new write call
+        lastWriteAttempt = null;
 
         if (_pathFile is null)
         {
@@ -125,13 +126,15 @@ public class FileTXTIO : IFileTXTIO
         }
 
         //Cria o arquivo bak
-        bool hasAcess = false;
         if (File.Exists(_pathFile))
         {
-            hasAcess = false;
             bool bakSucess = false;
             while (!bakSucess)
             {
+                // BUG FIX: declare hasAcess inside the outer loop so it resets each iteration.
+                // Previously it was declared outside and never reset after deleting an invalid bak,
+                // causing the inner copy loop to be skipped forever (infinite outer loop doing nothing).
+                bool hasAcess = false;
                 while (!hasAcess)
                 {
                     try
@@ -149,11 +152,15 @@ public class FileTXTIO : IFileTXTIO
                         {
                             lastWriteAttempt = DateTime.Now;
                         }
-                        else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
                         {
                             eWrite = e;
                             lastWriteAttempt = null;
                             return false;
+                        }
+                        else
+                        {
+                            Thread.Sleep(_delay); // BUG FIX: prevent busy-wait spin
                         }
                     }
                     catch (Exception e)
@@ -163,12 +170,27 @@ public class FileTXTIO : IFileTXTIO
                         return false;
                     }
                 }
-                //texta o arquivo bak
+                //testa o arquivo bak
                 try
                 {
                     if (!fileServices.Check.CheckTextFile(_fileBak!) /*&& !fileServices.Check.CheckTextFileByChars(_fileBak!)*/)
                     {
-                        File.Delete(_fileBak!);
+                        try { File.Delete(_fileBak!); } catch { /* ignore — will be recreated next iteration */ }
+                        // BUG FIX: track repeated validation failures so the outer loop can time out
+                        if (lastWriteAttempt is null)
+                        {
+                            lastWriteAttempt = DateTime.Now;
+                        }
+                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
+                        {
+                            eWrite = new InvalidDataException("Bak file is consistently invalid: " + _fileBak);
+                            lastWriteAttempt = null;
+                            return false;
+                        }
+                        else
+                        {
+                            Thread.Sleep(_delay); // BUG FIX: prevent busy-wait spin
+                        }
                     }
                     else
                     {
@@ -185,14 +207,19 @@ public class FileTXTIO : IFileTXTIO
                     {
                         lastWriteAttempt = DateTime.Now;
                     }
-                    else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+                    else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
                     {
                         eWrite = e;
                         lastWriteAttempt = null;
                         return false;
                     }
+                    else
+                    {
+                        Thread.Sleep(_delay); // BUG FIX: prevent busy-wait spin
+                    }
                 }
             }
+            lastWriteAttempt = null;
         }
         return true;
     }
@@ -220,10 +247,14 @@ public class FileTXTIO : IFileTXTIO
                         {
                             lastWriteAttempt = DateTime.Now;
                         }
-                        else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
                         {
                             lastWriteAttempt = null;
                             hasAcess = true;
+                        }
+                        else
+                        {
+                            Thread.Sleep(_delay); // BUG FIX: prevent busy-wait spin
                         }
                     }
                     catch (Exception)
@@ -242,21 +273,20 @@ public class FileTXTIO : IFileTXTIO
         {
             lastWriteAttempt = DateTime.Now;
         }
-        else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
+        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
         {
             eWrite = ex;
             lastWriteAttempt = null;
             return false;
         }
-        Task.Delay(_delay);
-        return WriteTXT(parTXT);
+        Thread.Sleep(_delay); // BUG FIX: Task.Delay was not awaited so had no effect
+        return true; // BUG FIX: return true to signal WriteTXT to retry (was recursively calling WriteTXT causing stack overflow risk)
     }
     public async Task<bool> WriteTXTAsync(string parTXT)
     {
-        tryWriteTask = new Task<bool>(() => WriteTXT(parTXT));
-        tryWriteTask.Start();
-        await tryWriteTask;
-        return tryWriteTask.Result;
+        // BUG FIX: new Task<bool>(() => ...).Start() is an outdated pattern; use Task.Run for thread-pool execution
+        tryWriteTask = Task.Run(() => WriteTXT(parTXT));
+        return await tryWriteTask.ConfigureAwait(false);
     }
     public bool WriteTXT(string parTXT)
     {
@@ -269,38 +299,42 @@ public class FileTXTIO : IFileTXTIO
         {
             return false;
         }
-        bool hasAcess = false;
-        //Escreve o arquivo de fato
+        // BUG FIX: retry loop replaces the recursive ProcessWriterException → WriteTXT → ProcessWriterException
+        // chain that risked a stack overflow on many retries
         try
         {
-            using (StreamWriter sw = GetStreamWriter())
+            while (true)
             {
-                sw.Write(text);
-                if (lastReadAttempt is not null)
-                    lastReadAttempt = null;
+                try
+                {
+                    using (StreamWriter sw = GetStreamWriter())
+                    {
+                        sw.Write(text);
+                        lastWriteAttempt = null;
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (!ProcessWriterException(parTXT, ex))
+                        return false;
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            return ProcessWriterException(parTXT, ex);
         }
         finally
         {
-            if (!AfterWriteOrReader())
-            {
-
-            }
+            AfterWriteOrReader();
         }
-        return true;
     }
     #endregion
     #region Read
     public bool BeforeReader()
     {
-        if (eRead is not null)
-        {
-            eRead = null!;
-        }
+        eRead = null!;
+        // BUG FIX: clear stale retry state so the previous failure timestamp cannot cause
+        // an immediate timeout on the very first exception of a new read call
+        lastReadAttempt = null;
+
         if (_pathFile is null)
         {
             eRead = new FileNotFoundException("Path file is null");
@@ -335,7 +369,7 @@ public class FileTXTIO : IFileTXTIO
         }
         try
         {
-            File.Copy(_pathFile, _fileBak, true);
+            File.Copy(_pathFile, _fileBak!, true);
         }
         catch (Exception ex)
         {
@@ -382,65 +416,52 @@ public class FileTXTIO : IFileTXTIO
         {
             lastReadAttempt = DateTime.Now;
         }
-        else if ((DateTime.Now - ((DateTime)lastReadAttempt)).TotalMilliseconds > 5 * _delay / 2)
+        else if ((DateTime.Now - lastReadAttempt.Value).TotalMilliseconds > 5 * _delay / 2)
         {
             if (File.Exists(_fileBak))
             {
-                bool hasAcess = false;
-                while (!hasAcess)
+                // BUG FIX: wrap bak read in try/catch — StreamReader creation was outside any try block
+                try
                 {
-                    using (StreamReader sr = new(_fileBak))
+                    TextResult = File.ReadAllText(_fileBak);
+                    // BUG FIX: use File.Replace for atomic restore instead of Delete+Copy which can lose
+                    // both files if the Copy fails after the Delete
+                    try
                     {
-                        TextResult = sr.ReadToEnd();
-
-#pragma warning disable CS0168 // Variable is declared but never used
-                        try
-                        {
-                            File.Delete(_pathFile);
-                            File.Copy(_fileBak, _pathFile);
-                            File.Delete(_fileBak);
-                            hasAcess = true;
-                            return true;
-                        }
-                        catch (IOException e)
-                        {
-                            if (lastWriteAttempt is null)
-                            {
-                                lastWriteAttempt = DateTime.Now;
-                            }
-                            else if ((DateTime.Now - ((DateTime)lastWriteAttempt)).TotalMilliseconds > 5 * _delay)
-                            {
-                                lastWriteAttempt = null;
-                                hasAcess = true;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            lastWriteAttempt = null;
-                            hasAcess = true;
-                        }
-#pragma warning restore CS0168 // Variable is declared but never used
+                        if (File.Exists(_pathFile))
+                            File.Replace(_fileBak, _pathFile!, null);
+                        else
+                            File.Move(_fileBak, _pathFile!);
                     }
+                    catch
+                    {
+                        // Restoration failed but we read successfully from bak — TextResult is set
+                    }
+                    lastReadAttempt = null;
+                    return false; // stop retrying — TextResult is set, eRead is null → caller returns true
                 }
-
+                catch (Exception recoveryEx)
+                {
+                    eRead = recoveryEx;
+                    lastReadAttempt = null;
+                    return false; // stop retrying — recovery from bak also failed
+                }
             }
             eRead = ex;
             lastReadAttempt = null;
-            return false;
+            return false; // stop retrying — no bak available
         }
-        Task.Delay(_delay);
-        return ReadTXT();
+        Thread.Sleep(_delay); // BUG FIX: Task.Delay was not awaited so had no effect
+        return true; // BUG FIX: return true to signal ReadTXT to retry (was recursively calling ReadTXT causing stack overflow risk)
     }
     public async Task<bool> ReadTXTAsync()
     {
-        Task<bool> task = new Task<bool>(() => ReadTXT());
-        task.Start();
-        await task;
-        return task.Result;
+        // BUG FIX: new Task<bool>(() => ...).Start() is an outdated pattern; use Task.Run for thread-pool execution
+        return await Task.Run(() => ReadTXT()).ConfigureAwait(false);
     }
     public bool ReadTXT()
     {
-        TextResult = null;
+        TextResult = null!;
 
         if (!BeforeReader())
         {
@@ -448,32 +469,36 @@ public class FileTXTIO : IFileTXTIO
         }
 
         //Lê de fato o arquivo
+        // BUG FIX: retry loop replaces the recursive ProcessReaderException → ReadTXT → ProcessReaderException
+        // chain that risked a stack overflow on many retries
         try
         {
-            using (StreamReader sr = GetStreamReader())
+            while (true)
             {
-                if (sr is null)
-                    return false;
-                TextResult = sr.ReadToEnd();
-
-                if (lastReadAttempt is not null)
-                    lastReadAttempt = null;
-                return true;
+                try
+                {
+                    using (StreamReader sr = GetStreamReader())
+                    {
+                        TextResult = sr.ReadToEnd();
+                        lastReadAttempt = null;
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (!ProcessReaderException(ex))
+                        // false means stop: if eRead is null recovery succeeded (TextResult set), otherwise failed
+                        return eRead is null;
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            return ProcessReaderException(ex);
         }
         finally
         {
-            if (!AfterWriteOrReader())
-            {
-
-            }
+            AfterWriteOrReader();
         }
     }
-    private static DateTime? lastAcessAttempt;
+    // BUG FIX: was static — shared across all instances causing concurrency issues with retry timing
+    private DateTime? lastAcessAttempt;
     //private Exception
     private bool VerifyFilesAcess(bool isFileRead)
     {
@@ -494,12 +519,14 @@ public class FileTXTIO : IFileTXTIO
             }
             catch (DirectoryNotFoundException e)
             {
+                // BUG FIX: for write, this was silently ignored → infinite loop.
+                // A missing directory is always fatal regardless of direction.
                 if (isFileRead)
-                {
                     eRead = e;
-                    lastAcessAttempt = null;
-                    return false;
-                }
+                else
+                    eWrite = e;
+                lastAcessAttempt = null;
+                return false;
             }
             catch (FileNotFoundException e)
             {
@@ -509,6 +536,12 @@ public class FileTXTIO : IFileTXTIO
                     lastAcessAttempt = null;
                     return false;
                 }
+                else
+                {
+                    // BUG FIX: for write, a missing file is OK — we will create it.
+                    // Previously this fell through without setting hasAcess → infinite loop.
+                    hasAcess = true;
+                }
             }
             catch (IOException e)
             {
@@ -516,7 +549,7 @@ public class FileTXTIO : IFileTXTIO
                 {
                     lastAcessAttempt = DateTime.Now;
                 }
-                else if ((DateTime.Now - ((DateTime)lastAcessAttempt)).TotalMilliseconds > 5 * _delay)
+                else if ((DateTime.Now - lastAcessAttempt.Value).TotalMilliseconds > 5 * _delay)
                 {
                     //TODO return a error
                     if (isFileRead)
@@ -525,6 +558,10 @@ public class FileTXTIO : IFileTXTIO
                         eWrite = e;
                     lastAcessAttempt = null;
                     return false;
+                }
+                else
+                {
+                    Thread.Sleep(_delay); // BUG FIX: prevent busy-wait spin
                 }
             }
             catch (Exception e)
@@ -557,7 +594,7 @@ public class FileTXTIO : IFileTXTIO
                     {
                         lastAcessAttempt = DateTime.Now;
                     }
-                    else if ((DateTime.Now - ((DateTime)lastAcessAttempt)).TotalMilliseconds > 5 * _delay)
+                    else if ((DateTime.Now - lastAcessAttempt.Value).TotalMilliseconds > 5 * _delay)
                     {
                         if (isFileRead)
                             eRead = e;
@@ -565,6 +602,10 @@ public class FileTXTIO : IFileTXTIO
                             eWrite = e;
                         lastAcessAttempt = null;
                         return false;
+                    }
+                    else
+                    {
+                        Thread.Sleep(_delay); // BUG FIX: prevent busy-wait spin
                     }
                 }
                 catch (Exception e)
