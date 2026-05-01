@@ -1,3 +1,4 @@
+using BaseLibrary;
 using FluentAssertions;
 
 namespace BaseLibrary.Tests;
@@ -313,6 +314,14 @@ public class FileServicesDirectoryTests : IDisposable
     // -------------------------------------------------------------------------
     // RenameAllWhithoutSpaces
     // -------------------------------------------------------------------------
+
+    [Fact]
+    public void RenameAllWhithoutSpaces_NonExistentFolder_DoesNotThrow()
+    {
+        var act = () => _sut.RenameAllWhithoutSpaces(TmpPath("does_not_exist"));
+
+        act.Should().NotThrow();
+    }
 
     [Fact]
     public void RenameAllWhithoutSpaces_RenamesFilesWithSpaces()

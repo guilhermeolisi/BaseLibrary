@@ -123,6 +123,9 @@ public class FileServicesDirectory : IFileServicesDirectory
     }
     public void RenameAllWhithoutSpaces(string folder)
     {
+        if (!Directory.Exists(folder))
+            return;
+
         string[] files = Directory.GetFiles(folder);
         string? parentFolder = null;
         for (int i = 0; i < files.Length; i++)
