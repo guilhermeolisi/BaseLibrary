@@ -73,7 +73,7 @@ public class FileServicesDirectory : IFileServicesDirectory
         {
             foreach (string dir in Directory.GetDirectories(directory))
             {
-                GetDirectorySize(dir, recursive);
+                result += GetDirectorySize(dir, recursive);
             }
         }
 
@@ -86,6 +86,9 @@ public class FileServicesDirectory : IFileServicesDirectory
     }
     public void DirectoryClear(string sourceDirName)
     {
+        if (!Directory.Exists(sourceDirName))
+            return;
+
         // Get the subdirectories for the specified directory.
         string[] files = Directory.GetFiles(sourceDirName);
         for (int i = 0; i < files.Length; i++)
@@ -121,16 +124,14 @@ public class FileServicesDirectory : IFileServicesDirectory
     public void RenameAllWhithoutSpaces(string folder)
     {
         string[] files = Directory.GetFiles(folder);
-        string parentFolder = null;
+        string? parentFolder = null;
         for (int i = 0; i < files.Length; i++)
         {
             string fileName = Path.GetFileName(files[i]);
             if (fileName.Contains(' '))
             {
-#if DEBUG
-                var trash = files[i].Replace(" ", "%20");
-#endif
                 parentFolder ??= Path.GetDirectoryName(files[i]);
+                if (parentFolder is null) continue;
                 fileName = fileName.Replace(" ", "%20");
                 File.Move(files[i], Path.Combine(parentFolder, fileName));
             }
@@ -138,11 +139,12 @@ public class FileServicesDirectory : IFileServicesDirectory
         string[] folders = Directory.GetDirectories(folder);
         for (int i = 0; i < folders.Length; i++)
         {
-            string folderPath = folders[i].Substring(0);
+            string folderPath = folders[i];
             string folderName = Path.GetFileName(folderPath);
             if (folderName.Contains(' '))
             {
                 parentFolder ??= Path.GetDirectoryName(folderPath);
+                if (parentFolder is null) continue;
 
                 folderName = folderName.Replace(" ", "%20");
                 folderPath = Path.Combine(parentFolder, folderName);
@@ -153,6 +155,9 @@ public class FileServicesDirectory : IFileServicesDirectory
     }
     public int CountTotalFiles(string folder, string? pattern = null, string[]? excludePattern = null)
     {
+        if (!Directory.Exists(folder))
+            return 0;
+
         int result = 0;
 
         string[] files = pattern is null ? Directory.GetFiles(folder) : Directory.GetFiles(folder, pattern);
