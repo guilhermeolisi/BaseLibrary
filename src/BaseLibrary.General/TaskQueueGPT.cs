@@ -10,11 +10,9 @@ public class TaskQueueGPT : ITaskQueue
     {
         if (work is null) throw new ArgumentNullException(nameof(work));
 
-        return Enqueue(async () =>
-        {
-            work();
-            await Task.CompletedTask;
-        });
+        // Use a synchronous-returning lambda to avoid async state-machine overhead
+        // and to preserve the original exception stack trace.
+        return Enqueue(() => { work(); return Task.CompletedTask; });
     }
 
     // 2) Função assíncrona, sem retorno
@@ -35,13 +33,20 @@ public class TaskQueueGPT : ITaskQueue
                         await work().ConfigureAwait(false);
                         tcs.TrySetResult(null);
                     }
+                    catch (OperationCanceledException ex)
+                    {
+                        // Propagate cancellation correctly so callers see IsCanceled == true.
+                        tcs.TrySetCanceled(ex.CancellationToken);
+                    }
                     catch (Exception ex)
                     {
                         tcs.TrySetException(ex);
                     }
                 },
                 CancellationToken.None,
-                TaskContinuationOptions.None,
+                // DenyChildAttach prevents tasks created inside work() with
+                // AttachedToParent from delaying completion of the chain node.
+                TaskContinuationOptions.DenyChildAttach,
                 TaskScheduler.Default)
                 .Unwrap();
         }
@@ -67,13 +72,20 @@ public class TaskQueueGPT : ITaskQueue
                         var result = await work().ConfigureAwait(false);
                         tcs.TrySetResult(result);
                     }
+                    catch (OperationCanceledException ex)
+                    {
+                        // Propagate cancellation correctly so callers see IsCanceled == true.
+                        tcs.TrySetCanceled(ex.CancellationToken);
+                    }
                     catch (Exception ex)
                     {
                         tcs.TrySetException(ex);
                     }
                 },
                 CancellationToken.None,
-                TaskContinuationOptions.None,
+                // DenyChildAttach prevents tasks created inside work() with
+                // AttachedToParent from delaying completion of the chain node.
+                TaskContinuationOptions.DenyChildAttach,
                 TaskScheduler.Default)
                 .Unwrap();
         }
@@ -81,12 +93,11 @@ public class TaskQueueGPT : ITaskQueue
         return tcs.Task;
     }
 
-    // 4) Função síncrona com retorno (o overload que você pediu)
+    // 4) Função síncrona com retorno
     public Task<T> Enqueue<T>(Func<T> work)
     {
         if (work is null) throw new ArgumentNullException(nameof(work));
 
-        // Aqui é o truque: convertemos para Func<Task<T>>
         return Enqueue<T>(() => Task.FromResult(work()));
     }
 
@@ -101,6 +112,9 @@ public class TaskQueueGPT : ITaskQueue
 
     public void WaitAll()
     {
-        WaitAllAsync().GetAwaiter().GetResult();
+        // Use Task.Run to avoid deadlocks when called from a thread bound to a
+        // SynchronizationContext (e.g. UI thread) where continuations inside
+        // the queue might be scheduled back onto the same context.
+        Task.Run(WaitAllAsync).GetAwaiter().GetResult();
     }
 }
