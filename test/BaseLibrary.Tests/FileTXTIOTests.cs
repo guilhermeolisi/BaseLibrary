@@ -403,13 +403,14 @@ public class FileTXTIOTests : IDisposable
         var sut = CreateSut();
         var path = TmpPath("pwe_timeout.txt");
         sut.SetPathFile(path);
+        sut.SetDelay(10); // WriteTimeoutMs = 50ms — avoids a 1.4s wall-clock wait
         var ioEx = new IOException("still locked");
 
         // First call starts the timer
         sut.ProcessWriterException("text", ioEx);
 
-        // Wait longer than the 5 * 250 ms timeout
-        await Task.Delay(1400);
+        // Wait longer than the 5 * 10 ms = 50 ms timeout
+        await Task.Delay(100);
 
         var result = sut.ProcessWriterException("text", ioEx);
 
@@ -440,13 +441,14 @@ public class FileTXTIOTests : IDisposable
         var sut = CreateSut();
         var path = TmpPath("pre_timeout.txt");
         sut.SetPathFile(path);
+        sut.SetDelay(10); // ReadTimeoutMs = 25ms — avoids a 750ms wall-clock wait
         var ioEx = new IOException("still locked");
 
         // First call starts the timer
         sut.ProcessReaderException(ioEx);
 
-        // Wait longer than the 5 * 250 / 2 = 625 ms timeout
-        await Task.Delay(750);
+        // Wait longer than the 5 * 10 / 2 = 25 ms timeout
+        await Task.Delay(100);
 
         var result = sut.ProcessReaderException(ioEx);
 
@@ -464,12 +466,13 @@ public class FileTXTIOTests : IDisposable
         File.WriteAllText(path, "original");
         File.WriteAllText(bakPath, "backup content");
         sut.SetPathFile(path);
+        sut.SetDelay(10); // ReadTimeoutMs = 25ms — avoids a 750ms wall-clock wait
 
         // Start retry timer
         sut.ProcessReaderException(new IOException("locked"));
 
-        // Wait for timeout
-        await Task.Delay(750);
+        // Wait longer than the 5 * 10 / 2 = 25 ms timeout
+        await Task.Delay(100);
 
         // Act — this should now trigger bak recovery
         var result = sut.ProcessReaderException(new IOException("still locked"));
@@ -490,9 +493,10 @@ public class FileTXTIOTests : IDisposable
         File.WriteAllText(path, "original");
         File.WriteAllText(bakPath, "restored content");
         sut.SetPathFile(path);
+        sut.SetDelay(10); // ReadTimeoutMs = 25ms — avoids a 750ms wall-clock wait
 
         sut.ProcessReaderException(new IOException("locked"));
-        await Task.Delay(750);
+        await Task.Delay(100);
         sut.ProcessReaderException(new IOException("still locked"));
 
         // After recovery the original should be restored from bak

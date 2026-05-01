@@ -36,6 +36,8 @@ public class FileTXTIO : IFileTXTIO
         eWrite = null!;
     }
     public void SetStayBak(bool value) => _isStayBak = value;
+    /// <summary>Sets the base retry delay in milliseconds. Primarily used in tests to reduce wait times.</summary>
+    public void SetDelay(int milliseconds) => _delay = milliseconds;
     public void SetPathFile(string? pathFile)
     {
         if (pathFile == _pathFile)
@@ -311,7 +313,7 @@ public class FileTXTIO : IFileTXTIO
                 {
                     using (StreamWriter sw = GetStreamWriter())
                     {
-                        sw.Write(text);
+                        sw.Write(parTXT); // use the local parameter, not the instance field, to avoid data races
                         lastWriteAttempt = null;
                         return true;
                     }
@@ -420,27 +422,33 @@ public class FileTXTIO : IFileTXTIO
         }
         else if ((DateTime.Now - lastReadAttempt.Value).TotalMilliseconds > ReadTimeoutMs)
         {
-            if (File.Exists(_fileBak))
+            string? fileBak = _fileBak; // capture once — _fileBak is a computed property that can return null
+            if (fileBak is not null && File.Exists(fileBak))
             {
                 // BUG FIX: wrap bak read in try/catch — StreamReader creation was outside any try block
                 try
                 {
-                    TextResult = File.ReadAllText(_fileBak);
+                    TextResult = File.ReadAllText(fileBak);
                     // BUG FIX: use File.Replace for atomic restore instead of Delete+Copy which can lose
                     // both files if the Copy fails after the Delete
                     try
                     {
                         if (File.Exists(_pathFile))
-                            File.Replace(_fileBak, _pathFile!, null);
+                            File.Replace(fileBak, _pathFile!, null);
                         else
-                            File.Move(_fileBak, _pathFile!);
+                            File.Move(fileBak, _pathFile!);
                     }
-                    catch
+                    catch (Exception restoreEx)
                     {
-                        // Restoration failed but we read successfully from bak — TextResult is set
+                        // Restoration failed: preserve the bak so AfterWriteOrReader() does not delete the
+                        // last good copy, and surface the error so the caller knows the original is not restored.
+                        _isStayBak = true;
+                        eRead = restoreEx;
+                        lastReadAttempt = null;
+                        return false; // stop retrying — backup was read but original could not be restored
                     }
                     lastReadAttempt = null;
-                    return false; // stop retrying — TextResult is set, eRead is null → caller returns true
+                    return false; // stop retrying — TextResult is set and original was restored from bak
                 }
                 catch (Exception recoveryEx)
                 {
