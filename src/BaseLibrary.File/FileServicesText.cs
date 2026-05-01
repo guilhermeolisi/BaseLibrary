@@ -81,6 +81,11 @@ public class FileServicesText : IFileServicesText
         if (parTXT is null)
             throw new ArgumentNullException(nameof(parTXT));
 
+        if (!Directory.Exists(Path.GetDirectoryName(pathFile)))
+        {
+            return false;
+        }
+
         short count = 0;
         bool isCont = true;
         bool returnBak = false;
@@ -169,9 +174,9 @@ public class FileServicesText : IFileServicesText
                     {
                         File.SetCreationTime(pathFile, creation);
                     }
-                    if (File.GetLastWriteTime(pathFile) != creation)
+                    if (File.GetLastWriteTime(pathFile) != lastWrite)
                     {
-                        File.SetLastWriteTime(pathFile, creation);
+                        File.SetLastWriteTime(pathFile, lastWrite);
                     }
                 }
                 catch (Exception e)
@@ -204,7 +209,7 @@ public class FileServicesText : IFileServicesText
         short count = 0;
         bool isCont = true;
         string fileTemp = BakReadBegin(pathFile);
-        if (fileTemp == pathFile + tmpExt && !File.Exists(Path.GetDirectoryName(pathFile)))
+        if (fileTemp == pathFile + tmpExt && !Directory.Exists(Path.GetDirectoryName(pathFile)))
         {
             return null;
         }
@@ -256,7 +261,7 @@ public class FileServicesText : IFileServicesText
         short count = 0;
         bool isCont = true;
         string fileTemp = BakReadBegin(pathFile);
-        if (fileTemp == pathFile + tmpExt && !File.Exists(Path.GetDirectoryName(pathFile)))
+        if (fileTemp == pathFile + tmpExt && !Directory.Exists(Path.GetDirectoryName(pathFile)))
         {
             return null;
         }
@@ -313,7 +318,7 @@ public class FileServicesText : IFileServicesText
         DateTime? trash4 = (File.Exists(pathFile) ? File.GetCreationTime(pathFile) : null);
 #endif
 
-        if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile)) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile))
+        if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile)))
         {
 #pragma warning disable CS0168 // Variable is declared but never used
             try
@@ -331,9 +336,9 @@ public class FileServicesText : IFileServicesText
                 {
                     File.SetCreationTime(pathFile, creation);
                 }
-                if (File.GetLastWriteTime(pathFile) != creation)
+                if (File.GetLastWriteTime(pathFile) != lastWrite)
                 {
-                    File.SetLastWriteTime(pathFile, creation);
+                    File.SetLastWriteTime(pathFile, lastWrite);
                 }
 
             }
@@ -347,7 +352,7 @@ public class FileServicesText : IFileServicesText
     }
     private void BakReadEnd(string pathFile)
     {
-        if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile)) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile))
+        if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile)))
         {
 #pragma warning disable CS0168 // Variable is declared but never used
             try
@@ -366,9 +371,9 @@ public class FileServicesText : IFileServicesText
                 {
                     File.SetCreationTime(pathFile, creation);
                 }
-                if (File.GetLastWriteTime(pathFile) != creation)
+                if (File.GetLastWriteTime(pathFile) != lastWrite)
                 {
-                    File.SetLastWriteTime(pathFile, creation);
+                    File.SetLastWriteTime(pathFile, lastWrite);
                 }
 
             }
