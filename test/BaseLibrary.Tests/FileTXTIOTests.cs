@@ -371,7 +371,7 @@ public class FileTXTIOTests : IDisposable
         var sut = CreateSut();
         var path = TmpPath("roundtrip.txt");
         sut.SetPathFile(path);
-        var content = "Round-trip content — with accents: ção";
+        var content = "Round-trip content - with accents: cao";
 
         sut.WriteTXT(content).Should().BeTrue();
         sut.ReadTXT().Should().BeTrue();

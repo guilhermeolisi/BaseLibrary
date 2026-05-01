@@ -8,6 +8,8 @@ public class FileTXTIO : IFileTXTIO
     protected IFileServices fileServices;
 
     private int _delay = 250;
+    private int WriteTimeoutMs => 5 * _delay;
+    private int ReadTimeoutMs => 5 * _delay / 2;
     private string? text;
     private string? _pathFile;
     private string? _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
@@ -152,7 +154,7 @@ public class FileTXTIO : IFileTXTIO
                         {
                             lastWriteAttempt = DateTime.Now;
                         }
-                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
+                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
                         {
                             eWrite = e;
                             lastWriteAttempt = null;
@@ -181,7 +183,7 @@ public class FileTXTIO : IFileTXTIO
                         {
                             lastWriteAttempt = DateTime.Now;
                         }
-                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
+                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
                         {
                             eWrite = new InvalidDataException("Bak file is consistently invalid: " + _fileBak);
                             lastWriteAttempt = null;
@@ -207,7 +209,7 @@ public class FileTXTIO : IFileTXTIO
                     {
                         lastWriteAttempt = DateTime.Now;
                     }
-                    else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
+                    else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
                     {
                         eWrite = e;
                         lastWriteAttempt = null;
@@ -247,7 +249,7 @@ public class FileTXTIO : IFileTXTIO
                         {
                             lastWriteAttempt = DateTime.Now;
                         }
-                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
+                        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
                         {
                             lastWriteAttempt = null;
                             hasAcess = true;
@@ -273,7 +275,7 @@ public class FileTXTIO : IFileTXTIO
         {
             lastWriteAttempt = DateTime.Now;
         }
-        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > 5 * _delay)
+        else if ((DateTime.Now - lastWriteAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
         {
             eWrite = ex;
             lastWriteAttempt = null;
@@ -416,7 +418,7 @@ public class FileTXTIO : IFileTXTIO
         {
             lastReadAttempt = DateTime.Now;
         }
-        else if ((DateTime.Now - lastReadAttempt.Value).TotalMilliseconds > 5 * _delay / 2)
+        else if ((DateTime.Now - lastReadAttempt.Value).TotalMilliseconds > ReadTimeoutMs)
         {
             if (File.Exists(_fileBak))
             {
@@ -549,7 +551,7 @@ public class FileTXTIO : IFileTXTIO
                 {
                     lastAcessAttempt = DateTime.Now;
                 }
-                else if ((DateTime.Now - lastAcessAttempt.Value).TotalMilliseconds > 5 * _delay)
+                else if ((DateTime.Now - lastAcessAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
                 {
                     //TODO return a error
                     if (isFileRead)
@@ -594,7 +596,7 @@ public class FileTXTIO : IFileTXTIO
                     {
                         lastAcessAttempt = DateTime.Now;
                     }
-                    else if ((DateTime.Now - lastAcessAttempt.Value).TotalMilliseconds > 5 * _delay)
+                    else if ((DateTime.Now - lastAcessAttempt.Value).TotalMilliseconds > WriteTimeoutMs)
                     {
                         if (isFileRead)
                             eRead = e;
