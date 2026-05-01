@@ -299,6 +299,65 @@ public class FileServicesTextTests : IDisposable
         (await _sut.ReadTXTAsync(path)).Should().Be("second version");
     }
 
+    /// <summary>
+    /// Regression for Fix 4 (BakReadBegin / BakReadEnd):
+    /// After promoting a .tmp whose LastWriteTime differs from its CreationTime,
+    /// the promoted file must carry the original LastWriteTime, not CreationTime.
+    /// </summary>
+    [Fact]
+    public void ReadTXT_AfterTmpPromotion_RestoresLastWriteTime()
+    {
+        var path = TmpPath("restore_lw.txt");
+        var tmpPath = path + ".tmp";
+
+        // Write .tmp with explicitly different CreationTime and LastWriteTime
+        File.WriteAllText(tmpPath, "backup content");
+        var expectedLastWrite = new DateTime(2021, 3, 15, 8, 30, 0, DateTimeKind.Local);
+        File.SetLastWriteTime(tmpPath, expectedLastWrite);
+
+        // No main file → BakReadBegin promotes .tmp to main
+        _sut.ReadTXT(path);
+
+        // LastWriteTime on the promoted file must match the .tmp's LastWriteTime (Fix 4 regression).
+        // Note: CreationTime is platform-specific and not asserted here.
+        File.GetLastWriteTime(path).Should().BeCloseTo(expectedLastWrite, TimeSpan.FromSeconds(2));
+    }
+
+    /// <summary>
+    /// Regression for Fix 4 (BakWriteEnd):
+    /// When a write fails and the .tmp backup is restored, the file's
+    /// LastWriteTime should be restored to the backup's LastWriteTime —
+    /// not to its CreationTime.
+    /// </summary>
+    [Fact]
+    public void WriteTXT_OnWriteFailure_RestoresContentAndLastWriteTime()
+    {
+        var path = TmpPath("write_failure_ts.txt");
+        _sut.WriteTXT(path, "original content");
+
+        // Set a specific, easily distinguishable LastWriteTime on the file.
+        // BakWriteBegin will copy the file to .tmp and preserve this as .tmp's LastWriteTime.
+        var originalLastWrite = new DateTime(2019, 5, 20, 9, 0, 0, DateTimeKind.Local);
+        File.SetLastWriteTime(path, originalLastWrite);
+
+        // Make file read-only so the write attempt fails (UnauthorizedAccessException).
+        File.SetAttributes(path, FileAttributes.ReadOnly);
+        try
+        {
+            var result = _sut.WriteTXT(path, "new content");
+
+            // Write should fail (false) and content must be restored from .tmp
+            result.Should().BeFalse();
+            File.ReadAllText(path).Should().Be("original content");
+            // LastWriteTime must be restored from backup's LastWriteTime, not CreationTime
+            File.GetLastWriteTime(path).Should().BeCloseTo(originalLastWrite, TimeSpan.FromSeconds(2));
+        }
+        finally
+        {
+            File.SetAttributes(path, FileAttributes.Normal);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // WriteTXT / ReadTXT – empty string content
     // -------------------------------------------------------------------------

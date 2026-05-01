@@ -11,7 +11,8 @@ public class FileServicesText : IFileServicesText
         if (parTXT is null)
             throw new ArgumentNullException(nameof(parTXT));
 
-        if (!Directory.Exists(Path.GetDirectoryName(pathFile)))
+        var dir = Path.GetDirectoryName(pathFile);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
         {
             return false;
         }
@@ -81,7 +82,8 @@ public class FileServicesText : IFileServicesText
         if (parTXT is null)
             throw new ArgumentNullException(nameof(parTXT));
 
-        if (!Directory.Exists(Path.GetDirectoryName(pathFile)))
+        var dirAsync = Path.GetDirectoryName(pathFile);
+        if (!string.IsNullOrEmpty(dirAsync) && !Directory.Exists(dirAsync))
         {
             return false;
         }
@@ -209,9 +211,11 @@ public class FileServicesText : IFileServicesText
         short count = 0;
         bool isCont = true;
         string fileTemp = BakReadBegin(pathFile);
-        if (fileTemp == pathFile + tmpExt && !Directory.Exists(Path.GetDirectoryName(pathFile)))
+        if (fileTemp == pathFile + tmpExt)
         {
-            return null;
+            var readDir = Path.GetDirectoryName(pathFile);
+            if (!string.IsNullOrEmpty(readDir) && !Directory.Exists(readDir))
+                return null;
         }
         try
         {
@@ -261,9 +265,11 @@ public class FileServicesText : IFileServicesText
         short count = 0;
         bool isCont = true;
         string fileTemp = BakReadBegin(pathFile);
-        if (fileTemp == pathFile + tmpExt && !Directory.Exists(Path.GetDirectoryName(pathFile)))
+        if (fileTemp == pathFile + tmpExt)
         {
-            return null;
+            var readDir = Path.GetDirectoryName(pathFile);
+            if (!string.IsNullOrEmpty(readDir) && !Directory.Exists(readDir))
+                return null;
         }
         try
         {
