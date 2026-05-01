@@ -21,7 +21,7 @@ public class UIThreadServicesTests
     /// Sets up a UIThreadServices with an ImmediateSynchronizationContext and
     /// then replaces the current context with a different one so that
     /// IsOnUIThread returns false (simulating a background thread).
-    /// Returns the service and captures cleanup via an IDisposable Action.
+    /// Returns the service and a cleanup Action to restore the original context.
     /// </summary>
     private static (UIThreadServices service, Action cleanup) CreateServiceNotOnUIThread()
     {
