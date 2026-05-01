@@ -13,17 +13,39 @@ public class FileServicesFile : IFileServicesFile
     }
     public void CopyConserveTime(string original, string destination, bool preservetime = true)
     {
+        if (string.IsNullOrWhiteSpace(original))
+            throw new ArgumentException("The path cannot be null or empty.", nameof(original));
+        if (string.IsNullOrWhiteSpace(destination))
+            throw new ArgumentException("The path cannot be null or empty.", nameof(destination));
+        if (!File.Exists(original))
+            throw new FileNotFoundException("The source file does not exist.", original);
+
         File.Copy(original, destination);
-        File.SetCreationTime(destination, File.GetCreationTime(original));
-        File.SetLastWriteTime(destination, File.GetLastWriteTime(original));
-        File.SetLastAccessTime(destination, File.GetLastAccessTime(original));
+        if (preservetime)
+        {
+            File.SetCreationTime(destination, File.GetCreationTime(original));
+            File.SetLastWriteTime(destination, File.GetLastWriteTime(original));
+            File.SetLastAccessTime(destination, File.GetLastAccessTime(original));
+        }
+        else
+        {
+            var now = DateTime.Now;
+            File.SetCreationTime(destination, now);
+            File.SetLastWriteTime(destination, now);
+            File.SetLastAccessTime(destination, now);
+        }
     }
     /// <summary>
     /// Get the file size in bytes
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>size in bytes</returns>
-    public long FileSize(string filePath) => new FileInfo(filePath).Length;
+    public long FileSize(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("The path cannot be null or empty.", nameof(filePath));
+        return new FileInfo(filePath).Length;
+    }
     public DateTime FileLastModification(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -36,20 +58,39 @@ public class FileServicesFile : IFileServicesFile
     }
     public void ExtractZipConserveTime(string zipPath, string extractPath)
     {
+        if (string.IsNullOrWhiteSpace(zipPath))
+            throw new ArgumentException("The ZIP path cannot be null or empty.", nameof(zipPath));
+        if (!File.Exists(zipPath))
+            throw new FileNotFoundException("The ZIP file does not exist.", zipPath);
+        if (string.IsNullOrWhiteSpace(extractPath))
+            throw new ArgumentException("The extract path cannot be null or empty.", nameof(extractPath));
+
+        // Normalise extractPath so the path-traversal prefix check is consistent
+        string fullExtractPath = Path.GetFullPath(extractPath);
+        if (!fullExtractPath.EndsWith(Path.DirectorySeparatorChar))
+            fullExtractPath += Path.DirectorySeparatorChar;
+
         using (ZipArchive archive = ZipFile.OpenRead(zipPath))
         {
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
+                // Skip directory entries (Name is empty for directories)
+                if (string.IsNullOrEmpty(entry.Name))
+                    continue;
+
                 // Gets the full path to ensure that relative segments are removed.
                 string destinationPath = Path.GetFullPath(Path.Combine(extractPath, entry.FullName));
 
-                string folder = Path.GetDirectoryName(destinationPath);
-                directory.CreatAllPath(folder);
-
                 // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
                 // are case-insensitive.
-                if (destinationPath.StartsWith(extractPath, StringComparison.Ordinal))
-                    entry.ExtractToFile(destinationPath);
+                // Perform the security check before creating directories.
+                if (!destinationPath.StartsWith(fullExtractPath, StringComparison.Ordinal))
+                    continue;
+
+                string folder = Path.GetDirectoryName(destinationPath)!;
+                directory.CreatAllPath(folder);
+
+                entry.ExtractToFile(destinationPath);
             }
         }
     }
@@ -70,8 +111,8 @@ public class FileServicesFile : IFileServicesFile
 
         using (Process process = new())
         {
-            string commandProcess = null;
-            string argsProcess = "";
+            string commandProcess;
+            string argsProcess;
 
             switch (OS)
             {
@@ -88,7 +129,7 @@ public class FileServicesFile : IFileServicesFile
                     argsProcess = "\"" + filePath + "\"";
                     break;
                 default:
-                    break;
+                    throw new ArgumentException($"Unsupported OS value '{OS}'. Use 0 for Windows, 1 for Linux, or 2 for macOS.", nameof(OS));
             }
 
             process.StartInfo = new()
@@ -106,6 +147,9 @@ public class FileServicesFile : IFileServicesFile
     }
     public bool VerifyIfEncrypted(string filePath)
     {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("The path cannot be null or empty.", nameof(filePath));
+
         FileAttributes attrs = File.GetAttributes(filePath);
 
         bool fileIsEncrypted = (attrs & FileAttributes.Encrypted) != 0;
@@ -121,6 +165,10 @@ public class FileServicesFile : IFileServicesFile
     /// <exception cref="InvalidOperationException"></exception>
     public void CopyDecriptingFile(string sourcePath, string destinationFolder, string anEFSFolder)
     {
+        if (string.IsNullOrWhiteSpace(sourcePath))
+            throw new ArgumentException("The source path cannot be null or empty.", nameof(sourcePath));
+        if (!File.Exists(sourcePath))
+            throw new FileNotFoundException("The source file does not exist.", sourcePath);
         if (string.IsNullOrWhiteSpace(anEFSFolder))
             throw new ArgumentException("The EFS folder path cannot be null or empty.", nameof(anEFSFolder));
 
@@ -128,14 +176,8 @@ public class FileServicesFile : IFileServicesFile
         string filePathApp = Path.Combine(anEFSFolder, fileName);
         string filePathDestination = Path.Combine(destinationFolder, fileName);
         //Copia para a pasta App que supostamente seria no disco encriptografado
-        try
-        {
-            File.Copy(sourcePath, filePathApp, true);
-        }
-        catch (Exception ex)
-        {
+        File.Copy(sourcePath, filePathApp, true);
 
-        }
         // Descriptografa o arquivo copiado
         try
         {
@@ -228,8 +270,11 @@ public class FileServicesFile : IFileServicesFile
     /// <param name="filePath">The full path of the file to delete. The path must not be null or empty.</param>
     public void TryDeleteFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
-            throw new ArgumentException("The string can not be null or empty", nameof(filePath));
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("The path cannot be null or empty.", nameof(filePath));
+
+        if (!File.Exists(filePath))
+            return;
 
         int retryCount = 3;
         TimeSpan delay = delayVerification;
