@@ -2,11 +2,11 @@ using FluentAssertions;
 
 namespace BaseLibrary.Tests;
 
-public class TaskQueueGPTTests
+public class TaskQueueTests
 {
     // ─── helpers ───────────────────────────────────────────────────────────────
 
-    private static TaskQueueGPT CreateQueue() => new();
+    private static TaskQueue CreateQueue() => new();
 
     // ─── sequential ordering ────────────────────────────────────────────────────
 

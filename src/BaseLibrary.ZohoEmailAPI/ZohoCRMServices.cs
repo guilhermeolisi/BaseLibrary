@@ -214,6 +214,9 @@ public class ZohoCRMServices : IEmailSender
         return exceptionMessage;
     }
 
-    
+    public Task<GOSResult> SendMessage(string emailTo, string subject, string message, bool isAsync)
+    {
+        throw new NotImplementedException();
+    }
 }
 

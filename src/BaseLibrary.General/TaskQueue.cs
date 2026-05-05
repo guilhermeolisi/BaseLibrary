@@ -1,6 +1,6 @@
 ﻿namespace BaseLibrary;
 
-public class TaskQueueGPT : ITaskQueue
+public class TaskQueue : ITaskQueue
 {
     private readonly object _lock = new();
     private Task _tail = Task.CompletedTask;
