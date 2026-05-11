@@ -8,6 +8,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Platforms>AnyCPU</Platforms>
+    <Configurations>Debug;Release;Debug Velopack</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
