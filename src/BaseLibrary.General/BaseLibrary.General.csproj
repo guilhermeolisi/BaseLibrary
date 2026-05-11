@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x86;x64;ARM64</Platforms>
 		<RootNamespace>BaseLibrary</RootNamespace>
-		<Configurations>Debug;Release;Debug Velopack</Configurations>
+		<Configurations>Debug;Release</Configurations>
 		<!--<IsTrimmable>true</IsTrimmable>-->
 	</PropertyGroup>
 
