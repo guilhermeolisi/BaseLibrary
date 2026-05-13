@@ -5,256 +5,287 @@ namespace BaseLibrary;
 
 public class ConsoleServices : IConsoleServices
 {
-    StringBuilder? internalLog = null;
+    private const char Block = '■';
+    private const string Back = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+    private const string Twirl = "-\\|/";
 
-    public void InitizaliseInternalLog() => internalLog = new();
-    public string? GetInternalLog() => internalLog?.ToString();
+    private readonly IConsoleOutput consoleOutput;
+    private readonly IProcessRunner processRunner;
+    private readonly object syncRoot = new();
+    private StringBuilder internalLog = new();
 
-    //https://www.codeproject.com/Tips/5255878/A-Console-Progress-Bar-in-Csharp
-    const char _block = '■';
-    const string _back = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"; //total: 17
-    const string _twirl = "-\\|/";
+    public ConsoleServices(IConsoleOutput? consoleOutput = null, IProcessRunner? processRunner = null)
+    {
+        this.consoleOutput = consoleOutput ?? new SystemConsoleOutput();
+        this.processRunner = processRunner ?? new DefaultProcessRunner();
+    }
+
+    public void InitializeInternalLog() => InitizaliseInternalLog();
+
+    public void InitizaliseInternalLog()
+    {
+        lock (syncRoot)
+        {
+            internalLog = new StringBuilder();
+        }
+    }
+
+    public string? GetInternalLog()
+    {
+        lock (syncRoot)
+        {
+            return internalLog.ToString();
+        }
+    }
+
     public void WriteProgressBar(int percent, int progress = -1, bool update = false)
     {
-        var p = (int)((percent / 10f) + .5f);
-        //int progress;
-        //if (currentValue < 0)
-        //    progress = -1;
-        //else
-        //    progress = ;
-        if (update)
-            Console.Write((progress >= 0 ? "\b" : "") + _back +
-                (progress >= 0 ? _twirl[progress % _twirl.Length] : "") +
-                "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
-        else
-            Console.Write((progress >= 0 ? _twirl[progress % _twirl.Length] : "") +
-                "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
+        int normalizedPercent = Math.Clamp(percent, 0, 100);
+        int blocks = (int)((normalizedPercent / 10f) + .5f);
+        int spinnerIndex = NormalizeSpinnerIndex(progress);
+        string spinner = progress >= 0 ? Twirl[spinnerIndex].ToString() : string.Empty;
+        string message = (update ? (progress >= 0 ? "\b" : string.Empty) + Back : string.Empty) +
+            spinner +
+            "[" + new string(Block, blocks) + new string(' ', 10 - blocks) + string.Format("] {0,3:##0}%", normalizedPercent);
+
+        consoleOutput.Write(message);
     }
+
     public void WriteProgress(int progress, bool update = false)
     {
         if (update)
-            Console.Write("\b");
-        Console.Write(_twirl[progress % _twirl.Length]);
+            consoleOutput.Write("\b");
+
+        consoleOutput.Write(Twirl[NormalizeSpinnerIndex(progress)].ToString());
     }
+
     public GOSResult ExecCommandLine(string cmd, string? args, string? workFolder, bool isAsync, bool isShell, bool isQuite, bool isEscaped)
     {
-        if (args is null)
+        if (string.IsNullOrWhiteSpace(cmd))
+            return new GOSResult(false, null, "Command cannot be null or empty.");
+
+        if (!string.IsNullOrWhiteSpace(workFolder) && !Directory.Exists(workFolder))
+            return new GOSResult(false, null, $"Working directory does not exist: {workFolder}");
+
+        string arguments = args ?? string.Empty;
+        string fileName = isEscaped ? cmd.Replace("\"", "\\\"") : cmd;
+        string finalArguments = isEscaped ? arguments.Replace("\"", "\\\"") : arguments;
+
+        try
         {
-            args = string.Empty;
-        }
-        if (workFolder is null)
-        {
-            workFolder = string.Empty;
-        }
-
-        string cmdEscaped = cmd.Replace("\"", "\\\"");
-        var argsEscaped = args.Replace("\"", "\\\"");
-        string message = string.Empty;
-
-
-        using (Process process = new())
-        {
-            process.StartInfo = new ProcessStartInfo
-            {
-                RedirectStandardOutput = !isShell,
-                UseShellExecute = isShell,
-                CreateNoWindow = isQuite,
-                WindowStyle = isQuite ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
-                WorkingDirectory = workFolder,
-                //FileName = "bash",//"/bin/bash"
-                //Arguments = $"-c \"{escapedArgs}\""
-                //FileName = cmdEscaped,
-                //Arguments = argsEscaped
-                FileName = isEscaped ? cmdEscaped : cmd,
-                Arguments = isEscaped ? argsEscaped : args,
-                //ArgumentList = argList
-            };
-            try
-            {
-                //if (!isQuite)
-                //{
-                //    Console.Write("Executing " + cmd + "...");
-                //}
-                process.Start();
-                if (process.StartInfo.RedirectStandardOutput && !isAsync)
-                {
-                    message = process.StandardOutput.ReadToEnd();
-
-                    if (!isQuite)
-                        Console.WriteLine(message);
-
-                }
-                if (!isAsync)
-                {
-                    process.WaitForExit();
-                    message = "Exit code: " + process.ExitCode + (string.IsNullOrWhiteSpace(message) ? "" : Environment.NewLine + message);
-                    if (!isQuite && process.ExitCode != 0)
-                        Console.Write(message);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                return new GOSResult(false, e, message);
-            }
-        }
-        ;
-        //Console.WriteLine();
-        return new GOSResult(true, null, message);
-    }
-    public GOSResult RunProcess(string fileName, string arguments, string? workFolder, bool useShellWindow)
-    {
-        StringBuilder sb = new();
-        //dotnet publish SindarinProgram.csproj -p:PublishProfile=windowsx64
-        using (Process process = new())
-        {
-            // redirect the output
-            //process.StartInfo.RedirectStandardOutput = true;
-            //process.StartInfo.RedirectStandardError = true;
-
-            process.StartInfo = new()
+            ProcessStartInfo startInfo = new()
             {
                 FileName = fileName,
-                WorkingDirectory = workFolder,
-                //ArgumentList = { "publish", "Nimloth.Desktop.csproj", "-p:PublishProfile=" + name },
-                Arguments = arguments,
+                Arguments = finalArguments,
+                WorkingDirectory = string.IsNullOrWhiteSpace(workFolder) ? Environment.CurrentDirectory : workFolder,
+                UseShellExecute = isShell,
+                RedirectStandardOutput = !isShell,
+                RedirectStandardError = !isShell,
+                CreateNoWindow = isQuite,
+                WindowStyle = isQuite ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+            };
+
+            ProcessRunResult runResult = processRunner.Run(startInfo, waitForExit: !isAsync);
+
+            if (runResult.Exception is not null)
+            {
+                if (!isQuite)
+                    consoleOutput.WriteLine(runResult.Exception.ToString());
+
+                return new GOSResult(false, runResult.Exception, runResult.Exception.Message);
+            }
+
+            if (!runResult.Started)
+                return new GOSResult(false, null, "The process could not be started.");
+
+            if (isAsync)
+                return new GOSResult(true, null, "Process started asynchronously.");
+
+            string standardOutput = runResult.StandardOutput;
+            string standardError = runResult.StandardError;
+            string message = BuildProcessMessage(runResult.ExitCode ?? 0, standardOutput, standardError);
+
+            if (!isQuite && !string.IsNullOrWhiteSpace(standardOutput))
+                consoleOutput.WriteLine(standardOutput);
+
+            if (!isQuite && !runResult.Success && !string.IsNullOrWhiteSpace(standardError))
+                consoleOutput.WriteLine(standardError);
+
+            return new GOSResult(runResult.Success, null, message);
+        }
+        catch (Exception e)
+        {
+            if (!isQuite)
+                consoleOutput.WriteLine(e.ToString());
+
+            return new GOSResult(false, e, e.Message);
+        }
+    }
+
+    public GOSResult RunProcess(string fileName, string arguments, string? workFolder, bool useShellWindow)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return new GOSResult(false, null, "File name cannot be null or empty.");
+
+        if (!string.IsNullOrWhiteSpace(workFolder) && !Directory.Exists(workFolder))
+            return new GOSResult(false, null, $"Working directory does not exist: {workFolder}");
+
+        try
+        {
+            ProcessStartInfo startInfo = new()
+            {
+                FileName = fileName,
+                Arguments = arguments ?? string.Empty,
+                WorkingDirectory = string.IsNullOrWhiteSpace(workFolder) ? Environment.CurrentDirectory : workFolder,
                 CreateNoWindow = !useShellWindow,
                 UseShellExecute = useShellWindow,
-                //WindowStyle = ProcessWindowStyle.Normal
                 RedirectStandardOutput = !useShellWindow,
                 RedirectStandardError = !useShellWindow,
             };
-            if (workFolder is not null)
-                process.StartInfo.WorkingDirectory = workFolder;
 
-            if (!useShellWindow)
+            ProcessRunResult runResult = processRunner.Run(startInfo, waitForExit: true);
+
+            if (runResult.Exception is not null)
             {
-                process.OutputDataReceived += (sender, args) => sb.AppendLine(args.Data);
-                process.ErrorDataReceived += (sender, args) => sb.AppendLine($"ERR: {args.Data}");
-            }
-            process.Start();
-
-            //string message = process.StandardOutput.ReadToEnd();
-            //string messageerror = process.StandardError.ReadToEnd();
-
-            if (!useShellWindow)
-            {
-                // start our event pumps
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
+                WriteLine(runResult.Exception.Message, 3);
+                return new GOSResult(false, runResult.Exception, runResult.Exception.Message);
             }
 
-            process.WaitForExit();
+            if (!runResult.Started)
+                return new GOSResult(false, null, "The process could not be started.");
 
-            string trash = sb.ToString();
+            string message = BuildProcessMessage(runResult.ExitCode ?? 0, runResult.StandardOutput, runResult.StandardError);
+            if (!runResult.Success)
+                WriteLine("Exit Code error: " + (runResult.ExitCode ?? -1), 3);
 
-            if (process.ExitCode == 0)
-            {
-                //console.WriteLine(" done", 1);
-            }
-            else
-            {
-                WriteLine("Exit Code error: " + process.ExitCode);
-
-                if (!useShellWindow)
-                {
-                    //WriteLine(sb.ToString());
-
-                    //Console.WriteLine("Output: " + message);
-                    //Console.WriteLine("Error: " + messageerror);
-                    //Console.WriteLine("--------");
-                    //Console.WriteLine("Output: " + process.StandardOutput.ReadToEnd());
-                    //Console.WriteLine("--------");
-                    //Console.WriteLine("Error: " + process.StandardError.ReadToEnd());
-                }
-                return new(false, sb.ToString());
-            }
+            return new GOSResult(runResult.Success, null, message);
         }
-
-        return new(true, sb.ToString());
-
+        catch (Exception e)
+        {
+            WriteLine(e.Message, 3);
+            return new GOSResult(false, e, e.Message);
+        }
     }
+
     public bool DialogYesNo(string message)
     {
-        Console.Write(message);
-        Console.ForegroundColor = ConsoleColor.Blue;
-        Console.Write(" [Y/n]: ");
-        Console.ResetColor();
+        consoleOutput.Write(message);
+        TrySetForegroundColor(ConsoleColor.Blue);
+        consoleOutput.Write(" [Y/n]: ");
+        TryResetColor();
+
+        if (consoleOutput.IsInputRedirected)
+        {
+            consoleOutput.WriteLine("Y");
+            return true;
+        }
+
         bool answer = true;
         do
         {
-            ConsoleKeyInfo x = Console.ReadKey();
+            ConsoleKeyInfo x = consoleOutput.ReadKey();
 
             if (x.Key == ConsoleKey.Y || x.Key == ConsoleKey.Enter)
             {
                 if (x.Key == ConsoleKey.Enter)
-                {
-                    Console.Write("Y");
-                }
+                    consoleOutput.Write("Y");
+
                 break;
             }
-            else if (x.Key == ConsoleKey.N || x.Key == ConsoleKey.Escape)
+
+            if (x.Key == ConsoleKey.N || x.Key == ConsoleKey.Escape)
             {
                 if (x.Key == ConsoleKey.Escape)
-                {
-                    Console.Write("n");
-                }
+                    consoleOutput.Write("n");
+
                 answer = false;
                 break;
             }
-            else
-            {
-                Console.Write("\b \b");
-            }
-        } while (true);
-        Console.WriteLine();
+
+            consoleOutput.Write("\b \b");
+        }
+        while (true);
+
+        consoleOutput.WriteLine();
         return answer;
     }
+
     public void Write(string str, int color = 0, StringBuilder? sb = null)
     {
-        if (color != 0)
-        {
-            if (color == 1)
-                Console.ForegroundColor = ConsoleColor.Green;
-            else if (color == 2)
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (color == 3)
-                Console.ForegroundColor = ConsoleColor.Red;
-            else if (color == 4)
-                Console.ForegroundColor = ConsoleColor.Gray;
-        }
-        Console.Write(str);
+        string value = str ?? string.Empty;
 
-        sb?.Append(str);
-        internalLog?.Append(str);
-
-        if (color != 0)
+        lock (syncRoot)
         {
-            Console.ResetColor();
+            if (color != 0)
+                TrySetForegroundColor(GetConsoleColor(color));
+
+            consoleOutput.Write(value);
+            sb?.Append(value);
+            internalLog.Append(value);
+
+            if (color != 0)
+                TryResetColor();
         }
     }
+
     public void WriteLine(string str = "", int color = 0, StringBuilder? sb = null)
     {
-        Write(str, color, sb);
-        Console.WriteLine();
-        sb?.AppendLine();
-        internalLog?.AppendLine();
+        string value = str ?? string.Empty;
+
+        lock (syncRoot)
+        {
+            if (color != 0)
+                TrySetForegroundColor(GetConsoleColor(color));
+
+            consoleOutput.WriteLine(value);
+            sb?.AppendLine(value);
+            internalLog.AppendLine(value);
+
+            if (color != 0)
+                TryResetColor();
+        }
     }
+
     public void Clear()
     {
-        Console.Clear();
-        internalLog.Clear();
+        lock (syncRoot)
+        {
+            try
+            {
+                consoleOutput.Clear();
+            }
+            catch (IOException)
+            {
+            }
+            catch (PlatformNotSupportedException)
+            {
+            }
+            catch (InvalidOperationException)
+            {
+            }
+
+            internalLog.Clear();
+        }
     }
+
     public void EraseAndWrite(int eraseLength, string str, int color = 0)
     {
-        Write(new string('\b', eraseLength) + str + (str.Length < eraseLength ? new string(' ', eraseLength - str.Length) : ""), color);
+        int safeEraseLength = Math.Max(eraseLength, 0);
+        string value = str ?? string.Empty;
+        Write(new string('\b', safeEraseLength) + value + (value.Length < safeEraseLength ? new string(' ', safeEraseLength - value.Length) : string.Empty), color);
     }
+
     public void EraseAndWrite(string oldStr, string newStr, int color = 0)
     {
-        Write(new string('\b', oldStr.Length) + newStr + (newStr.Length < oldStr.Length ? new string(' ', oldStr.Length - newStr.Length) + new string('\b', oldStr.Length - newStr.Length) : ""), color);
+        string previous = oldStr ?? string.Empty;
+        string current = newStr ?? string.Empty;
+        Write(new string('\b', previous.Length) + current + (current.Length < previous.Length ? new string(' ', previous.Length - current.Length) + new string('\b', previous.Length - current.Length) : string.Empty), color);
     }
+
     public bool ProcessGOSResult(GOSResult gosResult, StringBuilder logTemp)
     {
+        ArgumentNullException.ThrowIfNull(logTemp);
+
         if (!gosResult.Success)
         {
             if (!string.IsNullOrWhiteSpace(gosResult.Message))
@@ -262,63 +293,185 @@ public class ConsoleServices : IConsoleServices
                 Write(gosResult.Message, 3);
                 logTemp.Append(gosResult.Message);
             }
+
             if (gosResult.Exception is not null)
             {
-                Write("EXCEPTION: " + gosResult.Exception.Message, 3);
-                logTemp.Append("EXCEPTION: " + gosResult.Exception.Message);
+                string exceptionMessage = "EXCEPTION: " + gosResult.Exception.Message;
+                Write(exceptionMessage, 3);
+                logTemp.Append(exceptionMessage);
             }
         }
+
         return gosResult.Success;
     }
+
     public void OpenFile(string fileName, sbyte os)
     {
-        using (Process process = new())
+        if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
+            return;
+
+        try
         {
-            string? commandProcess = null;
-            string argsProcess = "";
-            if (os == 0)
+            processRunner.Run(CreateOpenFileStartInfo(fileName, os), waitForExit: false);
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    private static ProcessStartInfo CreateOpenFileStartInfo(string fileName, sbyte os)
+    {
+        return os switch
+        {
+            1 => new ProcessStartInfo
             {
-                commandProcess = "\"" + fileName + "\"";// Path.Combine(sindarinFolder, "Sindarin manual.pdf");
-            }
-            else if (os == 1)
+                FileName = "xdg-open",
+                Arguments = fileName,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            },
+            2 => new ProcessStartInfo
             {
-                commandProcess = "xdg-open";
-                argsProcess = fileName;
-            }
-            else if (os == 2)
+                FileName = "open",
+                Arguments = fileName,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            },
+            _ => new ProcessStartInfo
             {
-                commandProcess = "open";
-                argsProcess = fileName;
-            }
-            process.StartInfo = new()
-            {
-                FileName = fileName, //"\"" + fileManual + "\"",
+                FileName = fileName,
                 UseShellExecute = true,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                //WorkingDirectory = sindarinFolder,
-                Arguments = argsProcess
-            };
+            }
+        };
+    }
 
-#pragma warning disable CS0168 // Variable is declared but never used
+    private static int NormalizeSpinnerIndex(int progress)
+        => ((progress % Twirl.Length) + Twirl.Length) % Twirl.Length;
+
+    private static string BuildProcessMessage(int exitCode, string standardOutput, string standardError)
+    {
+        StringBuilder sb = new();
+        sb.Append("Exit code: ");
+        sb.Append(exitCode);
+
+        if (!string.IsNullOrWhiteSpace(standardOutput))
+        {
+            sb.AppendLine();
+            sb.Append(standardOutput.TrimEnd());
+        }
+
+        if (!string.IsNullOrWhiteSpace(standardError))
+        {
+            sb.AppendLine();
+            sb.Append("ERR: ");
+            sb.Append(standardError.TrimEnd());
+        }
+
+        return sb.ToString();
+    }
+
+    private static ConsoleColor GetConsoleColor(int color)
+        => color switch
+        {
+            1 => ConsoleColor.Green,
+            2 => ConsoleColor.Yellow,
+            3 => ConsoleColor.Red,
+            4 => ConsoleColor.Gray,
+            _ => ConsoleColor.White
+        };
+
+    private void TrySetForegroundColor(ConsoleColor color)
+    {
+        try
+        {
+            consoleOutput.SetForegroundColor(color);
+        }
+        catch (IOException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private void TryResetColor()
+    {
+        try
+        {
+            consoleOutput.ResetColor();
+        }
+        catch (IOException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private sealed class SystemConsoleOutput : IConsoleOutput
+    {
+        public bool IsInputRedirected => Console.IsInputRedirected;
+
+        public void Clear() => Console.Clear();
+
+        public ConsoleKeyInfo ReadKey(bool intercept = false) => Console.ReadKey(intercept);
+
+        public void ResetColor() => Console.ResetColor();
+
+        public void SetForegroundColor(ConsoleColor color) => Console.ForegroundColor = color;
+
+        public void Write(string value) => Console.Write(value);
+
+        public void WriteLine(string? value = null) => Console.WriteLine(value);
+    }
+
+    private sealed class DefaultProcessRunner : IProcessRunner
+    {
+        public ProcessRunResult Run(ProcessStartInfo startInfo, bool waitForExit)
+        {
             try
             {
-                if (File.Exists(fileName))
+                using Process process = new() { StartInfo = startInfo };
+                bool started = process.Start();
+                if (!started)
+                    return new ProcessRunResult(false, false, null, string.Empty, string.Empty, null);
+
+                if (!waitForExit)
+                    return new ProcessRunResult(true, true, null, string.Empty, string.Empty, null);
+
+                string standardOutput = string.Empty;
+                string standardError = string.Empty;
+
+                if (startInfo.RedirectStandardOutput)
                 {
-                    process.Start();
+                    Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                    Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                    process.WaitForExit();
+                    Task.WhenAll(outputTask, errorTask).GetAwaiter().GetResult();
+                    standardOutput = outputTask.Result;
+                    standardError = errorTask.Result;
                 }
                 else
                 {
-                    //Console.WriteLine("File not found: " + Path.Combine(sindarinFolder, fileManual));
+                    process.WaitForExit();
                 }
+
+                return new ProcessRunResult(true, process.ExitCode == 0, process.ExitCode, standardOutput, standardError, null);
             }
             catch (Exception e)
             {
-                //Console.WriteLine("Problem trying to open the file \"" + Path.Combine(sindarinFolder, fileManual) + "\"");
-                //Console.WriteLine(e.Message);
-                //ExceptionMethods.SendException(emailTo, e, false, null);
+                return new ProcessRunResult(false, false, null, string.Empty, string.Empty, e);
             }
-#pragma warning restore CS0168 // Variable is declared but never used
         }
     }
 }
