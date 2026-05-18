@@ -96,6 +96,12 @@ public static class ExceptionMethods
         }
         return true;
     }
+    /// <remarks>
+    /// Compatibilizado com Native AOT. Enumera apenas os membros conhecidos de
+    /// <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace, Data,
+    /// InnerException, InnerExceptions). Propriedades específicas de exceções
+    /// derivadas NÃO são incluídas — se precisar delas, leia a exceção pelo tipo real.
+    /// </remarks>
     public static string ToDetailedString(this Exception exception)
     {
         if (exception is null)
@@ -106,6 +112,12 @@ public static class ExceptionMethods
         return ToDetailedString(exception, ExceptionOptions.Default);
     }
 
+    /// <remarks>
+    /// Compatibilizado com Native AOT. Enumera apenas os membros conhecidos de
+    /// <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace, Data,
+    /// InnerException, InnerExceptions). Propriedades específicas de exceções
+    /// derivadas NÃO são incluídas — se precisar delas, leia a exceção pelo tipo real.
+    /// </remarks>
     public static string ToDetailedString(this Exception exception, ExceptionOptions options)
     {
         var stringBuilder = new StringBuilder();

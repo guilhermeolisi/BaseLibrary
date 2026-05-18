@@ -5,6 +5,12 @@ namespace BaseLibrary.Collections;
 
 public static class Extensions
 {
+    /// <remarks>
+    /// Compatibilizado com Native AOT. A verificação de <see cref="IComparable"/> usa
+    /// o tipo estático <typeparamref name="T"/>, não o tipo em runtime dos elementos.
+    /// Informe o tipo concreto real em <typeparamref name="T"/> — uma coleção tipada
+    /// pela classe base não detectará IComparable implementado só na classe derivada.
+    /// </remarks>
     public static void OrderObservableToString<T>(this ObservableCollection<T> obs)
     {
         bool isIComparable = typeof(IComparable).IsAssignableFrom(typeof(T));

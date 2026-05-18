@@ -8,6 +8,12 @@ public static class ObjectProcess
         DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties |
         DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields;
 
+    /// <remarks>
+    /// Compatibilizado com Native AOT. ATENÇÃO: usa <c>typeof(T)</c> (tipo estático),
+    /// não o tipo em runtime. Passe sempre o tipo concreto real — ao passar uma
+    /// instância derivada por variável tipada como a classe base, apenas os membros
+    /// da classe base serão clonados.
+    /// </remarks>
     public static T CloneThis<[DynamicallyAccessedMembers(CopyMembers)] T>(this T source) where T : class, new()
     {
         if (source is null)
@@ -16,6 +22,12 @@ public static class ObjectProcess
         source.CopyTo(destination);
         return destination;
     }
+    /// <remarks>
+    /// Compatibilizado com Native AOT. ATENÇÃO: usa <c>typeof(T)</c> (tipo estático),
+    /// não o tipo em runtime. Passe sempre o tipo concreto real — ao passar uma
+    /// instância derivada por variável tipada como a classe base, apenas os membros
+    /// da classe base serão copiados.
+    /// </remarks>
     public static void CopyTo<[DynamicallyAccessedMembers(CopyMembers)] T>(this T source, T destination)
     {
         if (source is null)
@@ -65,6 +77,12 @@ public static class ObjectProcess
 
     //    return obj;
     //}
+    /// <remarks>
+    /// Compatibilizado com Native AOT. ATENÇÃO: usa <c>typeof(T1)</c>/<c>typeof(T2)</c>
+    /// (tipos estáticos), não os tipos em runtime. Passe sempre os tipos concretos
+    /// reais — ao passar uma instância derivada por variável tipada como a classe
+    /// base, apenas os membros da classe base serão copiados.
+    /// </remarks>
     public static void CopyTo<[DynamicallyAccessedMembers(CopyMembers)] T1, [DynamicallyAccessedMembers(CopyMembers)] T2>(this T1 source, ref T2 destination)
     {
         //https://www.programmingnotes.org/7521/cs-how-to-copy-all-properties-fields-from-one-object-to-another-using-cs/
