@@ -22,36 +22,29 @@ public class ExceptionDetailsServices : IExceptionDetailsServices
 
         AppendValue(stringBuilder, "Type", exception.GetType().FullName, options);
 
-        foreach (PropertyInfo property in exception
-            .GetType()
-            .GetProperties()
-            .OrderByDescending(x => string.Equals(x.Name, nameof(exception.Message), StringComparison.Ordinal))
-            .ThenByDescending(x => string.Equals(x.Name, nameof(exception.Source), StringComparison.Ordinal))
-            .ThenBy(x => string.Equals(x.Name, nameof(exception.InnerException), StringComparison.Ordinal))
-            .ThenBy(x => string.Equals(x.Name, nameof(AggregateException.InnerExceptions), StringComparison.Ordinal)))
+        foreach ((string name, object? value) in GetKnownMembers(exception))
         {
-#if DEBUG
-            if (property.Name == "InnerException")
-            { } //Verificar se o InnerException é incluido nas informações. Sim é inlcuido
-#endif
+            object? memberValue = value;
+            if (memberValue is null && options.OmitNullProperties)
+                continue;
 
-            var value = property.GetValue(exception, null);
-            if (value == null && options.OmitNullProperties)
-            {
-                if (options.OmitNullProperties)
-                {
-                    continue;
-                }
-                else
-                {
-                    value = string.Empty;
-                }
-            }
-
-            AppendValue(stringBuilder, property.Name, value, options);
+            AppendValue(stringBuilder, name, memberValue ?? string.Empty, options);
         }
 
         return stringBuilder.ToString().TrimEnd('\r', '\n');
+    }
+
+    private static IEnumerable<(string Name, object? Value)> GetKnownMembers(Exception exception)
+    {
+        yield return ("Message", exception.Message);
+        yield return ("Source", exception.Source);
+        yield return ("HResult", exception.HResult);
+        yield return ("HelpLink", exception.HelpLink);
+        yield return ("StackTrace", exception.StackTrace);
+        yield return ("Data", exception.Data);
+        if (exception is AggregateException aggregate)
+            yield return ("InnerExceptions", aggregate.InnerExceptions);
+        yield return ("InnerException", exception.InnerException);
     }
 
     private void AppendCollection(StringBuilder stringBuilder, string propertyName, IEnumerable collection, ExceptionOptions options)

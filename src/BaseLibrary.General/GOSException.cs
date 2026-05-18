@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace BaseLibrary
+﻿namespace BaseLibrary
 {
     public class GOSException : Exception
     {
@@ -17,11 +15,6 @@ namespace BaseLibrary
         }
 
         public GOSException(bool canContinue, string message, Exception innerException) : base(message, innerException)
-        {
-            CanContinue = canContinue;
-        }
-
-        protected GOSException(bool canContinue, SerializationInfo info, StreamingContext context) : base(info, context)
         {
             CanContinue = canContinue;
         }

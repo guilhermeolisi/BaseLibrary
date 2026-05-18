@@ -17,7 +17,7 @@ public static class EnumMethods
     {
         return enumServices.GetEnumNames<T>();
     }
-    public static IEnumerable<T> GetEnumValues<T>() where T : Enum
+    public static IEnumerable<T> GetEnumValues<T>() where T : struct, Enum
     {
         return enumServices.GetEnumValues<T>();
     }

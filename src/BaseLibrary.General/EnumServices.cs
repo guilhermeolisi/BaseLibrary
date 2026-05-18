@@ -16,9 +16,9 @@ public class EnumServices : IEnumServices
     {
         return Enum.GetNames(typeof(T));
     }
-    public IEnumerable<T> GetEnumValues<T>() where T : Enum
+    public IEnumerable<T> GetEnumValues<T>() where T : struct, Enum
     {
-        return Enum.GetValues(typeof(T)).Cast<T>();
+        return Enum.GetValues<T>();
     }
 
     public T ParseEnum<T>(string name) where T : struct, Enum // Fix: Add 'struct' constraint to ensure T is a non-nullable value type
