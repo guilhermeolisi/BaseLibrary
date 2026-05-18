@@ -12,10 +12,11 @@ namespace BaseLibrary;
 public interface IExceptionDetailsServices
 {
     /// <remarks>
-    /// Compatibilizado com Native AOT. As implementações enumeram apenas os membros
-    /// conhecidos de <see cref="Exception"/> (Message, Source, HResult, HelpLink,
-    /// StackTrace, Data, InnerException, InnerExceptions). Propriedades específicas
-    /// de exceções derivadas NÃO são incluídas — leia a exceção pelo tipo real.
+    /// Compatibilizado com Native AOT. As implementações enumeram os membros base
+    /// de <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace,
+    /// Data, InnerException, InnerExceptions) e, via <see cref="KnownExceptionMembers"/>
+    /// (switch AOT-safe, sem reflexão), as propriedades dos tipos derivados mais
+    /// comuns. Tipos derivados fora dessa lista expõem só os membros base.
     /// </remarks>
     string ToDetailedString(Exception exception);
     /// <inheritdoc cref="ToDetailedString(Exception)"/>

@@ -7,10 +7,13 @@ namespace BaseLibrary;
 public class ExceptionDetailsServices : IExceptionDetailsServices
 {
     /// <remarks>
-    /// Compatibilizado com Native AOT. Enumera apenas os membros conhecidos de
+    /// Compatibilizado com Native AOT. Enumera os membros base de
     /// <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace, Data,
-    /// InnerException, InnerExceptions). Propriedades específicas de exceções
-    /// derivadas NÃO são incluídas — se precisar delas, leia a exceção pelo tipo real.
+    /// InnerException, InnerExceptions) e, via <see cref="KnownExceptionMembers"/>
+    /// (switch AOT-safe, sem reflexão), as propriedades dos tipos derivados mais
+    /// comuns (ArgumentException, FileNotFoundException, HttpRequestException,
+    /// DbException, JsonException, XmlException, etc.). Tipos derivados fora dessa
+    /// lista expõem só os membros base — leia-os pelo tipo real se necessário.
     /// </remarks>
     public string ToDetailedString(Exception exception)
     {
@@ -23,10 +26,13 @@ public class ExceptionDetailsServices : IExceptionDetailsServices
     }
 
     /// <remarks>
-    /// Compatibilizado com Native AOT. Enumera apenas os membros conhecidos de
+    /// Compatibilizado com Native AOT. Enumera os membros base de
     /// <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace, Data,
-    /// InnerException, InnerExceptions). Propriedades específicas de exceções
-    /// derivadas NÃO são incluídas — se precisar delas, leia a exceção pelo tipo real.
+    /// InnerException, InnerExceptions) e, via <see cref="KnownExceptionMembers"/>
+    /// (switch AOT-safe, sem reflexão), as propriedades dos tipos derivados mais
+    /// comuns (ArgumentException, FileNotFoundException, HttpRequestException,
+    /// DbException, JsonException, XmlException, etc.). Tipos derivados fora dessa
+    /// lista expõem só os membros base — leia-os pelo tipo real se necessário.
     /// </remarks>
     public string ToDetailedString(Exception exception, ExceptionOptions options)
     {
@@ -54,6 +60,8 @@ public class ExceptionDetailsServices : IExceptionDetailsServices
         yield return ("HelpLink", exception.HelpLink);
         yield return ("StackTrace", exception.StackTrace);
         yield return ("Data", exception.Data);
+        foreach ((string name, object? value) in KnownExceptionMembers.GetDerived(exception))
+            yield return (name, value);
         if (exception is AggregateException aggregate)
             yield return ("InnerExceptions", aggregate.InnerExceptions);
         yield return ("InnerException", exception.InnerException);
