@@ -11,12 +11,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.ApplicationInsights" Version="3.1.1" />
+		<ProjectReference Include="..\BaseLibrary.File\BaseLibrary.File.csproj" />
+		<ProjectReference Include="..\BaseLibrary.HTTP\BaseLibrary.HTTP.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\BaseLibrary.File\BaseLibrary.File.csproj" />
-		<ProjectReference Include="..\BaseLibrary.HTTP\BaseLibrary.HTTP.csproj" />
+	  <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.8.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8" />
+	  <PackageReference Include="OpenTelemetry" Version="1.15.3" />
 	</ItemGroup>
 
 </Project>

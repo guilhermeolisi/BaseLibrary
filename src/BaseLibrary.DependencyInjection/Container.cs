@@ -53,12 +53,11 @@ public class Container : IContainer
     public TService RegisterSingletonAndReturn<TService>(Func<TService> creator)
     {
         // Verifica se já existe um registro para o tipo TService, se já existir, não deve registrar novamente
-        TService? service = (TService?)_singletonInstances[typeof(TService)];
-        if (service is not null)
+        if (_singletonInstances.TryGetValue(typeof(TService), out var existing) && existing is TService registered)
         {
-            return service;
+            return registered;
         }
-        service = creator();
+        TService service = creator();
         _singletonInstances[typeof(TService)] = service;
         return service;
     }

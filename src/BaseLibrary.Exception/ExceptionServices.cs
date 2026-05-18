@@ -141,14 +141,12 @@ public class ExceptionServices : IExceptionServices
 
         foreach (var item in AssembliesName)
         {
-            assembly = Assembly.Load(item);
+            assembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => string.Equals(a.GetName().Name, item, StringComparison.OrdinalIgnoreCase));
             if (assembly is not null)
                 break;
         }
-        if (assembly is null)
-        {
-            assembly = Assembly.GetEntryAssembly();
-        }
+        assembly ??= Assembly.GetEntryAssembly();
         var program = assembly?.GetName();
 
         Version version = (program is null ? null : program.Version) ?? new Version();

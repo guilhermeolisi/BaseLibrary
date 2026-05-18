@@ -7,14 +7,7 @@ public static class Extensions
 {
     public static void OrderObservableToString<T>(this ObservableCollection<T> obs)
     {
-        Type[] interfaces = obs.GetType().GetGenericArguments()[0].GetInterfaces();
-        bool isIComparable = false;
-        foreach (Type inter in interfaces)
-            if (inter.Name == "IComparable")
-            {
-                isIComparable = true;
-                break;
-            }
+        bool isIComparable = typeof(IComparable).IsAssignableFrom(typeof(T));
         if (isIComparable)
         {
             int i = 0;

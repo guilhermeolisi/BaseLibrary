@@ -1,60 +1,45 @@
-﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.DataContracts;
-using Microsoft.ApplicationInsights.Extensibility;
+using Azure.Monitor.OpenTelemetry.Exporter;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
 
 namespace BaseLibrary;
 
-public class MenssageAzureTrackTrace : IEmailSender
+public sealed class MenssageAzureTrackTrace : IEmailSender, IDisposable
 {
-    //private string azureKey;
-    //private IHTTPServices? httpServices;
-    private TelemetryClient telemetryClient;
+    private readonly ILoggerFactory loggerFactory;
+    private readonly ILogger logger;
+
     public MenssageAzureTrackTrace(string azureKey, IHTTPServices? httpServices = null)
     {
-        //this.azureKey = azureKey ?? throw new ArgumentNullException(nameof(azureKey));
-        //this.httpServices = httpServices ?? Locator.ConstanteContainer.Resolve<IHTTPServices>()
-        //    ?? throw new ArgumentNullException(nameof(httpServices));
+        if (string.IsNullOrWhiteSpace(azureKey))
+            throw new ArgumentException("Connection string cannot be null or empty.", nameof(azureKey));
 
-        //A recomendação da microsoft é uma nova instância e não reutilizar a mesma, mas isso pode ser um problema para o desempenho, então estou usando a mesma instância, mas criando uma nova configuração para cada instância, para evitar problemas de concorrência.
-        var config = new TelemetryConfiguration
+        loggerFactory = LoggerFactory.Create(builder =>
         {
-            ConnectionString = azureKey
-        };
-        this.telemetryClient = new TelemetryClient(config);
-        //var config = TelemetryConfiguration.CreateDefault();
-        //config.ConnectionString = azureKey;
-        //this.telemetryClient = new TelemetryClient(config);
-    }
-    public async Task<GOSResult> SendMessage(string emailTo, string subject, string message, bool isAsync)
-    {
-        //if (!httpServices.IsConnectedToInternet())
-        //{
-        //    return new GOSResult(false);
-        //}
-
-        //if (isAsync)
-        //{
-        //    await Task.Run(() => Method());
-        //}
-        //else
-        //{
-        //    Method();
-        //}
-
-        Method();
-
-        void Method()
-        {
-
-            telemetryClient.TrackTrace(message, SeverityLevel.Information, new Dictionary<string, string>
+            builder.AddOpenTelemetry(options =>
             {
-                { "subject", subject },
-                { "local time", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff") },
-
+                options.IncludeFormattedMessage = true;
+                options.IncludeScopes = true;
+                options.AddAzureMonitorLogExporter(exporter => exporter.ConnectionString = azureKey);
             });
+        });
+
+        logger = loggerFactory.CreateLogger<MenssageAzureTrackTrace>();
+    }
+
+    public Task<GOSResult> SendMessage(string emailTo, string subject, string message, bool isAsync)
+    {
+        using (logger.BeginScope(new Dictionary<string, object?>
+        {
+            ["subject"] = subject,
+            ["local time"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff"),
+        }))
+        {
+            logger.LogInformation("{TraceMessage}", message);
         }
 
-
-        return new GOSResult(true);
+        return Task.FromResult(new GOSResult(true));
     }
+
+    public void Dispose() => loggerFactory.Dispose();
 }

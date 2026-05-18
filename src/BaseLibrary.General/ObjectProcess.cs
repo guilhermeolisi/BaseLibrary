@@ -1,8 +1,14 @@
-﻿namespace BaseLibrary;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace BaseLibrary;
 
 public static class ObjectProcess
 {
-    public static T CloneThis<T>(this T source) where T : class, new()
+    private const DynamicallyAccessedMemberTypes CopyMembers =
+        DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields;
+
+    public static T CloneThis<[DynamicallyAccessedMembers(CopyMembers)] T>(this T source) where T : class, new()
     {
         if (source is null)
             return null;
@@ -10,13 +16,13 @@ public static class ObjectProcess
         source.CopyTo(destination);
         return destination;
     }
-    public static void CopyTo<T>(this T source, T destination)
+    public static void CopyTo<[DynamicallyAccessedMembers(CopyMembers)] T>(this T source, T destination)
     {
         if (source is null)
             return;
 
-        var sourceMembers = GetMembers(source.GetType());
-        var destinationMembers = GetMembers(destination.GetType());
+        var sourceMembers = GetMembers(typeof(T));
+        var destinationMembers = GetMembers(typeof(T));
 
         // Copy data from source to destination
         foreach (var sourceMember in sourceMembers)
@@ -59,15 +65,15 @@ public static class ObjectProcess
 
     //    return obj;
     //}
-    public static void CopyTo<T1, T2>(this T1 source, ref T2 destination)
+    public static void CopyTo<[DynamicallyAccessedMembers(CopyMembers)] T1, [DynamicallyAccessedMembers(CopyMembers)] T2>(this T1 source, ref T2 destination)
     {
         //https://www.programmingnotes.org/7521/cs-how-to-copy-all-properties-fields-from-one-object-to-another-using-cs/
 
         if (source is null)
             return;
 
-        var sourceMembers = GetMembers(source.GetType());
-        var destinationMembers = GetMembers(destination.GetType());
+        var sourceMembers = GetMembers(typeof(T1));
+        var destinationMembers = GetMembers(typeof(T2));
 
         // Copy data from source to destination
         foreach (var sourceMember in sourceMembers)
@@ -172,7 +178,7 @@ public static class ObjectProcess
         return type.Equals(targetType) || type.IsSubclassOf(targetType);
     }
 
-    private static List<System.Reflection.MemberInfo> GetMembers(System.Type type)
+    private static List<System.Reflection.MemberInfo> GetMembers([DynamicallyAccessedMembers(CopyMembers)] System.Type type)
     {
         var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public
             | System.Reflection.BindingFlags.NonPublic;
