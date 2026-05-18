@@ -15,6 +15,10 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
     private readonly ILoggerFactory loggerFactory;
     private readonly ILogger logger;
 
+    /// <remarks>
+    /// Telemetria compatibilizada com Native AOT: usa OpenTelemetry + Azure Monitor
+    /// Exporter (substitui o pacote depreciado Microsoft.ApplicationInsights).
+    /// </remarks>
     public ExceptionServicesAzure(string azurKey, string[] assembliesName, IExceptionDetailsServices? exceptionDetails = null, IHTTPServices? httpServices = null)
     {
         this.azureKey = azurKey ?? throw new ArgumentNullException(nameof(azurKey));

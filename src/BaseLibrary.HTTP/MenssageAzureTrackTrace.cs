@@ -9,6 +9,10 @@ public sealed class MenssageAzureTrackTrace : IEmailSender, IDisposable
     private readonly ILoggerFactory loggerFactory;
     private readonly ILogger logger;
 
+    /// <remarks>
+    /// Telemetria compatibilizada com Native AOT: usa OpenTelemetry + Azure Monitor
+    /// Exporter (substitui o pacote depreciado Microsoft.ApplicationInsights).
+    /// </remarks>
     public MenssageAzureTrackTrace(string azureKey, IHTTPServices? httpServices = null)
     {
         if (string.IsNullOrWhiteSpace(azureKey))

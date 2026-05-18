@@ -16,6 +16,10 @@ public class EnumServices : IEnumServices
     {
         return Enum.GetNames(typeof(T));
     }
+    /// <remarks>
+    /// Compatibilizado com Native AOT: usa <c>Enum.GetValues&lt;T&gt;()</c> (genérico)
+    /// em vez de <c>Enum.GetValues(Type)</c>. Requer um tipo de enum concreto real.
+    /// </remarks>
     public IEnumerable<T> GetEnumValues<T>() where T : struct, Enum
     {
         return Enum.GetValues<T>();
