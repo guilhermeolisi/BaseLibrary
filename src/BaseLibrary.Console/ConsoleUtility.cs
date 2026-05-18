@@ -11,14 +11,17 @@ public static class ConsoleUtility
     public static void WriteProgressBar(int percent, bool update = false)
     {
         var p = (int)((percent / 10f) + .5f);
-        if (update)
-            Console.Write(_back + "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
+        string bar = "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent);
+        // Só reescreve a linha (backspaces) em terminal interativo. Com a saída
+        // redirecionada (pipe/arquivo/log), os \b virariam lixo no log.
+        if (update && !Console.IsOutputRedirected)
+            Console.Write(_back + bar);
         else
-            Console.Write("[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent));
+            Console.Write(bar);
     }
     public static void WriteProgress(int progress, bool update = false)
     {
-        if (update)
+        if (update && !Console.IsOutputRedirected)
             Console.Write("\b");
         Console.Write(_twirl[progress % _twirl.Length]);
     }

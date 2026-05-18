@@ -277,6 +277,30 @@ public class ConsoleServicesTests : IDisposable
     }
 
     [Fact]
+    public void WriteProgressBar_ShouldNotEmitBackspaces_WhenOutputRedirected()
+    {
+        var console = new FakeConsoleOutput { IsOutputRedirectedValue = true };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.WriteProgressBar(20, progress: 1, update: true);
+
+        console.Writes.Should().ContainSingle();
+        console.Writes[0].Should().NotContain("\b");
+        console.Writes[0].Should().EndWith("[■■        ]  20%");
+    }
+
+    [Fact]
+    public void WriteProgress_ShouldNotEmitBackspace_WhenOutputRedirected()
+    {
+        var console = new FakeConsoleOutput { IsOutputRedirectedValue = true };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.WriteProgress(1, update: true);
+
+        console.Writes.Should().NotContain("\b");
+    }
+
+    [Fact]
     public void Write_ShouldSetAndResetColor_WhenColorIsProvided()
     {
         var console = new FakeConsoleOutput();
@@ -386,10 +410,13 @@ public class ConsoleServicesTests : IDisposable
     private sealed class FakeConsoleOutput : IConsoleOutput
     {
         public bool IsInputRedirectedValue { get; set; }
+        public bool IsOutputRedirectedValue { get; set; }
         public List<string> Writes { get; } = new();
         public List<string> ColorCalls { get; } = new();
 
         public bool IsInputRedirected => IsInputRedirectedValue;
+
+        public bool IsOutputRedirected => IsOutputRedirectedValue;
 
         public void Clear() => Writes.Add("<clear>");
 

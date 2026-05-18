@@ -44,7 +44,11 @@ public class ConsoleServices : IConsoleServices
         int blocks = (int)((normalizedPercent / 10f) + .5f);
         int spinnerIndex = NormalizeSpinnerIndex(progress);
         string spinner = progress >= 0 ? Twirl[spinnerIndex].ToString() : string.Empty;
-        string message = (update ? (progress >= 0 ? "\b" : string.Empty) + Back : string.Empty) +
+        // Só reescreve a linha (backspaces) em terminal interativo. Com a saída
+        // redirecionada (pipe/arquivo/log), os \b virariam lixo no log.
+        bool canRewrite = update && !consoleOutput.IsOutputRedirected;
+        string rewritePrefix = canRewrite ? (progress >= 0 ? "\b" : string.Empty) + Back : string.Empty;
+        string message = rewritePrefix +
             spinner +
             "[" + new string(Block, blocks) + new string(' ', 10 - blocks) + string.Format("] {0,3:##0}%", normalizedPercent);
 
@@ -53,7 +57,7 @@ public class ConsoleServices : IConsoleServices
 
     public void WriteProgress(int progress, bool update = false)
     {
-        if (update)
+        if (update && !consoleOutput.IsOutputRedirected)
             consoleOutput.Write("\b");
 
         consoleOutput.Write(Twirl[NormalizeSpinnerIndex(progress)].ToString());
@@ -421,6 +425,8 @@ public class ConsoleServices : IConsoleServices
     private sealed class SystemConsoleOutput : IConsoleOutput
     {
         public bool IsInputRedirected => Console.IsInputRedirected;
+
+        public bool IsOutputRedirected => Console.IsOutputRedirected;
 
         public void Clear() => Console.Clear();
 

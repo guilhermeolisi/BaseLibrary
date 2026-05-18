@@ -3,6 +3,7 @@ namespace BaseLibrary;
 public interface IConsoleOutput
 {
     bool IsInputRedirected { get; }
+    bool IsOutputRedirected { get; }
     void Clear();
     ConsoleKeyInfo ReadKey(bool intercept = false);
     void ResetColor();
