@@ -14,7 +14,7 @@ public interface IFileServicesFile
     /// <param name="destination">The full path where the file should be copied. This cannot be null or empty.</param>
     /// <param name="preservetime">A boolean value indicating whether to preserve the original file's timestamp.  <see langword="true"/> to
     /// preserve the timestamp; otherwise, <see langword="false"/>.</param>
-    void CopyConserveTime(string original, string destination, bool preservetime = true);
+    void CopyConserveTime(string original, string destination, bool preservetime = true, bool overwrite = false);
     void CopyDecriptingFile(string sourcePath, string destinationFolder, string appFolder);
     void CopyFileCarefulEncription(string sourcePath, string destinationFolder, string anEFSFolder);
     void CopyFileSafeLinux(string source, string dest, bool overwrite);

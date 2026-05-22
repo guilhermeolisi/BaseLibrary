@@ -11,7 +11,7 @@ public class FileServicesFile : IFileServicesFile
     {
         this.directory = directory ?? Locator.ConstantContainer.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
     }
-    public void CopyConserveTime(string original, string destination, bool preservetime = true)
+    public void CopyConserveTime(string original, string destination, bool preservetime = true, bool overwrite = false)
     {
         if (string.IsNullOrWhiteSpace(original))
             throw new ArgumentException("The path cannot be null or empty.", nameof(original));
@@ -20,7 +20,7 @@ public class FileServicesFile : IFileServicesFile
         if (!File.Exists(original))
             throw new FileNotFoundException("The source file does not exist.", original);
 
-        File.Copy(original, destination);
+        File.Copy(original, destination, overwrite);
         if (preservetime)
         {
             File.SetCreationTime(destination, File.GetCreationTime(original));
