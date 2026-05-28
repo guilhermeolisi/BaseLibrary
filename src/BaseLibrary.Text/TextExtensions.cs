@@ -31,5 +31,6 @@ public static class TextExtensions
     public static bool ContainsLetter(this string text) => services.ContainsLetter(text);
     public static bool ContainsDigit(this string text) => services.ContainsDigit(text);
     public static long CountLetterAndDigit(this string text) => services.CountLetterAndDigit(text);
+    public static string VerifyAndCorrectEndLineOS(this string text) => services.VerifyAndCorrectEndLineOS(text);
 
 }

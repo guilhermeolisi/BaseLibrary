@@ -445,4 +445,56 @@ public class TextServices : ITextServices
         }
         return count;
     }
+    public string VerifyAndCorrectEndLineOS(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+        string newLine = Environment.NewLine;
+        bool needCorrection = false;
+
+
+
+        // Check in all text if have any line endings that are different from the OS-specific line ending
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (text[i] == '\r')
+            {
+                if (i + 1 < text.Length && text[i + 1] == '\n')
+                {
+                    // Found a Windows-style line ending
+                    if (newLine != "\r\n")
+                    {
+                        needCorrection = true;
+                        break;
+                    }
+                    i++; // Skip the next character since it's part of the line ending
+                }
+                else
+                {
+                    // Found a Mac-style line ending
+                    if (newLine != "\r")
+                    {
+                        needCorrection = true;
+                        break;
+                    }
+                }
+            }
+            else if (text[i] == '\n')
+            {
+                // Found a Unix-style line ending
+                if (newLine != "\n")
+                {
+                    needCorrection = true;
+                    break;
+                }
+            }
+        }
+
+        if (!needCorrection)
+            return text;
+
+        // Replace all line endings with the OS-specific line ending
+        text = text.Replace("\r\n","\n").Replace("\r","\n").Replace("\n", newLine);
+        return text;
+    }
 }

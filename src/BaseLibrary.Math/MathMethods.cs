@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using static System.Math;
 
 namespace BaseLibrary.Math;
@@ -72,5 +73,6 @@ public static class MathMethods
             return value;
         return 0.0;
     }
-
+    public static void FFTCalcule(in Complex[] y, bool isReverse) => 
+        mathServices.FFTCalcule(y, isReverse);
 }

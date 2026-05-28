@@ -1,10 +1,13 @@
-﻿namespace BaseLibrary.Math;
+﻿using System.Numerics;
+
+namespace BaseLibrary.Math;
 
 public interface IMathServices
 {
     double ClausenIntegralSerie(double x, double error = 1E-10);
     public double[] DerivativeFivePoint(double[] y, double step, int order);
     double DistancePoints(double x1, double y1, double x2, double y2);
+    void FFTCalcule(in Complex[] y, bool isReverse);
     double[] FindChangingConcavityFromDerivative(double[] y, double xMin, double step);
     (double[] min, double[] max) FindMinMax(double[] y, double xMin, double step);
     (double[] min, double[] max) FindMinMaxFromDerivative(double[] y, double xMin, double step);

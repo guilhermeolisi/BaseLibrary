@@ -21,4 +21,5 @@ public interface ITextServices
     bool ContainsLetter(string text);
     bool ContainsDigit(string text);
     long CountLetterAndDigit(string text);
+    string VerifyAndCorrectEndLineOS(string text);
 }
