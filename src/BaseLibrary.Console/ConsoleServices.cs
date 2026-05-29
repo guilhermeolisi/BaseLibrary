@@ -14,6 +14,10 @@ public class ConsoleServices : IConsoleServices
     private readonly object syncRoot = new();
     private StringBuilder internalLog = new();
 
+    // Linhas de status fixas ("sticky") no rodapé do terminal.
+    private string[] _statusLines = [];
+    private int _statusLineCount = 0;
+
     public ConsoleServices(IConsoleOutput? consoleOutput = null, IProcessRunner? processRunner = null)
     {
         this.consoleOutput = consoleOutput ?? new SystemConsoleOutput();
@@ -353,6 +357,118 @@ public class ConsoleServices : IConsoleServices
         };
     }
 
+    // ------------------------------------------------------------------
+    // Área de status fixa ("sticky") no rodapé do terminal
+    // ------------------------------------------------------------------
+
+    /// <inheritdoc/>
+    public void UpdateStatusLines(params string[] lines)
+    {
+        lock (syncRoot)
+        {
+            // Saída redirecionada: não emite escape ANSI; o chamador deve usar
+            // WriteLine para progresso periódico quando necessário.
+            if (consoleOutput.IsOutputRedirected)
+            {
+                _statusLines = lines;
+                _statusLineCount = lines.Length;
+                return;
+            }
+
+            // Sobe o cursor até o início da área sticky anterior.
+            if (_statusLineCount > 0)
+                consoleOutput.Write($"\x1B[{_statusLineCount}A");
+
+            int width = GetSafeWindowWidth();
+            foreach (string line in lines)
+            {
+                // Apaga a linha inteira e escreve o novo conteúdo.
+                consoleOutput.Write("\r\x1B[2K");
+                consoleOutput.Write(TruncateLine(line, width));
+                consoleOutput.Write("\n");
+            }
+
+            _statusLines = lines;
+            _statusLineCount = lines.Length;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void WriteLineKeepingStatus(string line, int color = 0)
+    {
+        string value = line ?? string.Empty;
+
+        lock (syncRoot)
+        {
+            if (consoleOutput.IsOutputRedirected)
+            {
+                // Sem área sticky: escreve a linha normalmente.
+                if (color != 0) TrySetForegroundColor(GetConsoleColor(color));
+                consoleOutput.WriteLine(value);
+                internalLog.AppendLine(value);
+                if (color != 0) TryResetColor();
+                return;
+            }
+
+            // Sobe até o início da área sticky, apaga a linha atual e imprime o log.
+            if (_statusLineCount > 0)
+                consoleOutput.Write($"\x1B[{_statusLineCount}A");
+
+            consoleOutput.Write("\r\x1B[2K");
+            if (color != 0) TrySetForegroundColor(GetConsoleColor(color));
+            consoleOutput.WriteLine(value);
+            internalLog.AppendLine(value);
+            if (color != 0) TryResetColor();
+
+            // Reimprime as linhas sticky abaixo da linha de log recém-escrita.
+            int width = GetSafeWindowWidth();
+            foreach (string statusLine in _statusLines)
+            {
+                consoleOutput.Write("\r\x1B[2K");
+                consoleOutput.Write(TruncateLine(statusLine, width));
+                consoleOutput.Write("\n");
+            }
+        }
+    }
+
+    /// <inheritdoc/>
+    public void ClearStatusLines()
+    {
+        lock (syncRoot)
+        {
+            if (!consoleOutput.IsOutputRedirected && _statusLineCount > 0)
+            {
+                // Sobe até o início da área sticky, apaga cada linha e desce.
+                consoleOutput.Write($"\x1B[{_statusLineCount}A");
+                for (int i = 0; i < _statusLineCount; i++)
+                {
+                    consoleOutput.Write("\r\x1B[2K");
+                    if (i < _statusLineCount - 1)
+                        consoleOutput.Write("\n");
+                }
+                // Cursor fica na primeira linha da antiga área sticky, pronto para
+                // novos writes sobrescreverem o espaço previamente ocupado.
+            }
+
+            _statusLines = [];
+            _statusLineCount = 0;
+        }
+    }
+
+    // ------------------------------------------------------------------
+
+    private int GetSafeWindowWidth()
+    {
+        try { return consoleOutput.GetWindowWidth(); }
+        catch { return 120; }
+    }
+
+    private static string TruncateLine(string line, int maxWidth)
+    {
+        if (maxWidth <= 3 || line.Length <= maxWidth) return line;
+        return string.Concat(line.AsSpan(0, maxWidth - 3), "...");
+    }
+
     private static int NormalizeSpinnerIndex(int progress)
         => ((progress % Twirl.Length) + Twirl.Length) % Twirl.Length;
 
@@ -427,6 +543,12 @@ public class ConsoleServices : IConsoleServices
         public bool IsInputRedirected => Console.IsInputRedirected;
 
         public bool IsOutputRedirected => Console.IsOutputRedirected;
+
+        public int GetWindowWidth()
+        {
+            try { return Console.WindowWidth; }
+            catch { return 120; }
+        }
 
         public void Clear() => Console.Clear();
 

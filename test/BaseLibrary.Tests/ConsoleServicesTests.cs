@@ -407,16 +407,150 @@ public class ConsoleServicesTests : IDisposable
         result.Message.Should().Be("Process started asynchronously.");
     }
 
+    // ------------------------------------------------------------------
+    // Testes: área de status fixa (UpdateStatusLines / WriteLineKeepingStatus / ClearStatusLines)
+    // ------------------------------------------------------------------
+
+    [Fact]
+    public void UpdateStatusLines_NonRedirected_EmitsAnsiAndStoresLines()
+    {
+        var console = new FakeConsoleOutput { WindowWidthValue = 80 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("Processados: 1/10", "Arquivo: foo.cif");
+
+        // Primeira chamada: _statusLineCount era 0, não há cursor-up.
+        // Deve conter apaga-linha (\r\x1B[2K) + conteúdo + \n para cada linha.
+        string allWrites = string.Concat(console.Writes);
+        allWrites.Should().Contain("\r\x1B[2K");
+        allWrites.Should().Contain("Processados: 1/10");
+        allWrites.Should().Contain("Arquivo: foo.cif");
+    }
+
+    [Fact]
+    public void UpdateStatusLines_SecondCall_EmitsCursorUpToOverwrite()
+    {
+        var console = new FakeConsoleOutput { WindowWidthValue = 80 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("Linha 1", "Linha 2");
+        console.Writes.Clear();
+
+        services.UpdateStatusLines("Linha 1 nova", "Linha 2 nova");
+
+        // Segunda chamada deve subir o cursor 2 linhas (\x1B[2A).
+        string allWrites = string.Concat(console.Writes);
+        allWrites.Should().Contain("\x1B[2A");
+        allWrites.Should().Contain("Linha 1 nova");
+        allWrites.Should().Contain("Linha 2 nova");
+    }
+
+    [Fact]
+    public void UpdateStatusLines_Redirected_DoesNotEmitAnsiEscape()
+    {
+        var console = new FakeConsoleOutput { IsOutputRedirectedValue = true, WindowWidthValue = 80 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("Progresso: 50%", "Arquivo: bar.cif");
+
+        // Saída redirecionada: nenhum escape ANSI deve ser emitido.
+        string allWrites = string.Concat(console.Writes);
+        allWrites.Should().NotContain("\x1B");
+        allWrites.Should().BeEmpty(); // nada escrito no output redirecionado
+    }
+
+    [Fact]
+    public void WriteLineKeepingStatus_NonRedirected_ReprinstsStatusAfterLogLine()
+    {
+        var console = new FakeConsoleOutput { WindowWidthValue = 80 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("Status 1", "Status 2");
+        console.Writes.Clear();
+
+        services.WriteLineKeepingStatus("[ERRO] algo deu errado", color: 3);
+
+        string allWrites = string.Concat(console.Writes);
+        // Deve conter: cursor-up, a linha de log, e reimpressão do status.
+        allWrites.Should().Contain("\x1B[2A");
+        allWrites.Should().Contain("[ERRO] algo deu errado");
+        allWrites.Should().Contain("Status 1");
+        allWrites.Should().Contain("Status 2");
+        // Deve aplicar cor vermelha.
+        console.ColorCalls.Should().Contain("Set:Red");
+    }
+
+    [Fact]
+    public void WriteLineKeepingStatus_Redirected_WritesLineDirectly()
+    {
+        var console = new FakeConsoleOutput { IsOutputRedirectedValue = true, WindowWidthValue = 80 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("status");
+        console.Writes.Clear();
+
+        services.WriteLineKeepingStatus("[ERRO] falhou", color: 3);
+
+        // Saída redirecionada: apenas a linha de log, sem escape ANSI.
+        string allWrites = string.Concat(console.Writes);
+        allWrites.Should().Contain("[ERRO] falhou");
+        allWrites.Should().NotContain("\x1B");
+    }
+
+    [Fact]
+    public void ClearStatusLines_NonRedirected_EmitsEraseThenResetsCount()
+    {
+        var console = new FakeConsoleOutput { WindowWidthValue = 80 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("L1", "L2");
+        console.Writes.Clear();
+
+        services.ClearStatusLines();
+
+        string allWrites = string.Concat(console.Writes);
+        // Deve conter cursor-up e apagar linhas.
+        allWrites.Should().Contain("\x1B[2A");
+        allWrites.Should().Contain("\r\x1B[2K");
+
+        // Após clear: segunda chamada a UpdateStatusLines não deve emitir cursor-up.
+        console.Writes.Clear();
+        services.UpdateStatusLines("Nova linha");
+        string after = string.Concat(console.Writes);
+        after.Should().NotContain("\x1B[1A").And.NotContain("\x1B[2A");
+    }
+
+    [Fact]
+    public void UpdateStatusLines_TruncatesLongLines()
+    {
+        var console = new FakeConsoleOutput { WindowWidthValue = 20 };
+        var services = new ConsoleServices(console, new FakeProcessRunner());
+
+        services.UpdateStatusLines("Esta linha é muito longa para a janela");
+
+        string allWrites = string.Concat(console.Writes);
+        // Nenhuma escrita individual deve exceder a largura da janela + escapes.
+        // O conteúdo visível deve ser truncado com "..."
+        allWrites.Should().Contain("...");
+        // Primeiros (20-3)=17 chars + "..." — cabe exatamente em 20 colunas.
+        allWrites.Should().Contain("Esta linha é muit...");
+    }
+
+    // ------------------------------------------------------------------
+
     private sealed class FakeConsoleOutput : IConsoleOutput
     {
         public bool IsInputRedirectedValue { get; set; }
         public bool IsOutputRedirectedValue { get; set; }
+        public int WindowWidthValue { get; set; } = 120;
         public List<string> Writes { get; } = new();
         public List<string> ColorCalls { get; } = new();
 
         public bool IsInputRedirected => IsInputRedirectedValue;
 
         public bool IsOutputRedirected => IsOutputRedirectedValue;
+
+        public int GetWindowWidth() => WindowWidthValue;
 
         public void Clear() => Writes.Add("<clear>");
 
