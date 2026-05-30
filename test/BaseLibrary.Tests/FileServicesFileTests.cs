@@ -577,6 +577,60 @@ public class FileServicesFileTests : IDisposable
     }
 
     // -------------------------------------------------------------------------
+    // CopyFileCarefulEncription / IsSharingViolation (retry em arquivo em uso)
+    // -------------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(unchecked((int)0x80070020))] // ERROR_SHARING_VIOLATION (32)
+    [InlineData(unchecked((int)0x80070021))] // ERROR_LOCK_VIOLATION (33)
+    public void IsSharingViolation_ReturnsTrue_WhenHResultIsSharingOrLockViolation(int hresult)
+    {
+        var ex = new IOException("file in use", hresult);
+
+        FileServicesFile.IsSharingViolation(ex).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(unchecked((int)0x80070002))] // ERROR_FILE_NOT_FOUND (2)
+    [InlineData(unchecked((int)0x80070050))] // ERROR_FILE_EXISTS (80)
+    [InlineData(0)]
+    public void IsSharingViolation_ReturnsFalse_WhenHResultIsNotSharingOrLockViolation(int hresult)
+    {
+        var ex = new IOException("other io error", hresult);
+
+        FileServicesFile.IsSharingViolation(ex).Should().BeFalse();
+    }
+
+    [Fact]
+    public void CopyFileCarefulEncription_CopiesUnlockedFile_Successfully()
+    {
+        // Arrange
+        var src = CreateFile("careful_src.txt", "careful copy content");
+        var dest = TmpPath("careful_dest.txt");
+
+        // Act
+        _sut.CopyFileCarefulEncription(src, dest, _tmpDir);
+
+        // Assert
+        File.Exists(dest).Should().BeTrue();
+        File.ReadAllText(dest).Should().Be("careful copy content");
+    }
+
+    [Fact]
+    public void CopyFileCarefulEncription_OverwritesExistingDestination()
+    {
+        // Arrange
+        var src = CreateFile("careful_ow_src.txt", "new content");
+        var dest = CreateFile("careful_ow_dest.txt", "old content");
+
+        // Act
+        _sut.CopyFileCarefulEncription(src, dest, _tmpDir);
+
+        // Assert
+        File.ReadAllText(dest).Should().Be("new content");
+    }
+
+    // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
 

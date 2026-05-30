@@ -225,7 +225,22 @@ public class FileServicesFile : IFileServicesFile
         bool isEncrypted = false;
         try
         {
-            File.Copy(sourcePath, destinationFolder, true);
+            // Retry apenas em sharing violation (arquivo momentaneamente em uso por
+            // outro processo: antivírus, indexador, sincronização de nuvem). Outras
+            // IOExceptions caem direto na verificação de criptografia abaixo, sem
+            // atraso, preservando a detecção de arquivos EFS.
+            for (int attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    File.Copy(sourcePath, destinationFolder, true);
+                    break;
+                }
+                catch (IOException copyEx) when (attempt < 3 && IsSharingViolation(copyEx))
+                {
+                    System.Threading.Thread.Sleep(100);
+                }
+            }
         }
         catch (IOException ex)
         {
@@ -253,6 +268,14 @@ public class FileServicesFile : IFileServicesFile
         await using var src = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: true);
         await using var dst = new FileStream(dest, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.Write, FileShare.None, bufferSize, useAsync: true);
         await src.CopyToAsync(dst, cancellationToken);
+    }
+
+    // ERROR_SHARING_VIOLATION (32) / ERROR_LOCK_VIOLATION (33): arquivo em uso por
+    // outro processo. São transientes — vale a pena re-tentar a cópia.
+    internal static bool IsSharingViolation(IOException ex)
+    {
+        int code = ex.HResult & 0xFFFF;
+        return code == 32 || code == 33;
     }
 
     public void CopyFileSafeLinux(string source, string dest, bool overwrite)

@@ -15,6 +15,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="BaseLibrary.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\BaseLibrary.DependencyInjection\BaseLibrary.DependencyInjection.csproj" />
 		<ProjectReference Include="..\BaseLibrary.Text\BaseLibrary.Text.csproj" />
 		<ProjectReference Include="..\BaseLibrary.General\BaseLibrary.General.csproj" />
