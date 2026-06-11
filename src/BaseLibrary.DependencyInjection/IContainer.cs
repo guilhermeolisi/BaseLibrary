@@ -51,9 +51,35 @@ public interface IContainer
     TService RegisterSingletonAndReturn<TService>(Func<TService> creator);
 
     /// <summary>
+    /// Registers a singleton instance for the service type, overwriting any previous registration
+    /// (last-wins, equivalente ao RegisterConstant do Splat).
+    /// </summary>
+    /// <typeparam name="TService">The type of the service to register.</typeparam>
+    /// <param name="instance">The instance to register as the constant value of the service.</param>
+    void RegisterConstant<TService>(TService instance);
+
+    /// <summary>
+    /// Registers a singleton instance for the service type under a named contract, allowing multiple
+    /// registrations of the same <typeparamref name="TService"/> distinguished by <paramref name="contract"/>
+    /// (equivalente ao RegisterConstant(instance, type, contract) do Splat).
+    /// </summary>
+    /// <typeparam name="TService">The type of the service to register.</typeparam>
+    /// <param name="instance">The instance to register as the constant value of the service.</param>
+    /// <param name="contract">The contract name that identifies this particular registration.</param>
+    void RegisterConstant<TService>(TService instance, string contract);
+
+    /// <summary>
     /// Resolves an instance of the specified service type.
     /// </summary>
     /// <typeparam name="TService">The type of service to resolve.</typeparam>
     /// <returns>An instance of <typeparamref name="TService"/> if the service is registered; otherwise, <see langword="null"/>.</returns>
     TService? Resolve<TService>();
+
+    /// <summary>
+    /// Resolves an instance of the specified service type registered under the given named contract.
+    /// </summary>
+    /// <typeparam name="TService">The type of service to resolve.</typeparam>
+    /// <param name="contract">The contract name used when the service was registered.</param>
+    /// <returns>An instance of <typeparamref name="TService"/> if a registration exists for the contract; otherwise, <see langword="null"/>.</returns>
+    TService? Resolve<TService>(string contract);
 }

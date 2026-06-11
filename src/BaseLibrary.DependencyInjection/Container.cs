@@ -5,6 +5,9 @@ public class Container : IContainer
     private readonly Dictionary<Type, Func<object>> _registrations = new Dictionary<Type, Func<object>>();
     private readonly Dictionary<Type, object> _singletonInstances = new Dictionary<Type, object>();
     private readonly Dictionary<Type, Lazy<object>> _lazySingletons = new Dictionary<Type, Lazy<object>>();
+    // Registros nomeados (contract): permite múltiplas instâncias do mesmo TService diferenciadas por string,
+    // equivalente ao contract do Splat (ex.: IThemeCollectionProvider "theme" e "transparency").
+    private readonly Dictionary<(Type, string), object> _keyedInstances = new Dictionary<(Type, string), object>();
 
 
     public void Register<TService, TImplementation>() where TImplementation : TService, new()
@@ -79,9 +82,45 @@ public class Container : IContainer
         }
         _lazySingletons[typeof(TService)] = new Lazy<object>(() => creator());
     }
+    public void RegisterConstant<TService>(TService instance)
+    {
+        if (instance is null)
+        {
+            throw new ArgumentNullException(nameof(instance));
+        }
+        // Last-wins: sobrescreve qualquer registro anterior (mesma semântica do RegisterConstant do Splat).
+        _singletonInstances[typeof(TService)] = instance;
+    }
+
+    public void RegisterConstant<TService>(TService instance, string contract)
+    {
+        if (instance is null)
+        {
+            throw new ArgumentNullException(nameof(instance));
+        }
+        if (string.IsNullOrEmpty(contract))
+        {
+            throw new ArgumentException("Contract cannot be null or empty.", nameof(contract));
+        }
+        _keyedInstances[(typeof(TService), contract)] = instance;
+    }
+
     public TService? Resolve<TService>()
     {
         return (TService?)Resolve(typeof(TService));
+    }
+
+    public TService? Resolve<TService>(string contract)
+    {
+        if (string.IsNullOrEmpty(contract))
+        {
+            throw new ArgumentException("Contract cannot be null or empty.", nameof(contract));
+        }
+        if (_keyedInstances.TryGetValue((typeof(TService), contract), out var instance))
+        {
+            return (TService?)instance;
+        }
+        return default;
     }
 
     private object? Resolve(Type serviceType)

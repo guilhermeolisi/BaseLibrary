@@ -55,4 +55,73 @@ public class DependencyInjectionContainerTests
         service.Should().NotBeNull();
         service.Should().BeSameAs(numberService);
     }
+    // Testa o método RegisterConstant: registra uma instância e a resolve
+    [Fact]
+    public void RegisterConstant_WhenRegisteringInstance_ShouldResolveSameInstance()
+    {
+        // Arrange
+        var container = new Container();
+        var numberService = new NumberServices();
+        container.RegisterConstant<INumberServices>(numberService);
+        // Act
+        var service = container.Resolve<INumberServices>();
+        // Assert
+        service.Should().BeSameAs(numberService);
+    }
+    // Testa que RegisterConstant é last-wins: a segunda chamada sobrescreve a primeira
+    [Fact]
+    public void RegisterConstant_WhenRegisteringTwice_ShouldResolveLastRegisteredInstance()
+    {
+        // Arrange
+        var container = new Container();
+        var first = new NumberServices();
+        var second = new NumberServices();
+        container.RegisterConstant<INumberServices>(first);
+        container.RegisterConstant<INumberServices>(second);
+        // Act
+        var service = container.Resolve<INumberServices>();
+        // Assert
+        service.Should().BeSameAs(second);
+    }
+    // Testa o registro nomeado (contract): duas instâncias do mesmo serviço diferenciadas por contract
+    [Fact]
+    public void RegisterConstant_WhenRegisteringWithContracts_ShouldResolveEachByItsContract()
+    {
+        // Arrange
+        var container = new Container();
+        var themeProvider = new NumberServices();
+        var transparencyProvider = new NumberServices();
+        container.RegisterConstant<INumberServices>(themeProvider, "theme");
+        container.RegisterConstant<INumberServices>(transparencyProvider, "transparency");
+        // Act
+        var resolvedTheme = container.Resolve<INumberServices>("theme");
+        var resolvedTransparency = container.Resolve<INumberServices>("transparency");
+        // Assert
+        resolvedTheme.Should().BeSameAs(themeProvider);
+        resolvedTransparency.Should().BeSameAs(transparencyProvider);
+    }
+    // Testa que um contract nomeado não colide com o registro keyless do mesmo tipo
+    [Fact]
+    public void Resolve_WhenContractRegisteredButKeylessRequested_ShouldReturnNull()
+    {
+        // Arrange
+        var container = new Container();
+        container.RegisterConstant<INumberServices>(new NumberServices(), "theme");
+        // Act
+        var keyless = container.Resolve<INumberServices>();
+        // Assert
+        keyless.Should().BeNull();
+    }
+    // Testa que resolver um contract inexistente retorna null
+    [Fact]
+    public void Resolve_WhenContractNotRegistered_ShouldReturnNull()
+    {
+        // Arrange
+        var container = new Container();
+        container.RegisterConstant<INumberServices>(new NumberServices(), "theme");
+        // Act
+        var service = container.Resolve<INumberServices>("transparency");
+        // Assert
+        service.Should().BeNull();
+    }
 }
