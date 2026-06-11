@@ -6,6 +6,13 @@
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
     <Configurations>Debug;Release</Configurations>
+
+    <!-- Consumido pelo Sindarin, que é publicado em Native AOT. Marca o assembly como
+         trim-compatível e liga os analisadores trim/AOT/single-file em build, de modo que
+         qualquer padrão incompatível com AOT introduzido aqui falhe já na compilação.
+         IsAotCompatible=true também define IsTrimmable=true. -->
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
 
 </Project>
