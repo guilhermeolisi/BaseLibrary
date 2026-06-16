@@ -60,6 +60,17 @@ public partial class MatrixArrays : iMatrix
         this.data = values;
     }
     /// <summary>
+    /// Constrói uma matriz 1×n (uma LINHA) a partir de um vetor. Equivale ao
+    /// <c>Matrix&lt;double&gt;.Build.DenseOfRowArrays(singleRow)</c> do MathNet.
+    /// </summary>
+    public MatrixArrays(double[] singleRow)
+    {
+        if (singleRow is null || singleRow.Length == 0)
+            throw new Exception("The row must have at least one element.");
+        data = new double[1][];
+        data[0] = singleRow;
+    }
+    /// <summary>
     /// Constrói a partir de um array 2D (row-major). Equivale ao <c>Matrix&lt;double&gt;.Build.DenseOfArray</c>
     /// do MathNet.
     /// </summary>
@@ -82,7 +93,7 @@ public partial class MatrixArrays : iMatrix
     /// Constrói a partir de arrays de COLUNAS (cada <c>columns[c]</c> é a coluna c). Equivale ao
     /// <c>Matrix&lt;double&gt;.Build.DenseOfColumnArrays</c> do MathNet.
     /// </summary>
-    public static MatrixArrays FromColumnArrays(double[][] columns)
+    public static MatrixArrays FromColumnArrays(params double[][] columns)
     {
         int cols = columns.Length;
         if (cols <= 0 || columns[0].Length <= 0)
