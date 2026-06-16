@@ -105,6 +105,66 @@ public static class SpecialFunctions
         return x > 0.0 ? GammaUpperRegularized(0.5, t) : 2.0 - GammaUpperRegularized(0.5, t);
     }
 
+    // ===================================================================================
+    //  Bessel modificada I₀/I₁ e Struve modificada L₀/L₁ (usadas na absorção de capilar de Sabine).
+    //  Séries de potências de TERMOS POSITIVOS (sem cancelamento interno) → precisão de máquina;
+    //  convergem em ~x termos. A combinação I_ν(x)−L_ν(x) (a única usada) tem o mesmo condicionamento
+    //  que no MathNet.
+    // ===================================================================================
+
+    /// <summary>Função de Bessel modificada de 1ª espécie, ordem 0: I₀(x).</summary>
+    public static double BesselI0(double x) => BesselISeries(System.Math.Abs(x), 0); // par
+
+    /// <summary>Função de Bessel modificada de 1ª espécie, ordem 1: I₁(x).</summary>
+    public static double BesselI1(double x)
+    {
+        double v = BesselISeries(System.Math.Abs(x), 1);
+        return x < 0.0 ? -v : v; // ímpar
+    }
+
+    /// <summary>Função de Struve modificada, ordem 0: L₀(x).</summary>
+    public static double StruveL0(double x)
+    {
+        double v = StruveLSeries(System.Math.Abs(x), 0);
+        return x < 0.0 ? -v : v; // ímpar
+    }
+
+    /// <summary>Função de Struve modificada, ordem 1: L₁(x).</summary>
+    public static double StruveL1(double x) => StruveLSeries(System.Math.Abs(x), 1); // par
+
+    // I_ν(x) = Σ_{k≥0} (x/2)^(2k+ν) / (k!·Γ(ν+k+1)); razão t_k/t_{k-1} = (x/2)²/(k(k+ν)). x ≥ 0.
+    private static double BesselISeries(double x, int nu)
+    {
+        double half = x / 2.0;
+        double half2 = half * half;
+        double term = nu == 0 ? 1.0 : half; // (x/2)^ν / ν!
+        double sum = term;
+        for (int k = 1; k < 2000; k++)
+        {
+            term *= half2 / (k * (k + nu));
+            sum += term;
+            if (term <= sum * 1e-17 && k > half) break; // só após o pico (k≈x/2)
+        }
+        return sum;
+    }
+
+    // L_ν(x) = Σ_{m≥0} (x/2)^(2m+ν+1) / (Γ(m+3/2)·Γ(m+ν+3/2)); razão = (x/2)²/((m+½)(m+ν+½)). x ≥ 0.
+    private static double StruveLSeries(double x, int nu)
+    {
+        if (x == 0.0) return 0.0;
+        double half = x / 2.0;
+        double half2 = half * half;
+        double term = Pow(half, nu + 1) / (Gamma(1.5) * Gamma(nu + 1.5)); // m=0
+        double sum = term;
+        for (int m = 1; m < 2000; m++)
+        {
+            term *= half2 / ((m + 0.5) * (m + nu + 0.5));
+            sum += term;
+            if (term <= sum * 1e-17 && m > half) break;
+        }
+        return sum;
+    }
+
     // P(a,x) por série (convergente para x < a+1).
     private static double GammaSeries(double a, double x)
     {
