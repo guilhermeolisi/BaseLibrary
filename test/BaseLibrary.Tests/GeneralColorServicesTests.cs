@@ -369,7 +369,7 @@ public class GeneralColorServicesTests
             for (int j = 0; j < expectedHslValues.Length; j++)
             {
                 if (i == j) continue;
-                double diff = Math.Abs(expectedHslValues[i].h - expectedHslValues[j].h);
+                double diff = System.Math.Abs(expectedHslValues[i].h - expectedHslValues[j].h);
                 if (diff < closed)
                 {
                     closed = diff;
@@ -520,7 +520,7 @@ public class GeneralColorServicesTests
             for (int j = 0; j < expectedHslValues.Length; j++)
             {
                 if (i == j) continue;
-                double diff = Math.Abs(expectedHslValues[i].h - expectedHslValues[j].h);
+                double diff = System.Math.Abs(expectedHslValues[i].h - expectedHslValues[j].h);
                 if (diff < closed)
                 {
                     closed = diff;
@@ -583,7 +583,7 @@ public class GeneralColorServicesTests
             for (int j = 0; j < expectedHslValues.Length; j++)
             {
                 if (i == j) continue;
-                double diff = Math.Abs(expectedHslValues[i].h - expectedHslValues[j].h);
+                double diff = System.Math.Abs(expectedHslValues[i].h - expectedHslValues[j].h);
                 if (diff < closed)
                 {
                     closed = diff;
@@ -653,7 +653,7 @@ public class GeneralColorServicesTests
         double closed = double.MaxValue;
         for (int i = 0; i < dark.Length; i++)
         {
-            double diff = Math.Abs(expectedHslValues[i].h - dark[i].h);
+            double diff = System.Math.Abs(expectedHslValues[i].h - dark[i].h);
             double difH = expectedHslValues[i].h - dark[i].h;
             //if (difH < 0)
             //    difH += 360;
