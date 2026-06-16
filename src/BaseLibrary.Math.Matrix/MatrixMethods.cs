@@ -881,6 +881,24 @@ public static partial class MatrixMethods
         //TODO implementar paralelismo
         //TODO implementar inplace
 
+        // Fail-fast: para quem ESPERA a matriz invertível. O caminho quente do otimizador deve usar
+        // TryInverseLU (sem exceção) — matriz quase-singular é condição esperada, não excepcional.
+        if (!matrix.TryInverseLU(out iMatrix inverse))
+            throw new Exception("The matrix is not invertible.");
+        return inverse;
+    }
+
+    /// <summary>
+    /// Tenta inverter por decomposição LU (Crout). Devolve <c>false</c> quando a matriz é SINGULAR — sem
+    /// lançar exceção — para o caminho quente do otimizador, onde uma matriz normal quase-singular é uma
+    /// condição ESPERADA (tratada pelo λ de Marquardt) e não um erro. Matriz não-quadrada é uso indevido e
+    /// continua lançando. Em caso de singularidade, <paramref name="inverse"/> fica <c>null</c>.
+    /// Padrão idiomático .NET (Try-pattern): O(1) sempre, sem custo de stack-unwind de exceção.
+    /// </summary>
+    public static bool TryInverseLU(this iMatrix matrix, out iMatrix inverse)
+    {
+        inverse = null!;
+
         // Check if the matrix is square.
         if (matrix.RowCount != matrix.ColumnCount)
         {
@@ -891,10 +909,10 @@ public static partial class MatrixMethods
         int[] perm;  // out parameter
         iMatrix lum = matrix.DecomposeLU(out perm, out toggle); //ignore toggle
 
-        // Check if the determinant is zero.
+        // Determinante zero ⇒ singular: NÃO lança, devolve false.
         if (lum.DeterminantWithLU(toggle) == 0)
         {
-            throw new Exception("The matrix is not invertible.");
+            return false;
         }
 
         int n = matrix.ColumnCount;
@@ -911,18 +929,13 @@ public static partial class MatrixMethods
                     ind = j;
 
             iVector b = new VectorWithOne(n, ind);
-            //iVector b2 = new Vector(n);
-            //for (int j = 0; j < n; ++j)
-            //    if (i == perm[j])
-            //        b2[j] = 1.0;
-            //    else
-            //        b2[j] = 0.0;
-            iVector x = lum.SolveLinearLU(b); // 
+            iVector x = lum.SolveLinearLU(b); //
             //TODO fazer um metodo substitua a coluna com um array
             for (int j = 0; j < n; ++j)
                 result[j, i] = x[j];
         }
-        return result;
+        inverse = result;
+        return true;
     }
     public static iMatrix InverseLU(this iMatrix matrix, iMatrix lum, int[] perm, int toggle)
     {

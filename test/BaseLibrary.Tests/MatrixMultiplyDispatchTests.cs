@@ -128,4 +128,50 @@ public class MatrixMultiplyDispatchTests
         detCofactor.Should().BeApproximately(3.0, 1e-10);
         detLu.Should().BeApproximately(3.0, 1e-10);
     }
+
+    [Fact]
+    public void TryInverseLU_ShouldReturnTrueAndInverse_WhenInvertible()
+    {
+        var rnd = new Random(9);
+        var a = RandomArrays(rnd, 6, 6);
+
+        bool ok = ((iMatrix)a.Copy()).TryInverseLU(out iMatrix inv);
+
+        ok.Should().BeTrue();
+        iMatrix prod = ((iMatrix)a).Multiply(inv);
+        for (int i = 0; i < 6; i++)
+            for (int j = 0; j < 6; j++)
+                prod[i, j].Should().BeApproximately(i == j ? 1.0 : 0.0, 1e-8);
+    }
+
+    [Fact]
+    public void TryInverseLU_ShouldReturnFalse_WhenSingular_WithoutThrowing()
+    {
+        // Linha de zeros → matriz singular.
+        var singular = new MatrixArrays(new[]
+        {
+            new[] { 1.0, 2.0, 3.0 },
+            new[] { 0.0, 0.0, 0.0 },
+            new[] { 4.0, 5.0, 6.0 },
+        });
+
+        bool ok = ((iMatrix)singular).TryInverseLU(out iMatrix inv);
+
+        ok.Should().BeFalse();
+        inv.Should().BeNull();
+    }
+
+    [Fact]
+    public void InverseLU_ShouldStillThrow_WhenSingular()
+    {
+        var singular = new MatrixArrays(new[]
+        {
+            new[] { 1.0, 2.0 },
+            new[] { 2.0, 4.0 },
+        });
+
+        Action act = () => ((iMatrix)singular).InverseLU();
+
+        act.Should().Throw<Exception>();
+    }
 }
