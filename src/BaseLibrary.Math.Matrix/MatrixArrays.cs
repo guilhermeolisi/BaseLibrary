@@ -35,7 +35,7 @@ public partial class MatrixArrays : iMatrix
     }
     public void SetRow(int index, double[] rowValue)
     {
-        if (rowValue.Length != RowCount)
+        if (rowValue.Length != ColumnCount)
         {
             throw new Exception("The length of the row must be equal to the number of columns.");
         }

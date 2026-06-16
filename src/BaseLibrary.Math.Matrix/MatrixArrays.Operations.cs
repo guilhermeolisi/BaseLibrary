@@ -18,32 +18,33 @@ public partial class MatrixArrays
             throw new Exception("The matrices cannot be multiplied.");
         }
 
-        // Create the result 
+        // Create the result
         MatrixArrays result = new MatrixArrays(RowCount, matrix2.ColumnCount);
 
         double[][] data = this.data; // To improve performance
         double[] data2 = matrix2.data;
         double[][] dataResult = result.data;
 
-        int n1 = RowCount;
+        int inner = matrix2.RowCount;
+        int cols = matrix2.ColumnCount;
 
-        // Loop parallel through the rows of the first 
+        // matrix2 é column-major: a coluna j é contígua (data2[j*inner + k]). O produto interno (ijk
+        // com k interno) percorre di[k] e a coluna j de forma contígua — cache-friendly.
         Parallel.For(0, RowCount, i =>
         {
-            // Loop through the columns of the second 
-            for (int j = 0; j < matrix2.ColumnCount; j++)
+            double[] di = data[i];
+            double[] ri = dataResult[i];
+            for (int j = 0; j < cols; j++)
             {
-                int index2Colj = j * matrix2.RowCount;
-                // Loop through the rows of the second 
-                for (int k = 0; k < matrix2.RowCount; k++)
-                {
-                    // Add the product of the two matrices to the result 
-                    dataResult[i][j] += data[i][k] * data2[k + index2Colj];
-                }
+                int basej = j * inner;
+                double sum = 0.0;
+                for (int k = 0; k < inner; k++)
+                    sum += di[k] * data2[basej + k];
+                ri[j] = sum;
             }
         });
 
-        // Return the result 
+        // Return the result
         return result;
     }
     public iMatrix Multiply(MatrixArrays matrix2)
@@ -55,32 +56,33 @@ public partial class MatrixArrays
             throw new Exception("The matrices cannot be multiplied.");
         }
 
-        // Create the result 
+        // Create the result
         MatrixArrays result = new MatrixArrays(RowCount, matrix2.ColumnCount);
 
         double[][] data = this.data; // To improve performance
         double[][] data2 = matrix2.data;
         double[][] dataResult = result.data;
 
-        int n1 = RowCount;
+        int inner = matrix2.RowCount;
+        int cols = matrix2.ColumnCount;
 
-        // Loop parallel through the rows of the first 
+        // Ordem ikj: data2[k] e dataResult[i] são percorridos de forma contígua (cache-friendly),
+        // em vez da ordem ijk que estria data2[k][j] sobre k.
         Parallel.For(0, RowCount, i =>
         {
-            // Loop through the columns of the second 
-            for (int j = 0; j < matrix2.ColumnCount; j++)
+            double[] di = data[i];
+            double[] ri = dataResult[i];
+            for (int k = 0; k < inner; k++)
             {
-                int index2Colj = j * matrix2.RowCount;
-                // Loop through the rows of the second 
-                for (int k = 0; k < matrix2.RowCount; k++)
-                {
-                    // Add the product of the two matrices to the result 
-                    dataResult[i][j] += data[i][k] * data2[k][j];
-                }
+                double aik = di[k];
+                if (aik == 0.0) continue;
+                double[] bk = data2[k];
+                for (int j = 0; j < cols; j++)
+                    ri[j] += aik * bk[j];
             }
         });
 
-        // Return the result 
+        // Return the result
         return result;
     }
     public iMatrix TransposeAndMultiply(MatrixDense matrix2)

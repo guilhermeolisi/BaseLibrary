@@ -3,7 +3,7 @@ using static System.Math;
 
 namespace Sindarin.Math.Matrix;
 
-public static class MatrixMethods
+public static partial class MatrixMethods
 {
     static Random random = new Random();
 
@@ -76,25 +76,56 @@ public static class MatrixMethods
             throw new Exception("The matrices cannot be multiplied.");
         }
 
-        // Create the result matrix.
-        iMatrix result = new MatrixArrays(matrix1.RowCount, matrix2.ColumnCount);
+        // Despacho por estrutura: usa o kernel mais barato que se aplica ao par de tipos.
+        switch (matrix1.Structure)
+        {
+            case MatrixStructure.Identity:
+                return DensifyCopy(matrix2);
+            case MatrixStructure.Diagonal:
+                return MultiplyDiagonalLeft((MatrixDiagonal)matrix1, matrix2);
+            case MatrixStructure.Sparse:
+                return ((MatrixSparse)matrix1).Multiply(matrix2);
+        }
+        switch (matrix2.Structure)
+        {
+            case MatrixStructure.Identity:
+                return DensifyCopy(matrix1);
+            case MatrixStructure.Diagonal:
+                return MultiplyDiagonalRight(matrix1, (MatrixDiagonal)matrix2);
+        }
+        if (matrix1.Structure == MatrixStructure.UpperTriangular &&
+            matrix2.Structure == MatrixStructure.UpperTriangular)
+            return ((MatrixTriangularUpper)matrix1).Multiply((MatrixTriangularUpper)matrix2);
 
-        // Loop parallel through the rows of the first matrix.
+        // Caminhos densos especializados (cache-friendly, sem indexador virtual).
+        if (matrix1 is MatrixArrays a1 && matrix2 is MatrixArrays a2)
+            return a1.Multiply(a2);
+        if (matrix1 is MatrixDense d1 && matrix2 is MatrixDense d2)
+            return d1.Multiply(d2);
+
+        return MultiplyGeneric(matrix1, matrix2);
+    }
+
+    /// <summary>Multiplicação genérica densa (ordem ikj, sem suposições de estrutura).</summary>
+    private static iMatrix MultiplyGeneric(iMatrix matrix1, iMatrix matrix2)
+    {
+        MatrixArrays result = new MatrixArrays(matrix1.RowCount, matrix2.ColumnCount);
+        double[][] r = result.data;
+        int inner = matrix2.RowCount;
+        int cols = matrix2.ColumnCount;
+
         Parallel.For(0, matrix1.RowCount, i =>
         {
-            // Loop through the columns of the second matrix.
-            for (int j = 0; j < matrix2.ColumnCount; j++)
+            double[] ri = r[i];
+            // ikj: para cada k, soma a contribuição da linha k de matrix2 escalada por matrix1[i,k].
+            for (int k = 0; k < inner; k++)
             {
-                // Loop through the rows of the second matrix.
-                for (int k = 0; k < matrix2.RowCount; k++)
-                {
-                    // Add the product of the two matrices to the result matrix.
-                    result[i, j] += matrix1[i, k] * matrix2[k, j];
-                }
+                double aik = matrix1[i, k];
+                if (aik == 0.0) continue;
+                for (int j = 0; j < cols; j++)
+                    ri[j] += aik * matrix2[k, j];
             }
         });
-
-        // Return the result matrix.
         return result;
     }
 
@@ -262,8 +293,9 @@ public static class MatrixMethods
         iMatrix lum = matrix.DecomposeLU(out _, out toggle);
         double result = toggle;
 
-        for (int i = 0; i < matrix.RowCount; ++i)
-            result *= matrix[i, i];
+        // O determinante é o produto da diagonal de U (a matriz LU), NÃO da matriz original.
+        for (int i = 0; i < lum.RowCount; ++i)
+            result *= lum[i, i];
         return result;
     }
     /// <summary>

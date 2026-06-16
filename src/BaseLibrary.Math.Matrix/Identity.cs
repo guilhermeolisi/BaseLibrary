@@ -23,6 +23,9 @@ public class Identity : iMatrix
     public int RowCount => length;
 
     public int ColumnCount => length;
+
+    public MatrixStructure Structure => MatrixStructure.Identity;
+
     public double GetValue(int row, int column)
     {
         if (row < 0 || row >= RowCount || column < 0 || column >= ColumnCount)
@@ -37,8 +40,8 @@ public class Identity : iMatrix
     }
     public iVector GetRow(int row)
     {
-
-        return new VectorWithOne(row, length);
+        // VectorWithOne(length, indexOne): linha 'row' da identidade tem o 1 na coluna 'row'.
+        return new VectorWithOne(length, row);
     }
 
     public double[] GetRowArray(int row)

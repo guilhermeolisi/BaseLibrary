@@ -14,6 +14,13 @@ public interface iMatrix
 
     bool isSquare { get => ColumnCount == RowCount; }
 
+    /// <summary>
+    /// Estrutura conhecida da matriz. O default é <see cref="MatrixStructure.General"/>;
+    /// tipos especializados (diagonal, triangular, esparsa…) sobrescrevem para habilitar
+    /// kernels otimizados no despacho de <see cref="MatrixMethods.Multiply(iMatrix, iMatrix)"/>.
+    /// </summary>
+    MatrixStructure Structure => MatrixStructure.General;
+
     double GetValue(int row, int column);
     double GetValueTransposed(int row, int column);
     iVector GetRow(int index);

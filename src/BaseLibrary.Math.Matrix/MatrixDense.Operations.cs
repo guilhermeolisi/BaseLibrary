@@ -19,35 +19,33 @@ public partial class MatrixDense
             throw new Exception("The matrices cannot be multiplied.");
         }
 
-        // Create the result 
+        // Create the result
         MatrixDense result = new MatrixDense(RowCount, matrix2.ColumnCount);
 
         double[] data = this.data; // To improve performance
         double[] data2 = matrix2.data;
         double[] dataResult = result.data;
-        _ = data[data.Length - 1]; // To improve performance
-        _ = data2[data2.Length - 1]; // To improve performance
-        _ = dataResult[dataResult.Length - 1]; // To improve performance
 
         int n1 = RowCount;
+        int inner = matrix2.RowCount;
 
-        // Loop parallel through the rows of the first 
-        Parallel.For(0, RowCount, i =>
+        // Column-major: percorre as colunas j da saída (paralelo). Para cada k, escala a coluna k de A
+        // por B[k,j] e acumula na coluna j do resultado — colunas de A e do resultado são contíguas.
+        Parallel.For(0, matrix2.ColumnCount, j =>
         {
-            // Loop through the columns of the second 
-            for (int j = 0; j < matrix2.ColumnCount; j++)
+            int cbase = j * n1;
+            int bbase = j * inner;
+            for (int k = 0; k < inner; k++)
             {
-                int index2Colj = j * matrix2.RowCount;
-                // Loop through the rows of the second 
-                for (int k = 0; k < matrix2.RowCount; k++)
-                {
-                    // Add the product of the two matrices to the result 
-                    dataResult[i + index2Colj] += data[i + k * n1] * data2[k + index2Colj];
-                }
+                double bkj = data2[bbase + k];
+                if (bkj == 0.0) continue;
+                int abase = k * n1;
+                for (int i = 0; i < n1; i++)
+                    dataResult[cbase + i] += bkj * data[abase + i];
             }
         });
 
-        // Return the result 
+        // Return the result
         return result;
     }
     public iMatrix Multiply(MatrixArrays matrix2)
@@ -59,34 +57,32 @@ public partial class MatrixDense
             throw new Exception("The matrices cannot be multiplied.");
         }
 
-        // Create the result 
+        // Create the result
         MatrixDense result = new MatrixDense(RowCount, matrix2.ColumnCount);
 
         double[] data = this.data; // To improve performance
         double[][] data2 = matrix2.data;
         double[] dataResult = result.data;
-        _ = data[data.Length - 1]; // To improve performance
-        _ = dataResult[dataResult.Length - 1]; // To improve performance
 
         int n1 = RowCount;
+        int inner = matrix2.RowCount;
 
-        // Loop parallel through the rows of the first 
-        Parallel.For(0, RowCount, i =>
+        // A/resultado column-major; matrix2 row-major (data2[k][j]). Itera colunas j da saída e acumula
+        // a coluna k de A escalada por data2[k][j] — colunas de A e resultado são contíguas.
+        Parallel.For(0, matrix2.ColumnCount, j =>
         {
-            // Loop through the columns of the second 
-            for (int j = 0; j < matrix2.ColumnCount; j++)
+            int cbase = j * n1;
+            for (int k = 0; k < inner; k++)
             {
-                int index2Colj = j * matrix2.RowCount;
-                // Loop through the rows of the second 
-                for (int k = 0; k < matrix2.RowCount; k++)
-                {
-                    // Add the product of the two matrices to the result 
-                    dataResult[i + index2Colj] += data[i + k * n1] * data2[k][j];
-                }
+                double bkj = data2[k][j];
+                if (bkj == 0.0) continue;
+                int abase = k * n1;
+                for (int i = 0; i < n1; i++)
+                    dataResult[cbase + i] += bkj * data[abase + i];
             }
         });
 
-        // Return the result 
+        // Return the result
         return result;
     }
     public iMatrix TransposeAndMultiply(iMatrix matrix2)

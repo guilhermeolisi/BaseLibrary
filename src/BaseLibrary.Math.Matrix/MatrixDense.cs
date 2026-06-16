@@ -36,8 +36,12 @@ public partial class MatrixDense : iMatrix
     }
     public double[] GetRowArray(int index)
     {
-        return null;
-        //return data[index]; //TODO: check
+        // Armazenamento column-major: a linha 'index' é estriada (passo = RowCount).
+        double[] row = new double[ColumnCount];
+        int n = RowCount;
+        for (int c = 0; c < ColumnCount; c++)
+            row[c] = data[index + c * n];
+        return row;
     }
     public double[] GetData()
     {
@@ -45,11 +49,13 @@ public partial class MatrixDense : iMatrix
     }
     public void SetRow(int index, double[] rowValue)
     {
-        if (rowValue.Length != RowCount)
+        if (rowValue.Length != ColumnCount)
         {
             throw new Exception("The length of the row must be equal to the number of columns.");
         }
-        //data[index] = rowValue; //TODO: check
+        int n = RowCount;
+        for (int c = 0; c < ColumnCount; c++)
+            data[index + c * n] = rowValue[c];
     }
     public MatrixDense(int rows, int columns)
     {

@@ -44,8 +44,8 @@ public class VectorWithOne : iVector
 
     public double GetValue(int row, int column)
     {
-
-        return row == indexValueOne ? 1 : 0;
+        // Vetor-linha (RowCount == 1): o único 1 está na coluna 'indexValueOne'.
+        return column == indexValueOne ? 1 : 0;
 
     }
     public double GetValueTransposed(int row, int column)
