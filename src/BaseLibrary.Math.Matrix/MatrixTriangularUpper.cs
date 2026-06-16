@@ -101,18 +101,20 @@ public sealed class MatrixTriangularUpper : iMatrix
         MatrixTriangularUpper result = new MatrixTriangularUpper(n);
         double[] a = data, b = other.data, r = result.data;
         int[] rs = rowStart;
-        for (int i = 0; i < n; i++)
+        // Ordem ikj: para cada i, percorre k>=i (A[i,k] contíguo em 'a') e acumula a linha k de B
+        // escalada por A[i,k]. Tanto b[rs[k]+(j-k)] quanto r[rs[i]+(j-i)] são contíguos sobre j.
+        Parallel.For(0, n, i =>
         {
             int rsi = rs[i];
-            for (int j = i; j < n; j++)
+            for (int k = i; k < n; k++)
             {
-                double sum = 0.0;
-                // k vai de i até j: A[i,k] (k>=i) e B[k,j] (j>=k) ambos no triângulo superior.
-                for (int k = i; k <= j; k++)
-                    sum += a[rsi + (k - i)] * b[rs[k] + (j - k)];
-                r[rsi + (j - i)] = sum;
+                double aik = a[rsi + (k - i)];
+                if (aik == 0.0) continue;
+                int rsk = rs[k];
+                for (int j = k; j < n; j++)
+                    r[rsi + (j - i)] += aik * b[rsk + (j - k)];
             }
-        }
+        });
         return result;
     }
 
