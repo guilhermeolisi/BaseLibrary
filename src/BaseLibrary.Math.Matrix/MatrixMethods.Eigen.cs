@@ -31,21 +31,24 @@ public static partial class MatrixMethods
     }
 
     /// <summary>
-    /// Decomposição em autovalores de uma matriz SIMÉTRICA pelo método cíclico de Jacobi (rotações).
-    /// Devolve os autovalores em ordem CRESCENTE e os autovetores como COLUNAS de
-    /// <paramref name="eigenvectors"/> (<c>eigenvectors[a, p]</c> = componente a do p-ésimo autovetor),
-    /// na mesma convenção do <c>Evd(Symmetricity.Symmetric)</c> do MathNet. Robusto e O(n³) por varredura;
-    /// adequado a matrizes pequenas (nº de parâmetros do refinamento). Só o triângulo superior+diagonal é lido
-    /// (a matriz é assumida simétrica).
+    /// Decomposição em autovalores de uma matriz SIMÉTRICA pelo método cíclico de Jacobi (rotações de Givens),
+    /// na variante de Numerical Recipes: itera até zerar os elementos fora da diagonal ATÉ O PISO de
+    /// arredondamento (critério <c>sm == 0</c> + descarte dos off-diagonais desprezíveis relativos às
+    /// diagonais), atingindo precisão de máquina (~1e-15 na reconstrução <c>V·Λ·Vᵀ</c>), não uma tolerância
+    /// absoluta frouxa. Devolve os autovalores em ordem CRESCENTE e os autovetores como COLUNAS de
+    /// <paramref name="eigenvectors"/> (<c>eigenvectors[a, p]</c> = componente a do p-ésimo autovetor), na mesma
+    /// convenção do <c>Evd(Symmetricity.Symmetric)</c> do MathNet. Converge quadraticamente (~6–10 varreduras);
+    /// só o triângulo superior+diagonal é lido (a matriz é assumida simétrica). Devolve <c>false</c> se não
+    /// convergir em <paramref name="maxSweeps"/> (resultado ainda utilizável).
     /// </summary>
     public static bool SymmetricEigen(iMatrix matrix, out double[] eigenvalues, out MatrixArrays eigenvectors,
-        int maxSweeps = 100, double tolerance = 1e-15)
+        int maxSweeps = 50)
     {
         int n = matrix.RowCount;
         if (n != matrix.ColumnCount)
             throw new Exception("The matrix must be square.");
 
-        // Cópia de trabalho (simetrizada a partir do triângulo superior) e acumulador de autovetores V.
+        // Triângulo SUPERIOR de trabalho (o algoritmo só toca o triângulo superior) e acumulador de autovetores V.
         double[][] a = new double[n][];
         double[][] v = new double[n][];
         for (int i = 0; i < n; i++)
@@ -58,62 +61,61 @@ public static partial class MatrixMethods
         {
             a[i][i] = matrix[i, i];
             for (int j = i + 1; j < n; j++)
-            {
-                double val = matrix[i, j];
-                a[i][j] = val;
-                a[j][i] = val;
-            }
+                a[i][j] = matrix[i, j];
         }
 
         bool converged = false;
         for (int sweep = 0; sweep < maxSweeps; sweep++)
         {
-            // Soma dos quadrados dos elementos fora da diagonal.
-            double off = 0.0;
-            for (int p = 0; p < n; p++)
+            // sm = soma dos |off-diagonais| (triângulo superior). sm == 0 ⇒ tudo zerado até o piso de máquina.
+            double sm = 0.0;
+            for (int p = 0; p < n - 1; p++)
                 for (int q = p + 1; q < n; q++)
-                    off += a[p][q] * a[p][q];
-            if (off <= tolerance)
+                    sm += Abs(a[p][q]);
+            if (sm == 0.0)
             {
                 converged = true;
                 break;
             }
 
-            for (int p = 0; p < n; p++)
+            // Nas 3 primeiras varreduras só gira off-diagonais acima de um limiar (acelera); depois, todos.
+            double tresh = sweep < 3 ? 0.2 * sm / (n * n) : 0.0;
+
+            for (int p = 0; p < n - 1; p++)
             {
                 for (int q = p + 1; q < n; q++)
                 {
                     double apq = a[p][q];
-                    if (apq == 0.0) continue;
-
-                    // Ângulo de rotação que zera a[p][q].
-                    double theta = (a[q][q] - a[p][p]) / (2.0 * apq);
-                    double t = Sign(theta) / (Abs(theta) + Sqrt(theta * theta + 1.0));
-                    if (theta == 0.0) t = 1.0;
-                    double c = 1.0 / Sqrt(t * t + 1.0);
-                    double s = t * c;
-
-                    // Aplica a rotação de Givens nas linhas/colunas p,q de A.
-                    double app = a[p][p], aqq = a[q][q];
-                    a[p][p] = c * c * app - 2.0 * s * c * apq + s * s * aqq;
-                    a[q][q] = s * s * app + 2.0 * s * c * apq + c * c * aqq;
-                    a[p][q] = 0.0;
-                    a[q][p] = 0.0;
-                    for (int k = 0; k < n; k++)
+                    double g = 100.0 * Abs(apq);
+                    // Após algumas varreduras, zera off-diagonais DESPREZÍVEIS relativo às duas diagonais.
+                    if (sweep > 3 && Abs(a[p][p]) + g == Abs(a[p][p]) && Abs(a[q][q]) + g == Abs(a[q][q]))
                     {
-                        if (k == p || k == q) continue;
-                        double akp = a[k][p], akq = a[k][q];
-                        a[k][p] = c * akp - s * akq;
-                        a[p][k] = a[k][p];
-                        a[k][q] = s * akp + c * akq;
-                        a[q][k] = a[k][q];
+                        a[p][q] = 0.0;
                     }
-                    // Acumula a rotação em V (autovetores como colunas).
-                    for (int k = 0; k < n; k++)
+                    else if (Abs(apq) > tresh)
                     {
-                        double vkp = v[k][p], vkq = v[k][q];
-                        v[k][p] = c * vkp - s * vkq;
-                        v[k][q] = s * vkp + c * vkq;
+                        double h = a[q][q] - a[p][p];
+                        double t;
+                        if (Abs(h) + g == Abs(h))
+                            t = apq / h; // theta grande: aproximação estável
+                        else
+                        {
+                            double theta = 0.5 * h / apq;
+                            t = 1.0 / (Abs(theta) + Sqrt(1.0 + theta * theta));
+                            if (theta < 0.0) t = -t;
+                        }
+                        double c = 1.0 / Sqrt(1.0 + t * t);
+                        double s = t * c;
+                        double tau = s / (1.0 + c);
+                        h = t * apq;
+                        a[p][p] -= h;
+                        a[q][q] += h;
+                        a[p][q] = 0.0;
+                        // Rotaciona os demais elementos (só triângulo superior), forma ROTATE de NR (menos erro).
+                        for (int r = 0; r < p; r++) JacobiRotate(a, r, p, r, q, s, tau);
+                        for (int r = p + 1; r < q; r++) JacobiRotate(a, p, r, r, q, s, tau);
+                        for (int r = q + 1; r < n; r++) JacobiRotate(a, p, r, q, r, s, tau);
+                        for (int r = 0; r < n; r++) JacobiRotate(v, r, p, r, q, s, tau); // autovetores nas colunas
                     }
                 }
             }
@@ -136,5 +138,14 @@ public static partial class MatrixMethods
                 vec[row][col] = v[row][src];
         }
         return converged;
+    }
+
+    /// <summary>Rotação de Jacobi (ROTATE de Numerical Recipes) sobre dois pares de elementos.</summary>
+    private static void JacobiRotate(double[][] m, int i, int j, int k, int l, double s, double tau)
+    {
+        double g = m[i][j];
+        double h = m[k][l];
+        m[i][j] = g - s * (h + g * tau);
+        m[k][l] = h + s * (g - h * tau);
     }
 }

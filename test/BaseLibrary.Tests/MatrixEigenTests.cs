@@ -41,7 +41,7 @@ public class MatrixEigenTests
             {
                 double sum = 0;
                 for (int k = 0; k < n; k++) sum += vec[i, k] * eig[k] * vec[j, k];
-                sum.Should().BeApproximately(a[i, j], 1e-9);
+                sum.Should().BeApproximately(a[i, j], 1e-12); // Jacobi NR converge à precisão de máquina
             }
     }
 
