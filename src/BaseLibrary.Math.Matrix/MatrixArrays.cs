@@ -59,6 +59,41 @@ public partial class MatrixArrays : iMatrix
         }
         this.data = values;
     }
+    /// <summary>
+    /// Constrói a partir de um array 2D (row-major). Equivale ao <c>Matrix&lt;double&gt;.Build.DenseOfArray</c>
+    /// do MathNet.
+    /// </summary>
+    public MatrixArrays(double[,] values)
+    {
+        int rows = values.GetLength(0);
+        int cols = values.GetLength(1);
+        if (rows <= 0 || cols <= 0)
+            throw new Exception("The rows and columns must be greater than zero.");
+        data = new double[rows][];
+        for (int i = 0; i < rows; i++)
+        {
+            data[i] = new double[cols];
+            for (int j = 0; j < cols; j++)
+                data[i][j] = values[i, j];
+        }
+    }
+
+    /// <summary>
+    /// Constrói a partir de arrays de COLUNAS (cada <c>columns[c]</c> é a coluna c). Equivale ao
+    /// <c>Matrix&lt;double&gt;.Build.DenseOfColumnArrays</c> do MathNet.
+    /// </summary>
+    public static MatrixArrays FromColumnArrays(double[][] columns)
+    {
+        int cols = columns.Length;
+        if (cols <= 0 || columns[0].Length <= 0)
+            throw new Exception("The rows and columns must be greater than zero.");
+        int rows = columns[0].Length;
+        MatrixArrays m = new MatrixArrays(rows, cols);
+        for (int c = 0; c < cols; c++)
+            for (int r = 0; r < rows; r++)
+                m.data[r][c] = columns[c][r];
+        return m;
+    }
 
     public double[][] GetData() => data;
     public void SetData(double[][] data) => this.data = data;

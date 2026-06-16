@@ -6,6 +6,13 @@ namespace Sindarin.Math.Matrix;
 /// </summary>
 public static partial class MatrixMethods
 {
+    /// <summary>
+    /// Alias de <see cref="InverseLU(iMatrix)"/> para compatibilidade com o <c>Matrix.Inverse()</c> do MathNet.
+    /// Lança em matriz singular (as matrizes de geometria/métrica são sempre invertíveis); para o caminho do
+    /// otimizador use <see cref="TryInverseLU"/>.
+    /// </summary>
+    public static iMatrix Inverse(this iMatrix matrix) => matrix.InverseLU();
+
     /// <summary>Cópia densa (em <see cref="MatrixArrays"/>) de qualquer matriz, via indexador.</summary>
     internal static MatrixArrays DensifyCopy(iMatrix matrix)
     {
