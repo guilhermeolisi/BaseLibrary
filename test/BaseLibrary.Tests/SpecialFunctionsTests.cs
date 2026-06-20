@@ -56,6 +56,24 @@ public class SpecialFunctionsTests
             (SpecialFunctions.Erf(x) + SpecialFunctions.Erfc(x)).Should().BeApproximately(1.0, 1e-12);
     }
 
+    // Regressão: erf/erfc em ±∞ devolviam NaN (GammaRegularized(0.5, +∞) avalia Exp(-∞+∞)=NaN).
+    // Quebrava o WPPM SizeDistribution lognormal em L=0 (Log(0)=-∞ → erfc(-∞)), gerando NaN em todo o Yc.
+    [Theory]
+    [InlineData(double.PositiveInfinity, 1.0)]
+    [InlineData(double.NegativeInfinity, -1.0)]
+    public void Erf_ShouldReturnLimit_AtInfinity(double x, double expected)
+    {
+        SpecialFunctions.Erf(x).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(double.PositiveInfinity, 0.0)]
+    [InlineData(double.NegativeInfinity, 2.0)]
+    public void Erfc_ShouldReturnLimit_AtInfinity(double x, double expected)
+    {
+        SpecialFunctions.Erfc(x).Should().Be(expected);
+    }
+
     [Theory]
     // Γ(1,x) = e^{-x}
     [InlineData(1.0, 2.0, 0.1353352832366127)]

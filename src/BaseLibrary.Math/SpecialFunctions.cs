@@ -92,6 +92,9 @@ public static class SpecialFunctions
     public static double Erf(double x)
     {
         if (x == 0.0) return 0.0;
+        // Limites em ±∞: erf(±∞)=±1. Necessário pois GammaLowerRegularized(0.5, +∞) avalia
+        // Exp(-∞ + 0.5·Log(∞) - …) = Exp(-∞+∞) = NaN; sem este guarda, erf(±∞) retornaria NaN.
+        if (double.IsInfinity(x)) return x > 0.0 ? 1.0 : -1.0;
         double p = GammaLowerRegularized(0.5, x * x);
         return x > 0.0 ? p : -p;
     }
@@ -100,6 +103,10 @@ public static class SpecialFunctions
     public static double Erfc(double x)
     {
         if (x == 0.0) return 1.0;
+        // Limites em ±∞: erfc(+∞)=0, erfc(-∞)=2. Necessário pois GammaUpperRegularized(0.5, +∞)
+        // avalia Exp(-∞ + 0.5·Log(∞) - …) = Exp(-∞+∞) = NaN; sem este guarda, erfc(±∞) retornaria NaN
+        // (ex.: SizeDistribution lognormal em L=0 faz Log(0)=-∞ → erfc(-∞)).
+        if (double.IsInfinity(x)) return x > 0.0 ? 0.0 : 2.0;
         double t = x * x;
         // x>0: erfc = Q(1/2,x²); x<0: erfc = 2 − Q(1/2,x²) (= 1 + P, evita cancelamento)
         return x > 0.0 ? GammaUpperRegularized(0.5, t) : 2.0 - GammaUpperRegularized(0.5, t);
