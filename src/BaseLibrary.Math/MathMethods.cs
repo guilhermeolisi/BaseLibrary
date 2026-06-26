@@ -20,6 +20,22 @@ public static class MathMethods
     //public static double ClausenIntegralSerie(double x, double error = 1E-10) => mathServices.ClausenIntegralSerie(x, error);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double ClausenIntegral(double x) => mathServices.ClausenIntegral(x);
+    /// <summary>x elevado a um expoente INTEIRO não-negativo via multiplicação (exponenciação por quadrado). Para
+    /// expoentes pequenos é muito mais rápido que <see cref="System.Math.Pow"/> (que vai por exp/log) e, em geral,
+    /// MAIS preciso (multiplicação vs arredondamento do exp/log). NÃO é bit-idêntico a Math.Pow: difere ~1 ulp por
+    /// operação , usar quando o expoente é inteiro e a performance importa (ex.: fórmulas TCH, quadrados de perfil).</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double IntPow(double x, int n)
+    {
+        double result = 1.0;
+        while (n > 0)
+        {
+            if ((n & 1) != 0) result *= x;
+            x *= x;
+            n >>= 1;
+        }
+        return result;
+    }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double Radians(double degrees)
     {
