@@ -14,6 +14,8 @@ public class ExceptionServices : IExceptionServices
     private IExceptionDetailsServices exceptionDetails;
     IEmailSender emailSender;
     IHTTPServices httpServices;
+    /// <inheritdoc/>
+    public bool TelemetryEnabled { get; set; } = true;
     public ExceptionServices(string emailTo, string[] assembliesName, string folder = null, IExceptionDetailsServices? exceptionDetails = null, IEmailSender? emailSender = null, IHTTPServices? httpServices = null, bool isConsole = false)
     {
         this.AssembliesName = assembliesName;
@@ -199,10 +201,6 @@ public class ExceptionServices : IExceptionServices
 
         if (!httpServices.IsConnectedToInternet())
             return new GOSResult(false);
-
-        //string sender, keypass;
-        //sender = "sindarinsender@gmail.com";
-        //keypass = "%hw.87&-";
 
         try
         {

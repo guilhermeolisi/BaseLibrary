@@ -9,17 +9,22 @@ namespace BaseLibrary;
 public class ExceptionServicesAzure : IExceptionServices, IDisposable
 {
     private readonly string[] assembliesName;
-    private string? folder, azureKey;
+    private string? azureKey;
     private IHTTPServices? httpServices;
     private IExceptionDetailsServices? exceptionDetails;
+    private readonly ITelemetryScrubber scrubber;
+    private readonly ITelemetryGate gate;
     private readonly ILoggerFactory loggerFactory;
     private readonly ILogger logger;
+
+    /// <inheritdoc/>
+    public bool TelemetryEnabled { get; set; } = true;
 
     /// <remarks>
     /// Telemetria compatibilizada com Native AOT: usa OpenTelemetry + Azure Monitor
     /// Exporter (substitui o pacote depreciado Microsoft.ApplicationInsights).
     /// </remarks>
-    public ExceptionServicesAzure(string azurKey, string[] assembliesName, IExceptionDetailsServices? exceptionDetails = null, IHTTPServices? httpServices = null)
+    public ExceptionServicesAzure(string azurKey, string[] assembliesName, IExceptionDetailsServices? exceptionDetails = null, IHTTPServices? httpServices = null, ITelemetryScrubber? scrubber = null, ITelemetryGate? gate = null)
     {
         this.azureKey = azurKey ?? throw new ArgumentNullException(nameof(azurKey));
         this.assembliesName = assembliesName ?? throw new ArgumentNullException(nameof(assembliesName));
@@ -27,6 +32,8 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
             ?? throw new ArgumentNullException(nameof(exceptionDetails));
         this.httpServices = httpServices ?? Locator.ConstantContainer.Resolve<IHTTPServices>()
             ?? throw new ArgumentNullException(nameof(httpServices));
+        this.scrubber = scrubber ?? new TelemetryScrubber();
+        this.gate = gate ?? new TelemetryGate();
 
         loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -57,6 +64,11 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
 
     public async Task SendException(Exception e, bool isAsync, string? messageExtra, string? OSversion)
     {
+        // Gate de consentimento: opt-out do app (Settings/CLI) + supressão universal
+        // (opt-out por env var / região China). Sem consentimento, nada é exportado.
+        if (!TelemetryEnabled || !gate.IsExportAllowed())
+            return;
+
         if (isAsync)
         {
             await Task.Run(() => Send());
@@ -76,6 +88,11 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
             Version version = programName?.Version ?? new Version();
             string appName = programName?.Name ?? "unknowApp";
 
+            // Redige dados pessoais incidentais (nome da conta do SO embutido em caminhos)
+            // ANTES de exportar. Exportamos a string já redigida em vez do objeto Exception
+            // cru: o exporter extrairia StackTrace/Message direto da exceção, contornando a redação.
+            string detail = scrubber.Scrub(GetExceptionText(e, messageExtra)) ?? string.Empty;
+
             using (logger.BeginScope(new Dictionary<string, object?>
             {
                 ["os"] = OSversion,
@@ -84,10 +101,11 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
                 ["local time"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff"),
                 ["program name"] = appName,
                 ["program version"] = version.ToString(),
-                ["extra message"] = messageExtra,
+                ["exception type"] = e.GetType().FullName,
+                ["extra message"] = scrubber.Scrub(messageExtra),
             }))
             {
-                logger.LogError(e, "{ExceptionMessage}", e.Message);
+                logger.LogError("{ExceptionDetail}", detail);
             }
         }
     }
@@ -102,18 +120,6 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
                 return loaded.GetName();
         }
         return null;
-    }
-
-    public void SetFolder(string folder)
-    {
-        if (this.folder == folder)
-            return;
-        this.folder = folder ?? throw new ArgumentNullException(nameof(folder));
-    }
-
-    public async Task VerifyLocalException(bool isAsync)
-    {
-
     }
 
     public void Dispose() => loggerFactory.Dispose();

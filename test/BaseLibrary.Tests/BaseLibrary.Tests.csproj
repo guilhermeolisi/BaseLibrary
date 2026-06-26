@@ -30,6 +30,7 @@
 		<ProjectReference Include="..\..\src\BaseLibrary.Console\BaseLibrary.Console.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.Colors\BaseLibrary.Colors.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.DependencyInjection\BaseLibrary.DependencyInjection.csproj" />
+		<ProjectReference Include="..\..\src\BaseLibrary.Exception\BaseLibrary.Exception.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.File\BaseLibrary.File.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.General\BaseLibrary.General.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.Math\BaseLibrary.Math.csproj" />

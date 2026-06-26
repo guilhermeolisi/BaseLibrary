@@ -14,88 +14,10 @@ namespace BaseLibrary;
 /// </summary>
 public static class ExceptionMethods
 {
-    static string fileExceptions = "Exceptions.txt";
-    public static void VerifyLocalException(string emailTo, bool isAsync)
-    {
-        string folder = AppContext.BaseDirectory;
-        if (File.Exists(Path.Combine(folder, fileExceptions)))
-        {
-            Console.Write("Some old internal errors messages were found in local file. Trying to send to developer...");
-            string message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions));
-            if (SendOnlineException(emailTo, message, isAsync))
-            {
-                File.Delete(Path.Combine(folder, fileExceptions));
-                Console.WriteLine("done");
-                Console.WriteLine("Content of sent message:");
-                Console.WriteLine(message);
-            }
-            else
-            {
-                Console.WriteLine("fail. A new attempt will be made in the future");
-            }
-        }
-    }
-    public static void SendException(string emailTo, Exception e, bool isAsync, string messageExtra)
-    {
-        Console.WriteLine();
-        Console.Write("A internal error is found. Trying to send to developer...");
-        var program = Assembly.GetEntryAssembly().GetName();
-        string Name = program?.Name;
-        Version ver = program?.Version;
-        string message = "Program: " + Name + Environment.NewLine +
-            "Version: " + ver.ToString() + Environment.NewLine + 
-            ToDetailedString(e) + 
-            (!String.IsNullOrWhiteSpace(messageExtra) ? Environment.NewLine + Environment.NewLine + messageExtra : "");
-
-        if (SendOnlineException(emailTo, message, isAsync))
-        {
-            Console.WriteLine("done");
-            VerifyLocalException(emailTo, isAsync);
-            Console.WriteLine("Content of sent message:");
-            Console.WriteLine(message);
-        }
-        else
-        {
-            Console.WriteLine("fail. A new attempt will be made in the future");
-            SaveLocalException(message, isAsync);
-        }
-    }
-    private static async void SaveLocalException(string message, bool isAsync)
-    {
-        string folder = AppContext.BaseDirectory;
-
-        message = "[" + DateTime.Now + "]" + Environment.NewLine + message;
-
-        if (File.Exists(Path.Combine(folder, fileExceptions)))
-        {
-            if (isAsync)
-                message = await FileMethods.ReadTXTAsync(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
-            else
-                message = FileMethods.ReadTXT(Path.Combine(folder, fileExceptions)) + Environment.NewLine + Environment.NewLine + message;
-        }
-        if (isAsync)
-            await FileMethods.WriteTXTAsync(Path.Combine(folder, fileExceptions), message);
-        else
-            FileMethods.WriteTXT(Path.Combine(folder, fileExceptions), message);
-    }
-    private static bool SendOnlineException(string emailTo, string message, bool isAsync)
-    {
-        if (!HTTPMethods.IsConnectedToInternetPing())
-            return false;
-
-        string sender, keypass;
-        sender = "sindarinsender@gmail.com";
-        keypass = "%hw.87&-";
-        try
-        {
-            HTTPMethods.SendEmail(sender, keypass, "Exception", emailTo, message, isAsync);
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-        return true;
-    }
+    // Caminho de e-mail SMTP legado (envio de exceções por e-mail) REMOVIDO.
+    // Continha uma credencial Gmail hardcoded; a telemetria de exceções agora usa
+    // ExceptionServicesAzure (OpenTelemetry/Azure Monitor). Apenas os helpers de
+    // formatação (ToDetailedString/GetExceptionText) permanecem nesta classe.
     /// <remarks>
     /// Compatibilizado com Native AOT. Enumera os membros base de
     /// <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace, Data,
