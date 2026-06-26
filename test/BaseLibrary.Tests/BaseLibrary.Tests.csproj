@@ -29,6 +29,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\BaseLibrary.Console\BaseLibrary.Console.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.Colors\BaseLibrary.Colors.csproj" />
+		<ProjectReference Include="..\..\src\BaseLibrary.Collections\BaseLibrary.Collections.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.DependencyInjection\BaseLibrary.DependencyInjection.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.Exception\BaseLibrary.Exception.csproj" />
 		<ProjectReference Include="..\..\src\BaseLibrary.File\BaseLibrary.File.csproj" />

@@ -62,6 +62,19 @@ public sealed class OrderedRefMap<TValue> : IEnumerable<KeyValuePair<int, TValue
         return false;
     }
 
+    // --- Compatibilidade drop-in com os call-sites que vinham do DictionarySlim (Cell._reflections) ---
+    // O backing é um ConcurrentDictionary (thread-safe; leitura/remoção lock-free), então as variantes
+    // "Unsafe" não exigem lock externo; o sufixo é mantido só para os call-sites continuarem idênticos.
+
+    /// <summary>Snapshot da lista de chaves (ordem NÃO determinística). Equivale a DictionarySlim.GetKeysList.</summary>
+    public List<int> GetKeysList() => new(_map.Keys);
+
+    /// <summary>ContainsKey direto (o ConcurrentDictionary já é thread-safe); nome mantido por compatibilidade.</summary>
+    public bool ContainsKeyUnsafe(int key) => _map.ContainsKey(key);
+
+    /// <summary>Remove sem lock externo; invalida a ordem cacheada (a membresia mudou).</summary>
+    public bool RemoveUnsafe(int key) => Remove(key, out _);
+
     public void Clear()
     {
         _map.Clear();
