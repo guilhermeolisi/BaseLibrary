@@ -718,4 +718,162 @@ public class FileTXTIOTests : IDisposable
         result.Should().BeFalse();
         sut.eRead.Should().BeOfType<FileNotFoundException>();
     }
+
+    // -------------------------------------------------------------------------
+    // WriteTXT — atomic write (WK2): a failure mid-write must never corrupt or
+    // truncate the final file; the previous content must survive intact.
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Test double that injects faults into the atomic-write seams so the tests can
+    /// simulate a crash/IO failure while writing the temp file or committing it, and
+    /// assert that the final file is left untouched.
+    /// </summary>
+    private sealed class FaultInjectingFileTXTIO : FileTXTIO
+    {
+        private readonly Action<string, string>? _onWrite;
+        private readonly Action<string, string>? _onCommit;
+
+        public FaultInjectingFileTXTIO(
+            IFileServices services,
+            Action<string, string>? onWrite = null,
+            Action<string, string>? onCommit = null) : base(services)
+        {
+            _onWrite = onWrite;
+            _onCommit = onCommit;
+        }
+
+        protected override void WriteContentToNewFile(string newPath, string content)
+        {
+            if (_onWrite is not null)
+                _onWrite(newPath, content);
+            else
+                base.WriteContentToNewFile(newPath, content);
+        }
+
+        protected override void CommitNewFile(string newPath, string finalPath)
+        {
+            if (_onCommit is not null)
+                _onCommit(newPath, finalPath);
+            else
+                base.CommitNewFile(newPath, finalPath);
+        }
+    }
+
+    [Fact]
+    public void WriteTXT_WhenWriteFailsMidway_ShouldPreserveOriginalFileContent()
+    {
+        // Arrange: a valid pre-existing file with the user's data
+        var path = TmpPath("atomic_midwrite.txt");
+        const string original = "ORIGINAL VALID CONTENT";
+        File.WriteAllText(path, original);
+
+        // Simulate a crash/disk-full in the middle of writing: write a partial temp
+        // file and then throw. The write goes to the .new temp, never the final file.
+        var sut = new FaultInjectingFileTXTIO(
+            _mockServices.Object,
+            onWrite: (newPath, content) =>
+            {
+                File.WriteAllText(newPath, content.Substring(0, content.Length / 2));
+                throw new IOException("Simulated failure mid-write");
+            });
+        sut.SetPathFile(path);
+        sut.SetDelay(5); // shorten the retry timeout so the test finishes fast
+
+        // Act
+        var result = sut.WriteTXT("BRAND NEW CONTENT THAT WILL NEVER COMMIT");
+
+        // Assert: the write failed, but the original file is fully intact
+        result.Should().BeFalse("a write that fails mid-way must not report success");
+        File.ReadAllText(path).Should().Be(original, "the previous content must survive a failed write");
+    }
+
+    [Fact]
+    public void WriteTXT_WhenCommitFails_ShouldPreserveOriginalFileContent()
+    {
+        // Arrange: valid pre-existing file
+        var path = TmpPath("atomic_commitfail.txt");
+        const string original = "ORIGINAL VALID CONTENT";
+        File.WriteAllText(path, original);
+
+        // The temp file is written in full, but the atomic promotion (commit) fails.
+        var sut = new FaultInjectingFileTXTIO(
+            _mockServices.Object,
+            onCommit: (newPath, finalPath) => throw new IOException("Simulated commit failure"));
+        sut.SetPathFile(path);
+        sut.SetDelay(5);
+
+        // Act
+        var result = sut.WriteTXT("BRAND NEW CONTENT");
+
+        // Assert: a failed commit leaves the final file untouched
+        result.Should().BeFalse("a failed commit must not report success");
+        File.ReadAllText(path).Should().Be(original, "a failed commit must leave the original untouched");
+    }
+
+    [Fact]
+    public void WriteTXT_WhenWriteFailsMidway_ShouldNotLeaveOrphanTempFile()
+    {
+        // Arrange
+        var path = TmpPath("atomic_orphan.txt");
+        var newPath = path + ".new";
+        File.WriteAllText(path, "original");
+        var sut = new FaultInjectingFileTXTIO(
+            _mockServices.Object,
+            onWrite: (np, content) =>
+            {
+                File.WriteAllText(np, "partial");
+                throw new IOException("mid-write");
+            });
+        sut.SetPathFile(path);
+        sut.SetDelay(5);
+
+        // Act
+        sut.WriteTXT("whatever");
+
+        // Assert: the partial temp file is cleaned up, not left behind
+        File.Exists(newPath).Should().BeFalse("the orphan .new temp must be cleaned up after a failed write");
+    }
+
+    [Fact]
+    public void WriteTXT_WhenSuccessful_ShouldWriteFinalContentAndLeaveNoTempFile()
+    {
+        // Arrange
+        var sut = CreateSut();
+        var path = TmpPath("atomic_success.txt");
+        var newPath = path + ".new";
+        File.WriteAllText(path, "old");
+        sut.SetPathFile(path);
+
+        // Act
+        var result = sut.WriteTXT("new content");
+
+        // Assert: the final file has the new content and no temp file is left behind
+        result.Should().BeTrue();
+        File.ReadAllText(path).Should().Be("new content");
+        File.Exists(newPath).Should().BeFalse("the temp file must be gone after a successful atomic write");
+    }
+
+    [Fact]
+    public void WriteTXT_WhenNewFileAndWriteFails_ShouldNotCreateFinalFile()
+    {
+        // Arrange: no pre-existing file
+        var path = TmpPath("atomic_new_fail.txt");
+        var sut = new FaultInjectingFileTXTIO(
+            _mockServices.Object,
+            onWrite: (newPath, content) =>
+            {
+                File.WriteAllText(newPath, "partial");
+                throw new IOException("mid-write on new file");
+            });
+        sut.SetPathFile(path);
+        sut.SetDelay(5);
+
+        // Act
+        var result = sut.WriteTXT("content that never lands");
+
+        // Assert: a failed write of a brand-new file must not leave a corrupt final file
+        result.Should().BeFalse();
+        File.Exists(path).Should().BeFalse("no final file should be created when the write fails");
+    }
 }

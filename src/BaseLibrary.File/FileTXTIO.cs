@@ -13,6 +13,11 @@ public class FileTXTIO : IFileTXTIO
     private string? text;
     private string? _pathFile;
     private string? _fileBak => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".bak";
+    // Arquivo temporario da escrita atomica: o novo conteudo e gravado aqui e so
+    // depois promovido ao arquivo final por File.Replace/Move (CommitNewFile). Assim
+    // uma falha no meio da escrita nunca trunca o arquivo final, que so muda pela
+    // operacao atomica de commit (tem o conteudo antigo ou o novo, nunca parcial).
+    private string? _fileNew => string.IsNullOrWhiteSpace(_pathFile) ? null : _pathFile + ".new";
 
     private bool _isStayBak;
     private bool _preserveBakOnRestoreFailure;
@@ -228,9 +233,47 @@ public class FileTXTIO : IFileTXTIO
         }
         return true;
     }
-    public StreamWriter GetStreamWriter()
+    // Escreve o novo conteudo no arquivo temporario (.new). protected virtual para
+    // permitir que testes de regressao simulem uma falha no meio da escrita (ex.:
+    // disco cheio) e verifiquem que o arquivo final permanece integro.
+    protected virtual void WriteContentToNewFile(string newPath, string content)
     {
-        return new StreamWriter(_pathFile, false, Encoding.UTF8);
+        using StreamWriter sw = new(newPath, false, Encoding.UTF8);
+        sw.Write(content);
+    }
+    // Commit atomico: promove o arquivo temporario a arquivo final numa unica
+    // operacao do sistema de arquivos. Antes disso o final permanece com o conteudo
+    // anterior; depois, com o novo. Nunca fica num estado intermediario.
+    protected virtual void CommitNewFile(string newPath, string finalPath)
+    {
+        if (File.Exists(finalPath))
+        {
+            try
+            {
+                // File.Replace e transacional no NTFS e preserva os atributos do destino.
+                File.Replace(newPath, finalPath, null);
+            }
+            catch (Exception) when (File.Exists(newPath))
+            {
+                // Fallback para sistemas de arquivo sem suporte a ReplaceFile (ex.: exFAT):
+                // File.Move com overwrite tambem e atomico no mesmo volume (MoveFileEx).
+                File.Move(newPath, finalPath, true);
+            }
+        }
+        else
+        {
+            File.Move(newPath, finalPath);
+        }
+    }
+    // Remove o arquivo temporario, se existir. Best-effort: nao deve mascarar o erro
+    // original de uma escrita que falhou.
+    private void SafeDeleteNewFile()
+    {
+        string? newPath = _fileNew;
+        if (newPath is not null && File.Exists(newPath))
+        {
+            try { File.Delete(newPath); } catch { /* best effort */ }
+        }
     }
     public bool AfterWriteOrReader()
     {
@@ -305,22 +348,27 @@ public class FileTXTIO : IFileTXTIO
             return false;
         }
         // BUG FIX: retry loop replaces the recursive ProcessWriterException → WriteTXT → ProcessWriterException
-        // chain that risked a stack overflow on many retries
+        // chain that risked a stack overflow on many retries.
+        // Escrita atomica: grava no arquivo temporario (.new) e so entao promove ao
+        // arquivo final (CommitNewFile). O arquivo final nunca e truncado se a escrita
+        // falhar no meio; o conteudo anterior so e substituido pela operacao de commit.
         try
         {
             while (true)
             {
                 try
                 {
-                    using (StreamWriter sw = GetStreamWriter())
-                    {
-                        sw.Write(parTXT); // use the local parameter, not the instance field, to avoid data races
-                        lastWriteAttempt = null;
-                        return true;
-                    }
+                    string newPath = _fileNew!; // _pathFile nao e null aqui (BeforeWrite garantiu)
+                    WriteContentToNewFile(newPath, parTXT); // usa o parametro local, nao o campo, para evitar corrida
+                    CommitNewFile(newPath, _pathFile!);
+                    lastWriteAttempt = null;
+                    return true;
                 }
                 catch (Exception ex)
                 {
+                    // A escrita falhou no meio: descarta o .new parcial. O arquivo final
+                    // continua integro com o conteudo anterior.
+                    SafeDeleteNewFile();
                     if (!ProcessWriterException(parTXT, ex))
                         return false;
                 }
@@ -328,6 +376,7 @@ public class FileTXTIO : IFileTXTIO
         }
         finally
         {
+            SafeDeleteNewFile();
             AfterWriteOrReader();
         }
     }
