@@ -1,28 +1,34 @@
-# BaseLibrary: Visão Geral da Solução
+# BaseLibrary: biblioteca multiuso
 
-## Estilo de escrita
+Biblioteca C# .NET 10 usada pelas demais solucoes do workspace (Sindarin, Nimloth,
+SindarinAI, AutoUpdater, GOS*). Utilitarios de proposito amplo, sem depender do
+dominio de difracao. Regras compartilhadas em `../CLAUDE.md`.
 
-- NUNCA use o travessão / em dash (`—`) em nenhum texto que você produzir: respostas no chat, comentários de código, mensagens de commit, documentação, este arquivo e os arquivos de memória. Use `:` ou `,` conforme couber. Preferência explícita do usuário.
+E dependencia de 14 projetos do `Nimloth.sln` e 12 do `Sindarin.sln`: mudanca de
+API aqui quebra consumidores. Commite BaseLibrary ANTES dos consumidores e rode o
+build deles (`dotnet build ../Nimloth/Nimloth.sln`) depois de mudar assinatura.
 
-## O que é esta solução
+## Componentes notaveis
 
-BaseLibrary é uma biblioteca multiuso geral em C# .NET 10, usada pelas demais soluções do usuário (em especial o Sindarin). Reúne utilitários de propósito amplo, sem depender do domínio de difração.
+- **BaseLibrary.Math.Matrix** (namespace `Sindarin.Math.Matrix`): matrizes proprias
+  (Diagonal, Triangular, Sparse, Jagged3D, densas). SUBSTITUIU o MathNet no
+  `Sindarin.Objects.Calculation`; inclui o caminho `M^T W M` (equacoes normais) do NLS.
+- **BaseLibrary.Math** e **BaseLibrary.Math.SpecialFunctions**: Gamma, Erf/Erfc,
+  Bessel, Struve, sem dependencia externa.
+- **BaseLibrary.DependencyInjection**: padrao de DI de todas as solucoes, exceto o
+  Nimloth (que usa `GOSDependencyInjection`).
+- **BaseLibrary.Console**: ferramentas de linha de comando reutilizaveis.
+- **BaseLibrary.File**: preferir `FileServices` a `FileMethods` quando houver as duas.
+- Tambem: General, Collections, Exception, HTTP, Text, Numbers.
 
-Componentes notáveis:
+## Convencoes
 
-- **BaseLibrary.Math.Matrix** (namespace `Sindarin.Math.Matrix`): implementação própria de matrizes (Diagonal, Triangular, Sparse, Jagged3D, além das densas), que SUBSTITUIU o MathNet no `Sindarin.Objects.Calculation`. Inclui o caminho `Mᵀ·W·M` (equações normais) usado pelo NLS.
-- **BaseLibrary.Math** e **BaseLibrary.Math.SpecialFunctions**: funções especiais próprias (Gamma, Erf/Erfc, Bessel, Struve), evitando dependência externa.
-- **BaseLibrary.DependencyInjection**: padrão de injeção de dependência adotado nas soluções do usuário.
-- **BaseLibrary.Console**: ferramentas de linha de comando reutilizáveis.
-- **BaseLibrary.File**: serviços de arquivo (preferir `FileServices` a `FileMethods` quando houver as duas).
+- Classes em PascalCase. Comentarios podem ser em portugues; texto de usuario em ingles.
+- Preferir classe instanciavel com interface a API estatica (permite DI e mock).
+- Testes: xUnit + Moq + FluentAssertions, AAA, um projeto de teste por projeto
+  (`BaseLibrary.Tests`). Regras completas em `../.claude/rules/testes.md`.
 
-## Stack
+## Comandos
 
-- C# .NET 10
-- Visual Studio + VSCode + GitHub
-
-## Convenções
-
-- Nomes de classes em PascalCase.
-- Comentários de código podem estar em português; texto de usuário em inglês.
-- Testes de unidade em xUnit + Moq + FluentAssertions, padrão AAA, um projeto de teste por projeto (ex.: `BaseLibrary.Tests`).
+- `dotnet build BaseLibrary.sln --no-restore`
+- `dotnet test BaseLibrary.sln --no-restore`
