@@ -262,7 +262,12 @@ public class GeneralColorServicesTests
             (byte r, byte g, byte b) = colorServices.HSLToRGB(h, s, l);
             string hex = colorServices.RGBToHex(r, g, b);
             // Assert
-            //hex.Should().Be(expectedTestHexColors[i]); // Não dá para comparar com o expectedTestHexColors[i] porque a precisão aqui não é possível considerar
+            // O hex exato não serve de oraculo: a conversão HSL -> RGB arredonda para byte,
+            // então comparamos os canais do hex produzido com os do hex esperado, com folga de 5.
+            (byte er, byte eg, byte eb) = colorServices.HexToRGB(expectedTestHexColors[i]);
+            r.Should().BeCloseTo(er, 5);
+            g.Should().BeCloseTo(eg, 5);
+            b.Should().BeCloseTo(eb, 5);
             strResult += hex + Environment.NewLine;
         }
     }
@@ -356,8 +361,8 @@ public class GeneralColorServicesTests
             (double h, double s, double l) = colorServices.RGBToHSL(r, g, b);
             // Assert
             h.Should().BeApproximately(expectedHslValues[i].h, 1);
-            s.Should().BeApproximately(expectedHslValues[i].s, 1);
-            l.Should().BeApproximately(expectedHslValues[i].l, 1);
+            s.Should().BeApproximately(expectedHslValues[i].s, 0.01);
+            l.Should().BeApproximately(expectedHslValues[i].l, 0.01);
             strResult += $"({h.ToString("F2")}, {s.ToString("F2")}, {l.ToString("F2")})," + Environment.NewLine;
 
         }
@@ -507,8 +512,8 @@ public class GeneralColorServicesTests
             (double h, double s, double l) = colorServices.RGBToHSL(r, g, b);
             // Assert
             h.Should().BeApproximately(expectedHslValues[i].h, 1);
-            s.Should().BeApproximately(expectedHslValues[i].s, 1);
-            l.Should().BeApproximately(expectedHslValues[i].l, 1);
+            s.Should().BeApproximately(expectedHslValues[i].s, 0.01);
+            l.Should().BeApproximately(expectedHslValues[i].l, 0.01);
             strResult += $"({h.ToString("F2")}, {s.ToString("F2")}, {l.ToString("F2")})," + Environment.NewLine;
 
         }
@@ -570,8 +575,8 @@ public class GeneralColorServicesTests
             (double h, double s, double l) = colorServices.RGBToHSL(r, g, b);
             // Assert
             h.Should().BeApproximately(expectedHslValues[i].h, 1);
-            s.Should().BeApproximately(expectedHslValues[i].s, 1);
-            l.Should().BeApproximately(expectedHslValues[i].l, 1);
+            s.Should().BeApproximately(expectedHslValues[i].s, 0.01);
+            l.Should().BeApproximately(expectedHslValues[i].l, 0.01);
             strResult += $"({h.ToString("F2")}, {s.ToString("F2")}, {l.ToString("F2")})," + Environment.NewLine;
 
         }
