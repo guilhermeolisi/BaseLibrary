@@ -16,7 +16,7 @@ build deles (`dotnet build ../Nimloth/Nimloth.sln`) depois de mudar assinatura.
 - **BaseLibrary.Math** e **BaseLibrary.Math.SpecialFunctions**: Gamma, Erf/Erfc,
   Bessel, Struve, sem dependencia externa.
 - **BaseLibrary.DependencyInjection**: padrao de DI de todas as solucoes, exceto o
-  Nimloth (que usa `GOSDependencyInjection`).
+  nenhuma: o Nimloth tambem usa este, apesar do que o texto antigo dizia (medido em 08/09/2026).
 - **BaseLibrary.Console**: ferramentas de linha de comando reutilizaveis.
 - **BaseLibrary.File**: preferir `FileServices` a `FileMethods` quando houver as duas.
 - Tambem: General, Collections, Exception, HTTP, Text, Numbers.
