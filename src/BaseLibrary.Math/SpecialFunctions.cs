@@ -112,6 +112,67 @@ public static class SpecialFunctions
         return x > 0.0 ? GammaUpperRegularized(0.5, t) : 2.0 - GammaUpperRegularized(0.5, t);
     }
 
+    /// <summary>ln B(a,b) = ln Γ(a) + ln Γ(b) − ln Γ(a+b), para a, b &gt; 0.</summary>
+    public static double BetaLn(double a, double b)
+    {
+        if (a <= 0.0) throw new ArgumentOutOfRangeException(nameof(a), "a must be > 0.");
+        if (b <= 0.0) throw new ArgumentOutOfRangeException(nameof(b), "b must be > 0.");
+        return GammaLn(a) + GammaLn(b) - GammaLn(a + b);
+    }
+
+    /// <summary>
+    /// Beta incompleta REGULARIZADA I_x(a,b) = B(x;a,b)/B(a,b), com a, b &gt; 0 e 0 ≤ x ≤ 1.
+    /// Fração contínua de Lentz (Numerical Recipes, betai/betacf), usando a simetria
+    /// I_x(a,b) = 1 − I_{1−x}(b,a) para ficar na região de convergência rápida.
+    /// </summary>
+    public static double BetaRegularized(double a, double b, double x)
+    {
+        if (a <= 0.0) throw new ArgumentOutOfRangeException(nameof(a), "a must be > 0.");
+        if (b <= 0.0) throw new ArgumentOutOfRangeException(nameof(b), "b must be > 0.");
+        if (x < 0.0 || x > 1.0) throw new ArgumentOutOfRangeException(nameof(x), "x must be in [0, 1].");
+        if (x == 0.0) return 0.0;
+        if (x == 1.0) return 1.0;
+        double front = Exp(a * Log(x) + b * Log(1.0 - x) - BetaLn(a, b));
+        return x < (a + 1.0) / (a + b + 2.0)
+            ? front * BetaContinuedFraction(a, b, x) / a
+            : 1.0 - front * BetaContinuedFraction(b, a, 1.0 - x) / b;
+    }
+
+    // Fração contínua da beta incompleta (Lentz modificado), convergente para x < (a+1)/(a+b+2).
+    private static double BetaContinuedFraction(double a, double b, double x)
+    {
+        double qab = a + b;
+        double qap = a + 1.0;
+        double qam = a - 1.0;
+        double c = 1.0;
+        double d = 1.0 - qab * x / qap;
+        if (Abs(d) < FpMin) d = FpMin;
+        d = 1.0 / d;
+        double h = d;
+        for (int m = 1; m <= 10000; m++)
+        {
+            int m2 = 2 * m;
+            double aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+            d = 1.0 + aa * d;
+            if (Abs(d) < FpMin) d = FpMin;
+            c = 1.0 + aa / c;
+            if (Abs(c) < FpMin) c = FpMin;
+            d = 1.0 / d;
+            h *= d * c;
+            aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+            d = 1.0 + aa * d;
+            if (Abs(d) < FpMin) d = FpMin;
+            c = 1.0 + aa / c;
+            if (Abs(c) < FpMin) c = FpMin;
+            d = 1.0 / d;
+            double del = d * c;
+            h *= del;
+            if (Abs(del - 1.0) < Epsilon)
+                break;
+        }
+        return h;
+    }
+
     // ===================================================================================
     //  Bessel modificada I₀/I₁ e Struve modificada L₀/L₁ (usadas na absorção de capilar de Sabine).
     //  Séries de potências de TERMOS POSITIVOS (sem cancelamento interno) → precisão de máquina;

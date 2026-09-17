@@ -151,5 +151,41 @@ public class SpecialFunctionsTests
             .Should().BeApproximately(2.0 / System.Math.PI, 0.05);
     }
 
+    [Theory]
+    [InlineData(0.1)]
+    [InlineData(0.37)]
+    [InlineData(0.9)]
+    public void BetaRegularized_ComAeBIguaisAUm_EAPropriaVariavel(double x)
+        // I_x(1,1) = x: a beta(1,1) e a uniforme.
+        => SpecialFunctions.BetaRegularized(1.0, 1.0, x).Should().BeApproximately(x, 1e-14);
+
+    [Theory]
+    // I_x(a,b) com a, b inteiros e a cauda da binomial: I_x(a,b) = Σ_{j=a}^{a+b−1} C(a+b−1,j) x^j (1−x)^(a+b−1−j).
+    // I_0,5(2,3) = 6/16 + 4/16 + 1/16 = 0,6875; I_0,2(3,2) = 4·0,008·0,8 + 0,0016 = 0,0272.
+    [InlineData(2.0, 3.0, 0.5, 0.6875)]
+    [InlineData(3.0, 2.0, 0.2, 0.0272)]
+    public void BetaRegularized_ComParametrosInteiros_BateComACaudaDaBinomial(double a, double b, double x, double expected)
+        => SpecialFunctions.BetaRegularized(a, b, x).Should().BeApproximately(expected, 1e-13);
+
+    [Fact]
+    public void BetaRegularized_DeveSerSimetrica()
+    {
+        foreach ((double a, double b, double x) in new[] { (0.5, 7.0, 0.2), (12.0, 3.5, 0.81), (40.0, 60.0, 0.4) })
+            (SpecialFunctions.BetaRegularized(a, b, x) + SpecialFunctions.BetaRegularized(b, a, 1.0 - x))
+                .Should().BeApproximately(1.0, 1e-12);
+    }
+
+    [Fact]
+    public void BetaRegularized_NasBordas_DaZeroEUm()
+    {
+        SpecialFunctions.BetaRegularized(2.5, 4.0, 0.0).Should().Be(0.0);
+        SpecialFunctions.BetaRegularized(2.5, 4.0, 1.0).Should().Be(1.0);
+    }
+
+    [Fact]
+    public void BetaLn_BateComOsFatoriais()
+        // B(3,4) = 2!·3!/6! = 12/720 = 1/60.
+        => SpecialFunctions.BetaLn(3.0, 4.0).Should().BeApproximately(System.Math.Log(1.0 / 60.0), 1e-12);
+
     private static double Abs(double v) => System.Math.Abs(v);
 }
