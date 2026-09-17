@@ -175,6 +175,15 @@ public class SpecialFunctionsTests
                 .Should().BeApproximately(1.0, 1e-12);
     }
 
+    [Theory]
+    // I_x(1,b) = 1 − (1−x)^b, em forma fechada. Com x na cauda longe e b grande, o ramo DIRETO da fração contínua
+    // multiplica por x^a·(1−x)^b, que estoura o expoente para baixo e devolve zero: é a simetria I_x(a,b) = 1 − I_{1−x}(b,a)
+    // que salva o valor. (Fechou a lacuna que a passada de mutação da E036 achou: trocar o ramo pelo direto ficava vivo.)
+    [InlineData(500.0, 0.999)]
+    [InlineData(2000.0, 0.99)]
+    public void BetaRegularized_ComXNaCaudaLonge_UsaASimetria_ENaoPerdeOValor(double b, double x)
+        => SpecialFunctions.BetaRegularized(1.0, b, x).Should().BeApproximately(1.0 - System.Math.Pow(1 - x, b), 1e-15);
+
     [Fact]
     public void BetaRegularized_NasBordas_DaZeroEUm()
     {
