@@ -54,7 +54,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
         Point3D diff = point - planePoint;
         return planeNormal.Dot(diff);
     }
-    
+
     //public static Point3D ProjectPointOntoPlane(Point3D p, Point3D p0, Point3D nUnit)
     //{
     //    // d = n · (p - p0) (distância assinada)
@@ -179,7 +179,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
             }
             if (hitA11A12)
             {
-                double t = (level - r11) / (r12 - r11);
+                double t = EdgeParameter(level, r11, r12);
                 double x = A11.X + t * (A12.X - A11.X);
                 double y = A11.Y + t * (A12.Y - A11.Y);
                 AddUnique(intersectionPoints, new Point2D(x, y), eps);
@@ -192,7 +192,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
             }
             if (hitA12A22)
             {
-                double t = (level - r12) / (r22 - r12);
+                double t = EdgeParameter(level, r12, r22);
                 double x = A12.X + t * (A22.X - A12.X);
                 double y = A12.Y + t * (A22.Y - A12.Y);
                 AddUnique(intersectionPoints, new Point2D(x, y), eps);
@@ -205,7 +205,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
             }
             if (hitA22A21)
             {
-                double t = (level - r21) / (r22 - r21);
+                double t = EdgeParameter(level, r21, r22);
                 double x = A21.X + t * (A22.X - A21.X);
                 double y = A21.Y + t * (A22.Y - A21.Y);
                 AddUnique(intersectionPoints, new Point2D(x, y), eps);
@@ -218,7 +218,7 @@ public readonly record struct Point3D(double X, double Y, double Z)
             }
             if (hitA21A11)
             {
-                double t = (level - r11) / (r21 - r11);
+                double t = EdgeParameter(level, r11, r21);
                 double x = A11.X + t * (A21.X - A11.X);
                 double y = A11.Y + t * (A21.Y - A11.Y);
                 AddUnique(intersectionPoints, new Point2D(x, y), eps);
@@ -304,6 +304,12 @@ public readonly record struct Point3D(double X, double Y, double Z)
 #endif
         return intersectionPoints;
     }
+    // Posicao do corte na aresta r0 -> r1, presa a [0, 1]. O snap decide o "hit" com tolerancia: um canto a
+    // -7e-11 do nivel conta como no nivel e o vizinho a -1,07e-10 nao, e o t cru sai -2, um ponto FORA da celula
+    // (E086, A020: (0, 100,37) numa esfera de raio 100). Preso, cai no canto que o snap ja tratou como nivel.
+    // O NaN de aresta degenerada (0/0) passa intacto: o Results3DData o remove no nivel zero (E075).
+    private static double EdgeParameter(double level, double r0, double r1)
+        => Clamp((level - r0) / (r1 - r0), 0.0, 1.0);
     private static Point2D Interpolation(Point3D p0, Point3D p1, double level)
     {
         double t = (level - p0.Z) / (p1.Z - p0.Z);
