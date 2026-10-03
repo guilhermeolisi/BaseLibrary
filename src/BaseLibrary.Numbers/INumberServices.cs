@@ -36,6 +36,7 @@ public interface INumberServices
     double RoundAlgharisms(double value, uint algharims);
     string DoubleResultText(NumberESD value, string? arredonda = null);
     string DoubleResultText(double valueNull, double esdNull, string? arredonda = null);
+    string DoubleResultText(double valueNull, double esdNull, double esdCorrected, string? arredonda = null);
     int ScaleOrderNumber(double value);
     string GenerateCodeID(short legnth, bool isCaseSensitive);
     string OrdinalIntegerToString(int number);

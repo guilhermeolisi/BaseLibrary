@@ -15,28 +15,28 @@ public class NumberServices : INumberServices
     /// <param name="value">O valor inteiro a ser verificado.</param>
     /// <returns>Retorna <c>true</c> se o valor for ímpar; caso contrário, <c>false</c>.</returns>
     public bool IsOdd(int value) => value % 2 != 0;
-    
+
     /// <summary>
     /// Verifica se um byte é ímpar.
     /// </summary>
     /// <param name="value">O valor byte a ser verificado.</param>
     /// <returns>Retorna <c>true</c> se o valor for ímpar; caso contrário, <c>false</c>.</returns>
     public bool IsOdd(byte value) => value % 2 != 0;
-    
+
     /// <summary>
     /// Verifica se um número inteiro é par.
     /// </summary>
     /// <param name="value">O valor inteiro a ser verificado.</param>
     /// <returns>Retorna <c>true</c> se o valor for par; caso contrário, <c>false</c>.</returns>
     public bool IsEven(int value) => value % 2 == 0;
-    
+
     /// <summary>
     /// Verifica se um byte é par.
     /// </summary>
     /// <param name="value">O valor byte a ser verificado.</param>
     /// <returns>Retorna <c>true</c> se o valor for par; caso contrário, <c>false</c>.</returns>
     public bool IsEven(byte value) => value % 2 == 0;
-    
+
     /// <summary>
     /// Conta o número de casas decimais de um número double.
     /// Zeros à esquerda após a vírgula não são considerados.
@@ -188,7 +188,7 @@ public class NumberServices : INumberServices
     /// <param name="arredonda">Formato opcional de arredondamento customizado.</param>
     /// <returns>Uma string representando o valor com o erro padrão entre parênteses quando aplicável.</returns>
     public string DoubleResultText(NumberESD value, string? arredonda = null) => DoubleResultText(value.Value, value.ESD, arredonda);
-    
+
     /// <summary>
     /// Converte um valor numérico com erro padrão (ESD) em texto formatado com notação científica quando apropriado.
     /// </summary>
@@ -225,17 +225,21 @@ public class NumberServices : INumberServices
         string result = string.Empty;
         int orderEsd = int.MinValue;
         int orderValue = int.MinValue;
-        if (!double.IsNaN(esdNull) && esdNull != 0)
+        // Zero com esd abaixo do que o double distingue (ou infinito): o esd nao diz nada, e o texto cru
+        // "0(1.0489997671492222E-30)" chegava ao usuario. Sai so o zero, como valor sem esd (E093).
+        bool esdIsNoise = value == 0 && (Abs(esdNull) < 1E-15 || double.IsInfinity(esdNull));
+        if (!double.IsNaN(esdNull) && esdNull != 0 && !esdIsNoise)
         {
 
             double esd = RoundAlgharisms(esdNull, 1);
             orderEsd = ScaleOrderNumber(esd);
             orderValue = ScaleOrderNumber(value);
-            bool isGreatEsd = orderValue < orderEsd;
+            // O zero nao tem ordem de grandeza (Log10(0) e -infinito): ele e escrito com as casas que o esd pede.
+            bool isGreatEsd = value != 0 && orderValue < orderEsd;
             //Processa ESD
             if (value == 0)
             {
-                esdAlgarism = esd.ToString();
+                esdAlgarism = Abs(esd) < 1 ? (esd / Pow(10.0, orderEsd)).ToString("F0") : esd.ToString("F0");
             }
             else if (isGreatEsd)
             {
@@ -395,6 +399,29 @@ public class NumberServices : INumberServices
         return result;
     }
     /// <summary>
+    /// Como <see cref="DoubleResultText(double, double, string?)"/>, com o esd corrigido num segundo parentese:
+    /// <c>18.5(1)(3)</c>. O arredondamento continua pelo esd normal, e o segundo parentese esta na mesma unidade
+    /// do primeiro (o algarismo do primeiro parentese e o esd arredondado medido nessa unidade). Sem esd, ou com
+    /// <paramref name="esdCorrected"/> nao finito ou nao positivo, o texto e o da sobrecarga sem correcao (E093).
+    /// </summary>
+    public string DoubleResultText(double valueNull, double esdNull, double esdCorrected, string? arredonda = null)
+    {
+        string text = DoubleResultText(valueNull, esdNull, arredonda);
+        if (!double.IsFinite(esdCorrected) || esdCorrected <= 0)
+            return text;
+
+        int open = text.IndexOf('(');
+        int close = open < 0 ? -1 : text.IndexOf(')', open);
+        if (close < 0)
+            return text;
+        if (!double.TryParse(text.AsSpan(open + 1, close - open - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out double firstAlgarism) || firstAlgarism <= 0)
+            return text;
+
+        double unit = RoundAlgharisms(esdNull, 1) / firstAlgarism;
+        double corrected = Round(esdCorrected / unit, MidpointRounding.AwayFromZero);
+        return text.Insert(close + 1, "(" + corrected.ToString("F0", CultureInfo.InvariantCulture) + ")");
+    }
+    /// <summary>
     /// Calcula a ordem de grandeza (potência de 10) de um número.
     /// </summary>
     /// <param name="value">O valor para calcular a ordem de grandeza.</param>
@@ -418,7 +445,7 @@ public class NumberServices : INumberServices
     /// Gerador de números aleatórios usado pelos métodos da classe.
     /// </summary>
     public Random Rand = new();
-    
+
     /// <summary>
     /// Gera um código identificador alfanumérico aleatório.
     /// </summary>
@@ -542,7 +569,7 @@ public class NumberServices : INumberServices
     /// <returns>O valor original se for menor ou igual ao máximo; caso contrário, retorna o máximo.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Max<T>(T value, T max) where T : IComparable<T> => value.CompareTo(max) > 0 ? max : value;
-    
+
     /// <summary>
     /// Retorna o maior valor entre o valor fornecido e um mínimo.
     /// </summary>
@@ -552,7 +579,7 @@ public class NumberServices : INumberServices
     /// <returns>O valor original se for maior ou igual ao mínimo; caso contrário, retorna o mínimo.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Min<T>(T value, T min) where T : IComparable<T> => value.CompareTo(min) < 0 ? min : value;
-    
+
     /// <summary>
     /// Retorna o maior valor entre dois valores fornecidos.
     /// </summary>
@@ -562,7 +589,7 @@ public class NumberServices : INumberServices
     /// <returns>O maior valor entre value1 e value2.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Bigger<T>(T value1, T value2) where T : IComparable<T> => value1.CompareTo(value2) > 0 ? value1 : value2;
-    
+
     /// <summary>
     /// Retorna o menor valor entre dois valores fornecidos.
     /// </summary>

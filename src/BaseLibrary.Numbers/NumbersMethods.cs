@@ -44,6 +44,7 @@ public static class NumbersMethods
     public static double RoundDecimal(this double value, int decimals) => numberServices.RoundDecimal(value, decimals);
     public static double RoundAlgharisms(this double value, uint algharims) => numberServices.RoundAlgharisms(value, algharims);
     public static string DoubleResultText(this double valueNull, double esdNull, string? arredonda = null) => numberServices.DoubleResultText(valueNull, esdNull, arredonda);
+    public static string DoubleResultText(this double valueNull, double esdNull, double esdCorrected, string? arredonda = null) => numberServices.DoubleResultText(valueNull, esdNull, esdCorrected, arredonda);
     public static int ScaleOrderNumber(this double value) => numberServices.ScaleOrderNumber(value);
     //public static Random Rand = new();
     public static string GenerateCodeID(short legnth, bool isCaseSensitive) => numberServices.GenerateCodeID(legnth, isCaseSensitive);
