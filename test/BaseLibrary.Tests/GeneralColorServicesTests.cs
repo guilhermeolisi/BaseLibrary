@@ -655,7 +655,6 @@ public class GeneralColorServicesTests
             (186.67, 0.47, 0.55),
         };
         List<(double h, double s, double l)> hslClose = [];
-        double closed = double.MaxValue;
         for (int i = 0; i < dark.Length; i++)
         {
             double diff = System.Math.Abs(expectedHslValues[i].h - dark[i].h);
