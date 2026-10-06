@@ -122,7 +122,7 @@ public class ExceptionServices : IExceptionServices
             {
 
             }
-            VerifyLocalException(isAsync);
+            await VerifyLocalException(isAsync);
 
         }
         else
