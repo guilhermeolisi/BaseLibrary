@@ -221,7 +221,6 @@ public class FileServicesText : IFileServicesText
         {
             if (File.Exists(pathFile + tmpExt))
             {
-#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     DateTime creation = File.GetCreationTime(pathFile + tmpExt);
@@ -241,25 +240,22 @@ public class FileServicesText : IFileServicesText
                         File.SetLastWriteTime(pathFile, lastWrite);
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //TODO verificar o que fazer
                 }
-#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         if (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetLastWriteTime(pathFile) > File.GetCreationTime(pathFile + tmpExt))
         {
-#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 File.Delete(pathFile + tmpExt);
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
-#pragma warning restore CS0168 // Variable is declared but never used
         }
     }
     public string? ReadTXT(string pathFile)
@@ -283,7 +279,6 @@ public class FileServicesText : IFileServicesText
             {
                 count++;
                 isCont = false;
-#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     using (StreamReader sr = new StreamReader(fileTemp))
@@ -291,16 +286,15 @@ public class FileServicesText : IFileServicesText
                         return sr.ReadToEnd();
                     }
                 }
-                catch (IOException e)
+                catch (IOException)
                 {
                     isCont = true;
                     Thread.Sleep(100);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return null;
                 }
-#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         finally
@@ -337,7 +331,6 @@ public class FileServicesText : IFileServicesText
             {
                 count++;
                 isCont = false;
-#pragma warning disable CS0168 // Variable is declared but never used
                 try
                 {
                     using (StreamReader sr = new StreamReader(fileTemp))
@@ -345,16 +338,15 @@ public class FileServicesText : IFileServicesText
                         return await sr.ReadToEndAsync();
                     }
                 }
-                catch (IOException e)
+                catch (IOException)
                 {
                     isCont = true;
                     await Task.Delay(200);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return null;
                 }
-#pragma warning restore CS0168 // Variable is declared but never used
             }
         }
         finally
@@ -386,7 +378,6 @@ public class FileServicesText : IFileServicesText
 
         if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile)))
         {
-#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 DateTime creation = File.GetCreationTime(pathFile + tmpExt);
@@ -408,11 +399,10 @@ public class FileServicesText : IFileServicesText
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return pathFile + tmpExt;
             }
-#pragma warning restore CS0168 // Variable is declared but never used
         }
         return pathFile;
     }
@@ -420,7 +410,6 @@ public class FileServicesText : IFileServicesText
     {
         if (File.Exists(pathFile + tmpExt) && (!File.Exists(pathFile) || File.GetCreationTime(pathFile + tmpExt) > File.GetLastWriteTime(pathFile)))
         {
-#pragma warning disable CS0168 // Variable is declared but never used
             try
             {
                 DateTime creation = File.GetCreationTime(pathFile + tmpExt);
@@ -443,11 +432,10 @@ public class FileServicesText : IFileServicesText
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return;
             }
-#pragma warning restore CS0168 // Variable is declared but never used
         }
         if (File.Exists(pathFile + tmpExt) && File.Exists(pathFile) && File.GetCreationTime(pathFile + tmpExt) < File.GetLastWriteTime(pathFile))
         {
@@ -455,7 +443,7 @@ public class FileServicesText : IFileServicesText
             {
                 File.Delete(pathFile + tmpExt);
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
