@@ -52,7 +52,7 @@ public static class ObjectProcess
             {
                 SetMemberValueWhitoutBoxing(destination, destinationMember, GetMemberValue(source, sourceMember));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -109,7 +109,7 @@ public static class ObjectProcess
             {
                 SetObjectValue(ref destination, destinationMember, GetMemberValue(source, sourceMember));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

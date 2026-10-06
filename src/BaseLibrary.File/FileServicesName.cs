@@ -158,7 +158,7 @@ public class FileServicesName : IFileServicesName
         {
             attr = File.GetAttributes(filePath);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
 
         }
@@ -195,7 +195,7 @@ public class FileServicesName : IFileServicesName
         {
             attr = File.GetAttributes(folderPath);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
 
         }

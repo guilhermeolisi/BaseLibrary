@@ -33,11 +33,11 @@ public class HTTPServices : IHTTPServices
                 return true;
             }
         }
-        catch (PlatformNotSupportedException ex)
+        catch (PlatformNotSupportedException)
         {
             return IsConnectedToInternet();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return false;
         }
@@ -59,7 +59,7 @@ public class HTTPServices : IHTTPServices
         {
             var emailAddress = new MailAddress(email);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             valid = false;
         }
@@ -74,7 +74,7 @@ public class HTTPServices : IHTTPServices
         {
             Process.Start(url);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             // hack because of this: https://github.com/dotnet/corefx/issues/10361
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
