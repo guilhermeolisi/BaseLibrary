@@ -183,6 +183,10 @@ public class FileServicesFile : IFileServicesFile
         // Descriptografa o arquivo copiado
         try
         {
+            // File.Decrypt (EFS) so existe no Windows; fora dele lanca a mesma PlatformNotSupportedException
+            // que o runtime lancaria, e o catch abaixo a embrulha como antes.
+            if (!OperatingSystem.IsWindows())
+                throw new PlatformNotSupportedException("File decryption (EFS) is only supported on Windows.");
             File.Decrypt(filePathApp);
         }
         catch (Exception ex)
