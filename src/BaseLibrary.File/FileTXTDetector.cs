@@ -102,7 +102,8 @@ OF SUCH DAMAGE.
 
         //First read only what we need for BOM detection
         byte[] bomBytes = new byte[InputFileStream.Length > 4 ? 4 : InputFileStream.Length];
-        InputFileStream.Read(bomBytes, 0, bomBytes.Length);
+        // Read pode devolver menos bytes do que pediu; ReadAtLeast repete ate encher (ou chegar ao fim).
+        InputFileStream.ReadAtLeast(bomBytes, bomBytes.Length, throwOnEndOfStream: false);
 
         encodingFound = DetectBOMBytes(bomBytes);
 
@@ -119,7 +120,7 @@ OF SUCH DAMAGE.
         byte[] sampleBytes = new byte[HeuristicSampleSize > InputFileStream.Length ? InputFileStream.Length : HeuristicSampleSize];
         Array.Copy(bomBytes, sampleBytes, bomBytes.Length);
         if (InputFileStream.Length > bomBytes.Length)
-            InputFileStream.Read(sampleBytes, bomBytes.Length, sampleBytes.Length - bomBytes.Length);
+            InputFileStream.ReadAtLeast(sampleBytes.AsSpan(bomBytes.Length), sampleBytes.Length - bomBytes.Length, throwOnEndOfStream: false);
         InputFileStream.Position = originalPos;
 
         //test byte array content
