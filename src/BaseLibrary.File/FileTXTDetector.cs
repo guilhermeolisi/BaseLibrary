@@ -226,10 +226,8 @@ OF SUCH DAMAGE.
         if (BOMBytes[0] == 0xef && BOMBytes[1] == 0xbb && BOMBytes[2] == 0xbf)
             return Encoding.UTF8;
 
-        if (BOMBytes[0] == 0x2b && BOMBytes[1] == 0x2f && BOMBytes[2] == 0x76)
-#pragma warning disable SYSLIB0001 // Type or member is obsolete
-            return Encoding.UTF7;
-#pragma warning restore SYSLIB0001 // Type or member is obsolete
+        // Sem o ramo do UTF-7 ("+/v"): o .NET o desabilitou por seguranca, e esses tres bytes
+        // tambem sao o comeco de um texto ASCII comum, que era tomado por UTF-7.
 
         if (BOMBytes.Length < 4)
             return null;

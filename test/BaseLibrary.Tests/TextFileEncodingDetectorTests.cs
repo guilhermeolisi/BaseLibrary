@@ -39,6 +39,20 @@ public class TextFileEncodingDetectorTests : IDisposable
         stream.Position.Should().Be(0);
     }
 
+    [Fact]
+    public void DetectTextByteArrayEncoding_ShouldNotReportBom_WhenAsciiTextStartsWithPlusSlashV()
+    {
+        // Arrange: texto ASCII que comeca com os bytes da antiga marca do UTF-7
+        byte[] data = Encoding.ASCII.GetBytes("+/v1 2 3\r\n4 5 6\r\n");
+
+        // Act
+        Encoding? encoding = TextFileEncodingDetector.DetectTextByteArrayEncoding(data, out bool hasBom);
+
+        // Assert: nada de BOM; ASCII puro nao tem sequencia UTF-8 suspeita, entao a heuristica devolve null
+        hasBom.Should().BeFalse();
+        encoding.Should().BeNull();
+    }
+
     // FileStream cujo Read devolve no maximo 1 byte por chamada, nas duas sobrecargas
     private sealed class OneBytePerReadFileStream(string path) : FileStream(path, FileMode.Open, FileAccess.Read)
     {
