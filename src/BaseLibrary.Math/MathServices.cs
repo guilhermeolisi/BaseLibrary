@@ -317,7 +317,6 @@ public class MathServices : IMathServices
         // Implementar o cálculo de ClausenIntegral por polinomio de Chebyshev dado por Kolbig 1995
         // enquanto isso fazer os calculos com ClausenIntegralSerie
         return ClausenIntegralSerie(x);
-        return 0;
     }
     ////////
     // This computes an in-place complex-to-complex FFT  

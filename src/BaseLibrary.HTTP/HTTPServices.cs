@@ -94,32 +94,8 @@ public class HTTPServices : IHTTPServices
             {
 
                 return false;
-                throw;
             }
         }
-        return true;
-
-        //https://stackoverflow.com/questions/4580263/how-to-open-in-default-browser-in-c-sharp
-        //Funciona no windows
-        Process.Start("explorer", url);
-        return true;
-
-        //Não funciona
-        Process myProcess = new Process();
-
-        try
-        {
-            // true is the default, but it is important not to set it to false
-            myProcess.StartInfo.UseShellExecute = true;
-            myProcess.StartInfo.FileName = "http://some.domain.tld/bla";
-            myProcess.Start();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return false;
-        }
-
         return true;
     }
 }
