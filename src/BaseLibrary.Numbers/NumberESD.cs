@@ -12,8 +12,8 @@ public struct NumberESD : IComparable
     public double Value = double.NaN;
     public double ESD = double.NaN;
     /// <summary>
-    /// ESD corrigido pela correlacao serial dos residuos (Berar-Lelann), NaN quando o run nao tem correcao.
-    /// Escrito no texto num segundo parentese, <c>valor(esd)(corrigido)</c> (E093).
+    /// ESD corrigido, NaN quando o run nao o tem. No Sindarin sai da covariancia robusta (sanduiche de Newey-West)
+    /// pela mesma propagacao do esd normal (E116). Escrito no texto entre colchetes, <c>valor(esd)[corrigido]</c>.
     /// </summary>
     public double ESDCorrected = double.NaN;
     public string? Text { get; private set; } = null;
@@ -64,6 +64,17 @@ public struct NumberESD : IComparable
     {
         NumberESD copy = this;
         copy.ESDCorrected = double.IsFinite(ESD) && ESD > 0 && double.IsFinite(factor) ? ESD * factor : double.NaN;
+        return copy;
+    }
+
+    /// <summary>
+    /// Copia com <see cref="ESDCorrected"/> = <paramref name="correctedEsd"/>, o esd ja calculado (o da covariancia
+    /// robusta); nao finito ou nao positivo da NaN (E116).
+    /// </summary>
+    public NumberESD WithCorrectedEsd(double correctedEsd)
+    {
+        NumberESD copy = this;
+        copy.ESDCorrected = double.IsFinite(correctedEsd) && correctedEsd > 0 ? correctedEsd : double.NaN;
         return copy;
     }
 

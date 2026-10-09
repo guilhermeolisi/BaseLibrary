@@ -5,7 +5,7 @@ using FluentAssertions;
 namespace BaseLibrary.Tests;
 
 /// <summary>
-/// Texto de resultado com esd (E093): o esd corrigido num segundo parentese, na mesma unidade do primeiro, e o zero
+/// Texto de resultado com esd (E093): o esd corrigido entre colchetes (E116), na mesma unidade do parentese, e o zero
 /// com esd. O texto usa a cultura corrente, entao cada caso roda sob a invariante.
 /// </summary>
 public class DoubleResultTextTests
@@ -27,9 +27,9 @@ public class DoubleResultTextTests
     }
 
     [Theory]
-    [InlineData(18.5, 0.1, 0.3, "18.5(1)(3)")]
-    [InlineData(18.5, 0.1, 1.2, "18.5(1)(12)")]
-    [InlineData(1.23E-05, 4E-07, 8E-07, "1.23(4)(8)E-5")]
+    [InlineData(18.5, 0.1, 0.3, "18.5(1)[3]")]
+    [InlineData(18.5, 0.1, 1.2, "18.5(1)[12]")]
+    [InlineData(1.23E-05, 4E-07, 8E-07, "1.23(4)[8]E-5")]
     public void DoubleResultText_ShouldAppendCorrectedEsdInTheSameUnit_WhenCorrectedEsdIsFinite(double value, double esd, double corrected, string expected)
     {
         string text = Invariant(() => numbers.DoubleResultText(value, esd, corrected));
@@ -92,7 +92,7 @@ public class DoubleResultTextTests
         NumberESD corrected = number.WithESDCorrected(3);
 
         corrected.ESDCorrected.Should().BeApproximately(0.3, 1E-15);
-        Invariant(() => corrected.NumberText!).Should().Be("18.5(1)(3)");
+        Invariant(() => corrected.NumberText!).Should().Be("18.5(1)[3]");
         Invariant(() => number.NumberText!).Should().Be("18.5(1)", "a copia nao muda o original");
     }
 
@@ -104,6 +104,40 @@ public class DoubleResultTextTests
         NumberESD corrected = number.WithESDCorrected(3);
 
         double.IsNaN(corrected.ESDCorrected).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(0.3)]
+    [InlineData(0.05)]
+    public void WithCorrectedEsd_ShouldStoreTheGivenEsd_NotMultiplyIt(double correctedEsd)
+    {
+        var number = new NumberESD(18.5, 0.1);
+
+        NumberESD corrected = number.WithCorrectedEsd(correctedEsd);
+
+        corrected.ESDCorrected.Should().Be(correctedEsd);
+        corrected.ESD.Should().Be(0.1, "o esd normal nao muda");
+        double.IsNaN(number.ESDCorrected).Should().BeTrue("a copia nao muda o original");
+    }
+
+    [Theory]
+    [InlineData(0.0)]
+    [InlineData(-0.2)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    public void WithCorrectedEsd_ShouldGiveNaN_WhenTheEsdIsNotFiniteOrNotPositive(double correctedEsd)
+    {
+        NumberESD corrected = new NumberESD(18.5, 0.1).WithCorrectedEsd(correctedEsd);
+
+        double.IsNaN(corrected.ESDCorrected).Should().BeTrue();
+    }
+
+    [Fact]
+    public void WithCorrectedEsd_ShouldBeWrittenInBrackets_InTheUnitOfTheParenthesis()
+    {
+        NumberESD corrected = new NumberESD(18.5, 0.1).WithCorrectedEsd(0.07);
+
+        Invariant(() => corrected.NumberText!).Should().Be("18.5(1)[1]", "0,07 em unidades de 0,1 arredonda para 1: o corrigido menor que o normal tambem aparece");
     }
 
     [Fact]

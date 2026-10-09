@@ -399,10 +399,11 @@ public class NumberServices : INumberServices
         return result;
     }
     /// <summary>
-    /// Como <see cref="DoubleResultText(double, double, string?)"/>, com o esd corrigido num segundo parentese:
-    /// <c>18.5(1)(3)</c>. O arredondamento continua pelo esd normal, e o segundo parentese esta na mesma unidade
-    /// do primeiro (o algarismo do primeiro parentese e o esd arredondado medido nessa unidade). Sem esd, ou com
-    /// <paramref name="esdCorrected"/> nao finito ou nao positivo, o texto e o da sobrecarga sem correcao (E093).
+    /// Como <see cref="DoubleResultText(double, double, string?)"/>, com o esd corrigido entre colchetes:
+    /// <c>18.5(1)[3]</c>. O arredondamento continua pelo esd normal, e o colchete esta na mesma unidade do
+    /// parentese (o algarismo do parentese e o esd arredondado medido nessa unidade). Sem esd, ou com
+    /// <paramref name="esdCorrected"/> nao finito ou nao positivo, o texto e o da sobrecarga sem correcao (E093;
+    /// colchetes desde a E116).
     /// </summary>
     public string DoubleResultText(double valueNull, double esdNull, double esdCorrected, string? arredonda = null)
     {
@@ -419,7 +420,7 @@ public class NumberServices : INumberServices
 
         double unit = RoundAlgharisms(esdNull, 1) / firstAlgarism;
         double corrected = Round(esdCorrected / unit, MidpointRounding.AwayFromZero);
-        return text.Insert(close + 1, "(" + corrected.ToString("F0", CultureInfo.InvariantCulture) + ")");
+        return text.Insert(close + 1, "[" + corrected.ToString("F0", CultureInfo.InvariantCulture) + "]");
     }
     /// <summary>
     /// Calcula a ordem de grandeza (potência de 10) de um número.
