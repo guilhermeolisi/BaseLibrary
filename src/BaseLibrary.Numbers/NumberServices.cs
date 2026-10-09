@@ -186,8 +186,9 @@ public class NumberServices : INumberServices
     /// </summary>
     /// <param name="value">O objeto NumberESD contendo o valor e o erro padrão.</param>
     /// <param name="arredonda">Formato opcional de arredondamento customizado.</param>
-    /// <returns>Uma string representando o valor com o erro padrão entre parênteses quando aplicável.</returns>
-    public string DoubleResultText(NumberESD value, string? arredonda = null) => DoubleResultText(value.Value, value.ESD, arredonda);
+    /// <returns>Uma string representando o valor com o erro padrão entre parênteses quando aplicável, e o esd
+    /// corrigido entre colchetes quando ha (E134; sem ele, o texto de antes).</returns>
+    public string DoubleResultText(NumberESD value, string? arredonda = null) => DoubleResultText(value.Value, value.ESD, value.ESDCorrected, arredonda);
 
     /// <summary>
     /// Converte um valor numérico com erro padrão (ESD) em texto formatado com notação científica quando apropriado.

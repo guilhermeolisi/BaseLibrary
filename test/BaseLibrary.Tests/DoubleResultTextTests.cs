@@ -51,6 +51,27 @@ public class DoubleResultTextTests
     }
 
     [Fact]
+    public void DoubleResultTextOfNumberEsd_ShouldWriteTheCorrectedEsd_LikeTheOverloadWithFourArguments()
+    {
+        NumberESD number = new NumberESD(18.5, 0.1).WithCorrectedEsd(0.3);
+
+        string text = Invariant(() => numbers.DoubleResultText(number));
+
+        text.Should().Be(Invariant(() => numbers.DoubleResultText(18.5, 0.1, 0.3)));
+        text.Should().Be("18.5(1)[3]");
+    }
+
+    [Fact]
+    public void DoubleResultTextOfNumberEsd_ShouldBeTheTextWithoutBrackets_WhenThereIsNoCorrectedEsd()
+    {
+        NumberESD number = new(18.5, 0.1);
+
+        string text = Invariant(() => numbers.DoubleResultText(number));
+
+        text.Should().Be(Invariant(() => numbers.DoubleResultText(18.5, 0.1)));
+    }
+
+    [Fact]
     public void DoubleResultText_ShouldNotWriteAnyParenthesis_WhenEsdIsNaNAndCorrectedIsFinite()
     {
         string text = Invariant(() => numbers.DoubleResultText(18.5, double.NaN, 0.3));
