@@ -215,6 +215,14 @@ public class NumericMethodsRegressionTests
     }
 
     [Fact]
+    public void SoftThreshold_ShouldKeepTheSignOfTheValue_WhenItShrinksAboveTheThreshold()
+    {
+        // Oraculo: a mao, sign(v)(|v| - t): -3 com t = 1 vai a -2 e 3 vai a 2, exatos em ponto flutuante
+        NumericMethods.SoftThreshold(-3.0, 1.0).Should().Be(-2.0);
+        NumericMethods.SoftThreshold(3.0, 1.0).Should().Be(2.0);
+    }
+
+    [Fact]
     public void FindLocalMaxima_ShouldFindNothing_WhenTheVectorIsConstant()
     {
         // Oraculo: caso limite, sem maximo estrito num vetor constante acima do limiar
