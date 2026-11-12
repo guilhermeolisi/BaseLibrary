@@ -949,6 +949,13 @@ public static class NumericMethods
         return (n & 1) == 1 ? values[mid] : (values[mid - 1] + values[mid]) / 2.0;
     }
 
+    /// <summary>
+    /// A variante com guarda de <see cref="Median"/> (E270): vetor vazio devolve 0 em vez de ler fora do vetor; com
+    /// elementos, e o <see cref="Median"/>, e tambem ordena a entrada no lugar. Para as copias com guarda do SindarinAI,
+    /// que nao trocam pelo helper sem guarda (`.claude/rules/calculo-compartilhado.md`).
+    /// </summary>
+    public static double MedianOrZeroWhenEmpty(double[] values) => values.Length == 0 ? 0 : Median(values);
+
     #endregion
 
     #region Sistemas banda-simétricos, suavização de Whittaker, B-splines e seleção de penalidade

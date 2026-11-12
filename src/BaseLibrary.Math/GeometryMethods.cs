@@ -73,4 +73,18 @@ public static class GeometryMethods
     {
         return a.X * b.X + a.Y * b.Y;
     }
+
+    /// <summary>
+    /// Produto escalar de dois vetores de 3 componentes (E270, vindo do <c>LatticeGeometry</c> do motor); fonte: CONTA
+    /// MINHA. Mesmo sistema de coordenadas nos dois argumentos; nao e o produto pela metrica (<see cref="CalculeScalarProduct"/>).
+    /// </summary>
+    public static double Dot(double[] a, double[] b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+    /// <summary>
+    /// Produto vetorial a × b de dois vetores de 3 componentes, base cartesiana destra (E270, vindo do
+    /// <c>LatticeGeometry</c> do motor); fonte: CONTA MINHA. Sem arredondamento, ao contrario do
+    /// <see cref="Cross(Point3D, Point3D)"/>, que arredonda a 14 casas.
+    /// </summary>
+    public static double[] Cross(double[] a, double[] b) =>
+        [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
