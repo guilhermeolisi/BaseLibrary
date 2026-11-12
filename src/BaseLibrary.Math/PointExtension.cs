@@ -5,18 +5,6 @@ namespace BaseLibrary.Math;
 
 public static class PointExtension
 {
-    public static double Dot(this Point3D a, Point3D b)
-    {
-        return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
-    }
-    public static Point3D Cross(this Point3D a, Point3D b)
-    {
-        return new Point3D(
-            Round(a.Y * b.Z - a.Z * b.Y, 14),
-            Round(a.Z * b.X - a.X * b.Z, 14),
-            Round(a.X * b.Y - a.Y * b.X, 14)
-        );
-    }
     public static double SquaredDistance(this Point3D a, Point3D b)
     {
         double dx = a.X - b.X;

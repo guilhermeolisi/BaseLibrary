@@ -20,10 +20,6 @@ public readonly record struct Point2D(double X, double Y)
     {
         return new Point2D(a.X / scalar, a.Y / scalar);
     }
-    public static double Dot(Point2D a, Point2D b)
-    {
-        return a.X * b.X + a.Y * b.Y;
-    }
     public static double Length(Point2D v)
     {
         return Sqrt(v.X * v.X + v.Y * v.Y);

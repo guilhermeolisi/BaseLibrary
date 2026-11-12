@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BaseLibrary.Math.Matrix\BaseLibrary.Math.Matrix.csproj" />
     <ProjectReference Include="..\BaseLibrary.Numbers\BaseLibrary.Numbers.csproj" />
   </ItemGroup>
 

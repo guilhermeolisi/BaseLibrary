@@ -4,7 +4,8 @@ namespace BaseLibrary.Math;
 
 /// <summary>
 /// Geradores de numeros aleatorios de proposito geral (uniforme e gaussiano por Box-Muller). Movidos de
-/// <c>Sindarin.Math.GeneralMethods</c> para BaseLibrary.Math (Onda 2.5) como casa canonica compartilhada
+/// Sindarin.Math (a classe de funcoes gerais do motor, Onda 2.5; o resto dela virou <see cref="NumericMethods"/>
+/// na E269) para BaseLibrary.Math como casa canonica compartilhada
 /// entre os nos Randon/RandonGauss e a geracao de ruido do DataXYE. Instancia unica de <see cref="Random"/>
 /// (nao semeada, portanto nao-deterministica entre execucoes, como no original).
 /// </summary>
