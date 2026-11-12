@@ -222,6 +222,100 @@ public class NumericMethodsRegressionTests
         NumericMethods.SoftThreshold(3.0, 1.0).Should().Be(2.0);
     }
 
+    [Theory]
+    [InlineData(2.0, 2)]
+    [InlineData(2.5, 2)]
+    [InlineData(0.5, 0)]
+    public void GetIndexX_ShouldReturnTheNodeOrTheOneImmediatelyBelow_ForASortedSeries(double x, int expected)
+    {
+        // Oraculo: caso limite, contrato do metodo: o indice do valor exato ou do imediatamente abaixo na serie 0..4
+        double[] xs = [0.0, 1.0, 2.0, 3.0, 4.0];
+
+        NumericMethods.GetIndexX(xs, x).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(2.0, 4, 2)]
+    [InlineData(2.5, 4, 2)]
+    [InlineData(2.5, 0, 2)]
+    [InlineData(2.0, 0, 2)]
+    public void GetIndexX_ShouldWalkToTheNodeOrTheOneImmediatelyBelow_FromTheStartingIndex(double x, int start, int expected)
+    {
+        // Oraculo: caso limite, o mesmo contrato, partindo de cima e de baixo do alvo
+        double[] xs = [0.0, 1.0, 2.0, 3.0, 4.0];
+        int closeTo = start;
+
+        NumericMethods.GetIndexX(xs, x, ref closeTo);
+
+        closeTo.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(1.0, true, 2)]
+    [InlineData(1.25, true, 2)]
+    [InlineData(1.0, false, 2)]
+    [InlineData(1.25, false, 2)]
+    public void GetIndexX_ShouldReturnTheNodeOrTheOneImmediatelyBelow_InTheChosenSeries_WithOrWithoutTheStep(
+        double x, bool withStep, int expected)
+    {
+        // Oraculo: caso limite, contrato do metodo na serie 1 (passo 0.5): pelo atalho do passo e pela busca binaria
+        double[][] xs = [[10.0, 11.0, 12.0], [0.0, 0.5, 1.0, 1.5, 2.0]];
+        double[]? steps = withStep ? [1.0, 0.5] : null;
+
+        NumericMethods.GetIndexX(xs, x, 1, steps).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(11.5, 1, 1)]
+    [InlineData(12.0, 1, 2)]
+    [InlineData(1.0, 0, 1)]
+    public void GetIndexX_ShouldFindTheSeriesAndTheNodeOrTheOneImmediatelyBelow_AcrossSeries(double x, int series, int node)
+    {
+        // Oraculo: caso limite, contrato do metodo: a serie que comeca abaixo de x e, nela, o no exato ou o de baixo
+        double[][] xs = [[0.0, 1.0, 2.0, 3.0], [10.0, 11.0, 12.0, 13.0]];
+
+        NumericMethods.GetIndexX(xs, x, [1.0, 1.0]).Should().Equal(series, node);
+        NumericMethods.GetIndexX(xs, x, [double.NaN, double.NaN]).Should().Equal(series, node);
+    }
+
+    [Fact]
+    public void BandQuadraticForm_ShouldBeTheQuadraticFormOfTheFullMatrix()
+    {
+        // Oraculo: a mao, vT A v: so diagonal {1, 2, 3} com v = (1, 1, 2) da 1 + 2 + 12 = 15;
+        // A = [[2, 1], [1, 2]] com v = (1, -1) da 2 - 1 - 1 + 2 = 2
+        NumericMethods.BandQuadraticForm([1.0, 2.0, 3.0], [], [1.0, 1.0, 2.0]).Should().Be(15.0);
+        NumericMethods.BandQuadraticForm([2.0, 2.0], [[1.0]], [1.0, -1.0]).Should().Be(2.0);
+    }
+
+    [Fact]
+    public void LCurveCorner_ShouldAverageTheTwoLambdasOfTheShortestStep()
+    {
+        // Oraculo: a mao, passos (dphi^2 + dpsi^2) = 18, 0.5 e 12.5: o menor e entre lambda 10 e 100, media 55
+        double[] lambdas = [1.0, 10.0, 100.0, 1000.0];
+        double[] phi = [0.0, 3.0, 3.5, 6.0];
+        double[] psi = [6.0, 3.0, 2.5, 0.0];
+
+        NumericMethods.LCurveCorner(lambdas, phi, psi).Should().Be(55.0);
+    }
+
+    [Fact]
+    public void ComplexInterpolation_ShouldInterpolateTheRealPart_AndIgnoreTheImaginary()
+    {
+        // Oraculo: a mao, reta pelas partes reais (0, 1) e (2, 3): em x = 1 da 2, em x = 0 da 1
+        double[] xs = [0.0, 2.0];
+        System.Numerics.Complex[] ys = [new(1.0, 5.0), new(3.0, -7.0)];
+
+        NumericMethods.Interpolation(xs, ys, 0, 1.0).Should().Be(2.0);
+        NumericMethods.Interpolation(xs, ys, 0, 0.0).Should().Be(1.0);
+    }
+
+    [Fact]
+    public void ToDouble_ShouldCopyEveryIntegerToADouble()
+    {
+        // Oraculo: a mao, conversao exata de inteiros pequenos
+        new[] { 1, -2, 3 }.ToDouble().Should().Equal(1.0, -2.0, 3.0);
+    }
+
     [Fact]
     public void FindLocalMaxima_ShouldFindNothing_WhenTheVectorIsConstant()
     {
