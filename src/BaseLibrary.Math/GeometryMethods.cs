@@ -87,4 +87,13 @@ public static class GeometryMethods
     /// </summary>
     public static double[] Cross(double[] a, double[] b) =>
         [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+    /// <summary>
+    /// Determinante de uma matriz 3x3 dada em linha major (<c>r[3·i + j]</c> = linha i, coluna j), pela expansao em
+    /// cofatores da primeira linha (E271, vindo do <c>ResultsStructureAdapter.Determinant</c> do Nimloth, corpo literal).
+    /// Fonte: CONTA MINHA (regra de Sarrus agrupada pela primeira linha). Nao e o <c>MatrixMethods.Determinant</c> bit a bit:
+    /// aquele e cofator recursivo sobre <c>iMatrix</c>, soma a partir de 0 (perde o -0) e aloca.
+    /// </summary>
+    public static double Determinant3x3(ReadOnlySpan<double> r)
+        => r[0] * (r[4] * r[8] - r[5] * r[7]) - r[1] * (r[3] * r[8] - r[5] * r[6]) + r[2] * (r[3] * r[7] - r[4] * r[6]);
 }
