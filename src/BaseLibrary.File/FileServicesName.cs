@@ -125,6 +125,43 @@ public class FileServicesName : IFileServicesName
         }
         return fileName;
     }
+    /// <summary>
+    /// Teto do nome de arquivo montado pelo app (nome + extensao), em bytes UTF-8. O sistema de arquivos recusa um
+    /// componente acima de 255 (bytes no Linux e no macOS, unidades UTF-16 no Windows); 150 deixa folga para o sufixo
+    /// " (n)" do <see cref="FileNameAvailable"/> e para o MAX_PATH do Windows com a pasta de um work da Library.
+    /// </summary>
+    public const int DefaultMaxFileNameBytes = 150;
+
+    public string FitFileNameLength(string fullPath, int maxBytes = DefaultMaxFileNameBytes)
+    {
+        if (string.IsNullOrWhiteSpace(fullPath))
+            throw new ArgumentNullException(nameof(fullPath));
+        string extension = Path.GetExtension(fullPath);
+        string name = Path.GetFileNameWithoutExtension(fullPath);
+        int budget = maxBytes - System.Text.Encoding.UTF8.GetByteCount(extension);
+        if (System.Text.Encoding.UTF8.GetByteCount(name) <= budget)
+            return fullPath;
+
+        // Corta por elemento de texto: nem par substituto nem caractere combinado ficam pela metade.
+        var cut = new System.Text.StringBuilder();
+        int bytes = 0;
+        var elements = System.Globalization.StringInfo.GetTextElementEnumerator(name);
+        while (elements.MoveNext())
+        {
+            string element = elements.GetTextElement();
+            int size = System.Text.Encoding.UTF8.GetByteCount(element);
+            if (bytes + size > budget)
+                break;
+            cut.Append(element);
+            bytes += size;
+        }
+        // O Windows nao aceita nome terminado em espaco ou ponto.
+        string fitted = cut.ToString().TrimEnd(' ', '.');
+        if (fitted.Length == 0)
+            fitted = "unnamed";
+        string? folder = Path.GetDirectoryName(fullPath);
+        return string.IsNullOrEmpty(folder) ? fitted + extension : Path.Combine(folder, fitted + extension);
+    }
     public bool IsFilePathValid(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
