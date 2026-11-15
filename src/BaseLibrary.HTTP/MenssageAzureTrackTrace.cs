@@ -13,20 +13,14 @@ public sealed class MenssageAzureTrackTrace : IEmailSender, IDisposable
     /// Telemetria compatibilizada com Native AOT: usa OpenTelemetry + Azure Monitor
     /// Exporter (substitui o pacote depreciado Microsoft.ApplicationInsights).
     /// </remarks>
-    public MenssageAzureTrackTrace(string azureKey, IHTTPServices? httpServices = null)
+    public MenssageAzureTrackTrace(string azureKey, IHTTPServices? httpServices = null,
+        Action<AzureMonitorExporterOptions>? configureExporter = null)
     {
         if (string.IsNullOrWhiteSpace(azureKey))
             throw new ArgumentException("Connection string cannot be null or empty.", nameof(azureKey));
 
-        loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.IncludeFormattedMessage = true;
-                options.IncludeScopes = true;
-                options.AddAzureMonitorLogExporter(exporter => exporter.ConnectionString = azureKey);
-            });
-        });
+        // E189: recurso sem nome da maquina e IP do cliente mascarado (AzureMonitorTelemetry).
+        loggerFactory = AzureMonitorTelemetry.CreateLoggerFactory(azureKey, configureExporter: configureExporter);
 
         logger = loggerFactory.CreateLogger<MenssageAzureTrackTrace>();
     }

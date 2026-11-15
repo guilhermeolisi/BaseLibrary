@@ -24,7 +24,8 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
     /// Telemetria compatibilizada com Native AOT: usa OpenTelemetry + Azure Monitor
     /// Exporter (substitui o pacote depreciado Microsoft.ApplicationInsights).
     /// </remarks>
-    public ExceptionServicesAzure(string azurKey, string[] assembliesName, IExceptionDetailsServices? exceptionDetails = null, IHTTPServices? httpServices = null, ITelemetryScrubber? scrubber = null, ITelemetryGate? gate = null)
+    public ExceptionServicesAzure(string azurKey, string[] assembliesName, IExceptionDetailsServices? exceptionDetails = null, IHTTPServices? httpServices = null, ITelemetryScrubber? scrubber = null, ITelemetryGate? gate = null,
+        Action<AzureMonitorExporterOptions>? configureExporter = null)
     {
         this.azureKey = azurKey ?? throw new ArgumentNullException(nameof(azurKey));
         this.assembliesName = assembliesName ?? throw new ArgumentNullException(nameof(assembliesName));
@@ -32,18 +33,12 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
             ?? throw new ArgumentNullException(nameof(exceptionDetails));
         this.httpServices = httpServices ?? Locator.ConstantContainer.Resolve<IHTTPServices>()
             ?? throw new ArgumentNullException(nameof(httpServices));
-        this.scrubber = scrubber ?? new TelemetryScrubber();
+        // E189: o padrao reduz caminhos, nomes da maquina e do usuario, e-mail e conteudo de arquivo.
+        this.scrubber = scrubber ?? new TelemetryExportScrubber();
         this.gate = gate ?? new TelemetryGate();
 
-        loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.IncludeFormattedMessage = true;
-                options.IncludeScopes = true;
-                options.AddAzureMonitorLogExporter(exporter => exporter.ConnectionString = azureKey);
-            });
-        });
+        // E189: recurso sem nome da maquina e IP do cliente mascarado (AzureMonitorTelemetry).
+        loggerFactory = AzureMonitorTelemetry.CreateLoggerFactory(azureKey, configureExporter: configureExporter);
 
         logger = loggerFactory.CreateLogger<ExceptionServicesAzure>();
     }
