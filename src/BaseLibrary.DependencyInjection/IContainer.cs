@@ -51,6 +51,25 @@ public interface IContainer
     TService RegisterSingletonAndReturn<TService>(Func<TService> creator);
 
     /// <summary>
+    /// Registers a singleton only if <typeparamref name="TService"/> has no registration of any kind yet (first wins,
+    /// atomic across threads). The creator runs at most once, outside the container lock.
+    /// </summary>
+    /// <returns><see langword="true"/> if this call registered the service; <see langword="false"/> if it was already registered.</returns>
+    bool TryRegisterSingleton<TService>(Func<TService> creator);
+
+    /// <summary>
+    /// Registers a lazy singleton only if <typeparamref name="TService"/> has no registration of any kind yet (first wins,
+    /// atomic across threads). The creator runs on the first resolve.
+    /// </summary>
+    bool TryRegisterLazySingleton<TService>(Func<TService> creator);
+
+    /// <summary>
+    /// Registers a transient factory only if <typeparamref name="TService"/> has no registration of any kind yet (first
+    /// wins, atomic across threads).
+    /// </summary>
+    bool TryRegister<TService>(Func<TService> creator);
+
+    /// <summary>
     /// Registers a singleton instance for the service type, overwriting any previous registration
     /// (last-wins, equivalente ao RegisterConstant do Splat).
     /// </summary>
