@@ -444,11 +444,6 @@ public class NumberServices : INumberServices
         }
     }
     /// <summary>
-    /// Gerador de números aleatórios usado pelos métodos da classe.
-    /// </summary>
-    public Random Rand = new();
-
-    /// <summary>
     /// Gera um código identificador alfanumérico aleatório.
     /// </summary>
     /// <param name="legnth">O comprimento do código a ser gerado.</param>
@@ -467,7 +462,7 @@ public class NumberServices : INumberServices
             //https://pt.wikipedia.org/wiki/ASCII
             for (int i = 0; i < legnth; i++)
             {
-                int tempShort = (int)Rand.Next(0, 61);
+                int tempShort = (int)Random.Shared.Next(0, 61);
                 if (tempShort <= 9)
                 {
                     codeTemp[i] = (char)(tempShort + 48);
@@ -488,7 +483,7 @@ public class NumberServices : INumberServices
             //https://pt.wikipedia.org/wiki/ASCII
             for (int i = 0; i < legnth; i++)
             {
-                int tempShort = (int)Rand.Next(0, 35);
+                int tempShort = (int)Random.Shared.Next(0, 35);
                 if (tempShort <= 9)
                 {
                     codeTemp[i] = (char)(tempShort + 48);

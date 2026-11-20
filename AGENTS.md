@@ -59,8 +59,9 @@ build deles (`dotnet build ../Nimloth/Nimloth.sln`) depois de mudar assinatura.
   o motor tem de rodar em varias instancias em paralelo no mesmo processo. Nada de campo `static` escrito depois da
   inicializacao, colecao `static` que recebe `Add`, `static Random` compartilhado, fachada estatica que guarda servico
   com estado, nem dependencia da cultura corrente (cultura invariante explicita). O `Container` e o `Locator` sao lidos
-  por varias threads: registro e leitura tem de ser seguros entre threads (a `E318 motor-sem-estado-global-varias-
-  instancias-do-interpreter-e-do-telchar-em-paralelo` conserta o de hoje). Regra completa:
+  por varias threads: registro e leitura tem de ser seguros entre threads (desde a E318: `Container` com
+  trava e bootstrap idempotente; a catraca `GlobalStateConfigTests` do Sindarin le os projetos daqui que o motor
+  referencia). Regra completa:
   `../Sindarin/.codex/rules/arquitetura.md`, secao 5.
 - Testes: xUnit + Moq + FluentAssertions, AAA, um projeto de teste por projeto
   (`BaseLibrary.Tests`). Regras completas em `../.codex/rules/testes.md`.

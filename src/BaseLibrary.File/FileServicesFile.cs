@@ -6,7 +6,7 @@ namespace BaseLibrary;
 
 public class FileServicesFile : IFileServicesFile
 {
-    IFileServicesDirectory directory;
+    private readonly IFileServicesDirectory directory;
     public FileServicesFile(IFileServicesDirectory? directory = null)
     {
         this.directory = directory ?? Locator.ConstantContainer.Resolve<IFileServicesDirectory>()! ?? new FileServicesDirectory();
