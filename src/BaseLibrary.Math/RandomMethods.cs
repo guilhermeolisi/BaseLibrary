@@ -6,12 +6,12 @@ namespace BaseLibrary.Math;
 /// Geradores de numeros aleatorios de proposito geral (uniforme e gaussiano por Box-Muller). Movidos de
 /// Sindarin.Math (a classe de funcoes gerais do motor, Onda 2.5; o resto dela virou <see cref="NumericMethods"/>
 /// na E269) para BaseLibrary.Math como casa canonica compartilhada
-/// entre os nos Randon/RandonGauss e a geracao de ruido do DataXYE. Instancia unica de <see cref="Random"/>
-/// (nao semeada, portanto nao-deterministica entre execucoes, como no original).
+/// entre os nos Randon/RandonGauss e a geracao de ruido do DataXYE. Usa <see cref="Random.Shared"/>
+/// (nao semeado e seguro entre threads, portanto nao-deterministico entre execucoes, como o original).
 /// </summary>
 public static class RandomMethods
 {
-    private static readonly Random random = new Random();
+    // Random.Shared e seguro entre threads (E318); a instancia unica de System.Random nao e.
 
     /// <summary>
     /// Calcule a random number with gaussian probability with a given mean and standard deviation.
@@ -26,8 +26,8 @@ public static class RandomMethods
     }
     public static double RandonGaussian(double sd)
     {
-        var u1 = random.NextDouble(); //uniform(0,1] random doubles
-        var u2 = random.NextDouble();
+        var u1 = Random.Shared.NextDouble(); //uniform(0,1] random doubles
+        var u2 = Random.Shared.NextDouble();
 
         var rand_std_normal = Sqrt(-2.0 * Log(u1)) * Sin(2.0 * PI * u2); //random normal(0,1)
 
@@ -42,6 +42,6 @@ public static class RandomMethods
     /// </summary>
     public static double Randon(double range)
     {
-        return random.NextDouble() * 2 * range - range;
+        return Random.Shared.NextDouble() * 2 * range - range;
     }
 }

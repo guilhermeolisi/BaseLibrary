@@ -15,14 +15,16 @@ public class FileBootstrappers
         IContainer container;
 
         container = Locator.ConstantContainer;
+        // Primeiro-vence atomico (E318): o bootstrap roda quantas vezes e de quantas threads quiserem, e o servico
+        // registrado antes (inclusive um mock de teste) fica.
 
-        container.RegisterSingleton<IFileServicesText>(new FileServicesText());
-        container.RegisterSingleton<IFileServicesCheck>(new FileServicesCheck());
-        container.RegisterSingleton<IFileServicesName>(new FileServicesName());
-        container.RegisterSingleton<IFileServicesDirectory>(new FileServicesDirectory());
-        container.RegisterSingleton<IFileServicesFile>(new FileServicesFile());
-        container.RegisterSingleton<IFileServices>(new FileServices());
-        container.Register<IFileTXTIO>(() => new FileTXTIO());
+        container.TryRegisterSingleton<IFileServicesText>(() => new FileServicesText());
+        container.TryRegisterSingleton<IFileServicesCheck>(() => new FileServicesCheck());
+        container.TryRegisterSingleton<IFileServicesName>(() => new FileServicesName());
+        container.TryRegisterSingleton<IFileServicesDirectory>(() => new FileServicesDirectory());
+        container.TryRegisterSingleton<IFileServicesFile>(() => new FileServicesFile());
+        container.TryRegisterSingleton<IFileServices>(() => new FileServices());
+        container.TryRegister<IFileTXTIO>(() => new FileTXTIO());
     }
     private void BusinessLocator()
     {

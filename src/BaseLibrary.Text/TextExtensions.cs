@@ -2,7 +2,7 @@
 
 public static class TextExtensions
 {
-    static ITextServices services = new TextServices();
+    static readonly ITextServices services = new TextServices();
 
     public static string FirstLetterToUpper(this string text) => services.FirstLetterToUpper(text);
     public static string FirstLetterToUpperStric(this string text) => services.FirstLetterToUpperStric(text);

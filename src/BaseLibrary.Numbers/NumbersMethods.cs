@@ -5,7 +5,7 @@ namespace BaseLibrary.Numbers;
 
 public static class NumbersMethods
 {
-    private static INumberServices numberServices = new NumberServices();
+    private static readonly INumberServices numberServices = new NumberServices();
 
     /// <summary>
     /// retorna se o inteiro é impar

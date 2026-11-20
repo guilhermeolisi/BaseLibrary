@@ -5,7 +5,7 @@ namespace Sindarin.Math.Matrix;
 
 public static partial class MatrixMethods
 {
-    static Random random = new Random();
+    // Random.Shared e seguro entre threads (E318); a instancia propria nao semeada nao era, e nenhum resultado dependia de semente.
 
 
     //public static double[] GetData(this iMatrix) { data; }
@@ -1396,7 +1396,7 @@ public static partial class MatrixMethods
         {
             for (int j = 0; j < matrix.ColumnCount; j++)
             {
-                matrix[i, j] = random.NextDouble() * (max - min) + min;
+                matrix[i, j] = Random.Shared.NextDouble() * (max - min) + min;
             }
         }
     }

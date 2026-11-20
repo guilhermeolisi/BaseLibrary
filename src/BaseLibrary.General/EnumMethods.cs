@@ -8,7 +8,7 @@ namespace BaseLibrary;
 
 public static class EnumMethods
 {
-    static IEnumServices enumServices = new EnumServices();
+    static readonly IEnumServices enumServices = new EnumServices();
     public static string GetEnumName<T>(this T value) where T : Enum
     {
         return enumServices.GetEnumName(value);

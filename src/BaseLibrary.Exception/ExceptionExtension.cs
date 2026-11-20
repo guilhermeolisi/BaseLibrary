@@ -9,7 +9,7 @@ namespace BaseLibrary;
 
 public static class ExceptionExtension
 {
-    private static ExceptionDetailsServices details = new();
+    private static readonly ExceptionDetailsServices details = new();
     /// <remarks>
     /// Compatibilizado com Native AOT. Enumera os membros base de
     /// <see cref="Exception"/> (Message, Source, HResult, HelpLink, StackTrace, Data,
