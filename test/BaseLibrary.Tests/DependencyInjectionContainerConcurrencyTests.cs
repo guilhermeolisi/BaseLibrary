@@ -124,6 +124,44 @@ public class DependencyInjectionContainerConcurrencyTests
     }
 
     [Fact]
+    public void TryRegisterSingleton_ShouldNotBlockAnotherThread_WhileTheCreatorWaitsForIt()
+    {
+        // O criador roda FORA da trava do Container (R6 da E318): um bootstrap cujo criador espera outra thread que
+        // registra outro tipo nao trava. Com o criador dentro da trava, a outra thread espera a trava e o criador espera
+        // a outra thread: impasse, que o tempo de 10 s converte em falha.
+        var container = new Container();
+        using var otherStarted = new ManualResetEventSlim();
+        using var otherDone = new ManualResetEventSlim();
+        bool creatorSawOther = false;
+        bool otherRegistered = false;
+
+        var creatorThread = new Thread(() => container.TryRegisterSingleton<IProbe>(() =>
+        {
+            otherStarted.Set();
+            creatorSawOther = otherDone.Wait(TimeSpan.FromSeconds(10));
+            return new Probe(1);
+        }))
+        { IsBackground = true };
+        var otherThread = new Thread(() =>
+        {
+            otherStarted.Wait(TimeSpan.FromSeconds(10));
+            otherRegistered = container.TryRegisterSingleton<IOther>(() => new Other());
+            otherDone.Set();
+        })
+        { IsBackground = true };
+
+        creatorThread.Start();
+        otherThread.Start();
+        bool joined = creatorThread.Join(TimeSpan.FromSeconds(30)) && otherThread.Join(TimeSpan.FromSeconds(30));
+
+        joined.Should().BeTrue();
+        creatorSawOther.Should().BeTrue("a outra thread registra enquanto o criador do primeiro tipo ainda roda");
+        otherRegistered.Should().BeTrue();
+        container.Resolve<IProbe>()!.Id.Should().Be(1);
+        container.Resolve<IOther>().Should().NotBeNull();
+    }
+
+    [Fact]
     public void TryRegisterLazySingleton_ShouldDeferTheCreatorToTheFirstResolve()
     {
         var container = new Container();

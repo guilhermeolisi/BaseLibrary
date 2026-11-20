@@ -52,7 +52,9 @@ public interface IContainer
 
     /// <summary>
     /// Registers a singleton only if <typeparamref name="TService"/> has no registration of any kind yet (first wins,
-    /// atomic across threads). The creator runs at most once, outside the container lock.
+    /// atomic across threads). The creator runs at most once, outside the container lock. If the creator throws, the
+    /// failure stays cached: the type counts as registered, every later Resolve rethrows it, and no later Try* call can
+    /// register the type.
     /// </summary>
     /// <returns><see langword="true"/> if this call registered the service; <see langword="false"/> if it was already registered.</returns>
     bool TryRegisterSingleton<TService>(Func<TService> creator);
