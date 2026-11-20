@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Globalization;
+using System.Diagnostics;
 using System.Text;
 
 namespace BaseLibrary;
@@ -54,7 +55,7 @@ public class ConsoleServices : IConsoleServices
         string rewritePrefix = canRewrite ? (progress >= 0 ? "\b" : string.Empty) + Back : string.Empty;
         string message = rewritePrefix +
             spinner +
-            "[" + new string(Block, blocks) + new string(' ', 10 - blocks) + string.Format("] {0,3:##0}%", normalizedPercent);
+            "[" + new string(Block, blocks) + new string(' ', 10 - blocks) + string.Format(CultureInfo.InvariantCulture, "] {0,3:##0}%", normalizedPercent);
 
         consoleOutput.Write(message);
     }

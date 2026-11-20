@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Globalization;
+using System.Diagnostics;
 
 namespace BaseLibrary;
 
@@ -11,7 +12,7 @@ public static class ConsoleUtility
     public static void WriteProgressBar(int percent, bool update = false)
     {
         var p = (int)((percent / 10f) + .5f);
-        string bar = "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format("] {0,3:##0}%", percent);
+        string bar = "[" + new string(_block, p) + new string(' ', 10 - p) + string.Format(CultureInfo.InvariantCulture, "] {0,3:##0}%", percent);
         // Só reescreve a linha (backspaces) em terminal interativo. Com a saída
         // redirecionada (pipe/arquivo/log), os \b virariam lixo no log.
         if (update && !Console.IsOutputRedirected)

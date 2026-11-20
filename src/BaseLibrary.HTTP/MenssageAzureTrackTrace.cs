@@ -1,3 +1,4 @@
+using System.Globalization;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
@@ -30,7 +31,7 @@ public sealed class MenssageAzureTrackTrace : IEmailSender, IDisposable
         using (logger.BeginScope(new Dictionary<string, object?>
         {
             ["subject"] = subject,
-            ["local time"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff"),
+            ["local time"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff", CultureInfo.InvariantCulture),
         }))
         {
             logger.LogInformation("{TraceMessage}", message);

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using BaseLibrary.DependencyInjection;
@@ -93,7 +94,7 @@ public class ExceptionServicesAzure : IExceptionServices, IDisposable
                 ["os"] = OSversion,
                 ["main assembly"] = mainAssemblyName,
                 ["main assembly Version"] = mainAssemblyVersion?.ToString() ?? "Unknown",
-                ["local time"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff"),
+                ["local time"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fffffff", CultureInfo.InvariantCulture),
                 ["program name"] = appName,
                 ["program version"] = version.ToString(),
                 ["exception type"] = e.GetType().FullName,

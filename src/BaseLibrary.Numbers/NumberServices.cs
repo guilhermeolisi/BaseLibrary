@@ -215,7 +215,7 @@ public class NumberServices : INumberServices
 #endif
         double value = valueNull;
         if (double.IsNaN(value))
-            return value.ToString();
+            return value.ToString(CultureInfo.InvariantCulture);
 
         if (Abs(value) < 1E-14)
             value = 0;
@@ -240,14 +240,14 @@ public class NumberServices : INumberServices
             //Processa ESD
             if (value == 0)
             {
-                esdAlgarism = Abs(esd) < 1 ? (esd / Pow(10.0, orderEsd)).ToString("F0") : esd.ToString("F0");
+                esdAlgarism = Abs(esd) < 1 ? (esd / Pow(10.0, orderEsd)).ToString("F0", CultureInfo.InvariantCulture) : esd.ToString("F0", CultureInfo.InvariantCulture);
             }
             else if (isGreatEsd)
             {
                 esdTemp = esd / Pow(10.0, orderEsd);
 
                 esdTemp = esdTemp * Pow(10.0, orderEsd - orderValue);
-                esdAlgarism = esdTemp.ToString();
+                esdAlgarism = esdTemp.ToString(CultureInfo.InvariantCulture);
                 //if (orderEsd - orderValue <= 3)
                 //{
                 //    esdTemp = esdTemp * Pow(10.0, orderEsd - orderValue);
@@ -255,7 +255,7 @@ public class NumberServices : INumberServices
                 //}
                 //else
                 //{
-                //    esdAlgarism = esdTemp.ToString("F0") + "E+" + (orderEsd - orderValue);
+                //    esdAlgarism = esdTemp.ToString("F0", CultureInfo.InvariantCulture) + "E+" + (orderEsd - orderValue);
                 //}
                 value = RoundAlgharisms(value, 1);
             }
@@ -263,7 +263,7 @@ public class NumberServices : INumberServices
             {
                 value = RoundDecimal(value, Abs(orderEsd));
                 esdTemp = esd / Pow(10.0, orderEsd);
-                esdAlgarism = esdTemp.ToString("F0");
+                esdAlgarism = esdTemp.ToString("F0", CultureInfo.InvariantCulture);
             }
             else
             {
@@ -271,11 +271,11 @@ public class NumberServices : INumberServices
                 if (orderValue > 4)
                 {
                     esdTemp = esd / Pow(10.0, orderEsd);
-                    esdAlgarism = esdTemp.ToString("F0");
+                    esdAlgarism = esdTemp.ToString("F0", CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    esdAlgarism = esd.ToString("F0");
+                    esdAlgarism = esd.ToString("F0", CultureInfo.InvariantCulture);
                 }
             }
             //Processa Value e result
@@ -344,7 +344,7 @@ public class NumberServices : INumberServices
 
                     //string temp = "F"+ algharism.ToString();
                     esdAlgarism = string.IsNullOrWhiteSpace(esdAlgarism) ? "" : "(" + esdAlgarism + ")";
-                    result = string.Format("{0}{1}E{2}", part[0], esdAlgarism, part[1]);
+                    result = string.Format(CultureInfo.InvariantCulture, "{0}{1}E{2}", part[0], esdAlgarism, part[1]);
                 }
                 else
                 {
@@ -365,30 +365,30 @@ public class NumberServices : INumberServices
                     _ = valueNull;
                     double trash = RoundAlgharisms(value, 1);
 #endif
-                    valueStr = RoundAlgharisms(value, 1).ToString();
+                    valueStr = RoundAlgharisms(value, 1).ToString(CultureInfo.InvariantCulture);
                 }
                 else if (!isGreatEsd && esd < 1)
                 {
 #if DEBUG
                     int decimals = CountDecimal(esd);
 #endif
-                    valueStr = value.ToString("F" + -orderEsd);
+                    valueStr = value.ToString("F" + -orderEsd, CultureInfo.InvariantCulture);
 
                 }
                 else
                 {
-                    valueStr = value.ToString();
+                    valueStr = value.ToString(CultureInfo.InvariantCulture);
                 }
                 esdAlgarism = string.IsNullOrWhiteSpace(esdAlgarism) ? "" : "(" + esdAlgarism + ")";
-                result = string.Format("{0}{1}", valueStr, esdAlgarism);
+                result = string.Format(CultureInfo.InvariantCulture, "{0}{1}", valueStr, esdAlgarism);
             }
         }
         else if (!string.IsNullOrWhiteSpace(arredonda))
         {
-            result = value.ToString(arredonda);
+            result = value.ToString(arredonda, CultureInfo.InvariantCulture);
         }
         else
-            result = value.ToString();
+            result = value.ToString(CultureInfo.InvariantCulture);
         //esdTemp = (esd / Pow(10.0, (int)Log10(esd)));
         //esdAlgarism = (esdTemp % (int)esdTemp).ToString();
 #if DEBUG
@@ -512,7 +512,7 @@ public class NumberServices : INumberServices
     /// <returns>Uma string representando o número ordinal (ex: "1st", "2nd", "3rd", "4th").</returns>
     public string OrdinalIntegerToString(int number)
     {
-        string str = number.ToString();
+        string str = number.ToString(CultureInfo.InvariantCulture);
         if (str.Last() == '1' && (str.Length == 1 || str[1] != '1'))
         {
             str += "st";

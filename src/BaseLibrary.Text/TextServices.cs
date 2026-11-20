@@ -1,4 +1,5 @@
-﻿namespace BaseLibrary.Text;
+﻿using System.Globalization;
+namespace BaseLibrary.Text;
 
 public class TextServices : ITextServices
 {
@@ -142,7 +143,7 @@ public class TextServices : ITextServices
             return text;
         for (int i = 0; i < numbers.Length; i++)
         {
-            text = text.Replace(numbers[i].text, numbers[i].num.ToString(), StringComparison.CurrentCultureIgnoreCase);
+            text = text.Replace(numbers[i].text, numbers[i].num.ToString(), StringComparison.InvariantCultureIgnoreCase);
         }
         return text;
     }
@@ -193,9 +194,9 @@ public class TextServices : ITextServices
         {
             //if (text.Contains(numbers[i].num.ToString(), StringComparison.InvariantCultureIgnoreCase))
             //{
-            //    text.Replace(numbers[i].num.ToString(), numbers[i].text, StringComparison.CurrentCultureIgnoreCase);
+            //    text.Replace(numbers[i].num.ToString(), numbers[i].text, StringComparison.InvariantCultureIgnoreCase);
             //}
-            text = text.Replace(numbers[i].num.ToString(), numbers[i].text, StringComparison.CurrentCultureIgnoreCase);
+            text = text.Replace(numbers[i].num.ToString(), numbers[i].text, StringComparison.InvariantCultureIgnoreCase);
         }
         return text;
     }
@@ -239,13 +240,13 @@ public class TextServices : ITextServices
 
     //                string sub = text.Substring(ind, ind + greeks[i].text.Length);
 
-    //                if (sub.Equals(greeks[i].text, StringComparison.CurrentCultureIgnoreCase))
+    //                if (sub.Equals(greeks[i].text, StringComparison.InvariantCultureIgnoreCase))
     //                {
     //                    text = text.Remove(ind, greeks[i].text.Length).Insert(ind, (isUpper ? greeks[i].upper : greeks[i].lower).ToString());
     //                }
     //                ind++;
     //            }
-    //            text = text.Replace(greeks[i].text, (isUpper ? greeks[i].upper : greeks[i].lower).ToString(), StringComparison.CurrentCultureIgnoreCase);
+    //            text = text.Replace(greeks[i].text, (isUpper ? greeks[i].upper : greeks[i].lower).ToString(), StringComparison.InvariantCultureIgnoreCase);
     //        }
     //    }
     //    return text;
@@ -278,7 +279,7 @@ public class TextServices : ITextServices
                     }
                     //string sub = text.Substring(ind, greeks[i].text.Length);
 
-                    //if (sub.Equals(greeks[i].text, StringComparison.CurrentCultureIgnoreCase))
+                    //if (sub.Equals(greeks[i].text, StringComparison.InvariantCultureIgnoreCase))
                     if (match)
                     {
 #if DEBUG
@@ -291,7 +292,7 @@ public class TextServices : ITextServices
                     }
                     ind++;
                 }
-                //text = text.Replace(greek[i].text, (isUpper ? greek[i].greekU : greek[i].greekL).ToString(), StringComparison.CurrentCultureIgnoreCase);
+                //text = text.Replace(greek[i].text, (isUpper ? greek[i].greekU : greek[i].greekL).ToString(), StringComparison.InvariantCultureIgnoreCase);
             }
         }
         return text;
@@ -397,7 +398,7 @@ public class TextServices : ITextServices
     {
         if (string.IsNullOrWhiteSpace(name))
             return name;
-        return string.Format("{0}{1}{2}", name, string.IsNullOrWhiteSpace(sufix) ? "" : " - " + sufix, index == 1 ? "" : " (" + index + ")");
+        return string.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", name, string.IsNullOrWhiteSpace(sufix) ? "" : " - " + sufix, index == 1 ? "" : " (" + index + ")");
     }
     public int Count(string text, char letter)
     {

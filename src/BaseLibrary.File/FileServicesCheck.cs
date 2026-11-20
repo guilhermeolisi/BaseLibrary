@@ -142,7 +142,7 @@ public class FileServicesCheck : IFileServicesCheck
             {
                 var isRecognizableType = FileTypeValidator.IsTypeRecognizable(fileStream);
 #if DEBUG
-                if (Path.GetExtension(path).Equals(".svg", StringComparison.CurrentCultureIgnoreCase))
+                if (Path.GetExtension(path).Equals(".svg", StringComparison.InvariantCultureIgnoreCase))
                 {
                     // Do something specific for SVG files
                 }
