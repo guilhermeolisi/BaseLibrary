@@ -50,6 +50,23 @@ public class NumberServicesCultureTests
         text.Should().Be("1.235(1)");
     }
 
+    [Theory]
+    [InlineData(3.25, 2)]          // |valor| >= 1: conta pelo texto "R" do numero
+    [InlineData(12345.678, 3)]
+    [InlineData(-7.5, 1)]
+    public void CountDecimal_ShouldNotDependOnTheThreadCulture(double value, int expected)
+    {
+        // Oraculo: a mao, as casas depois do ponto no literal (3.25 -> 2, 12345.678 -> 3, -7.5 -> 1). Sob pt-BR e de-DE o
+        // separador da thread e a virgula, e a contagem nao pode le-la (mutante 5 da E318: Split('.') sem ponto da 0).
+        var services = new NumberServices();
+
+        int ptBr = int.Parse(RunUnder(CultureInfo.GetCultureInfo("pt-BR"), () => services.CountDecimal(value).ToString(CultureInfo.InvariantCulture)), CultureInfo.InvariantCulture);
+        int deDe = int.Parse(RunUnder(CultureInfo.GetCultureInfo("de-DE"), () => services.CountDecimal(value).ToString(CultureInfo.InvariantCulture)), CultureInfo.InvariantCulture);
+
+        ptBr.Should().Be(expected);
+        deDe.Should().Be(expected);
+    }
+
     private static string RunUnder(CultureInfo culture, Func<string> action)
     {
         string result = string.Empty;
